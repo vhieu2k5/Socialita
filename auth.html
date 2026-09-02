@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Socialita — Đăng nhập / Đăng ký</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .auth-container {
+      display: flex;
+      min-height: 100vh;
+      background: #ffffff;
+    }
+    .auth-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 40px;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .auth-right {
+      flex: 1;
+      background: #111113;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      position: relative;
+    }
+    .auth-form-wrapper {
+      width: 100%;
+      max-width: 400px;
+    }
+    .auth-tabs {
+      background: #f3f4f6;
+      border-radius: 8px;
+      display: flex;
+      padding: 4px;
+      margin-bottom: 40px;
+      width: fit-content;
+    }
+    .auth-tab {
+      padding: 8px 24px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #636366;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      background: white;
+      color: #18181c;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .auth-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .auth-subtitle {
+      font-size: 14px;
+      color: #636366;
+      margin-bottom: 32px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .form-control {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-control:focus {
+      border-color: #e52e3d;
+    }
+    .form-row {
+      display: flex;
+      gap: 16px;
+    }
+    .form-row .form-group {
+      flex: 1;
+    }
+    .auth-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+    .auth-options label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .auth-options a {
+      color: #e52e3d;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .btn-submit {
+      width: 100%;
+      background: #e52e3d;
+      color: white;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      transition: background 0.15s;
+    }
+    .btn-submit:hover {
+      background: #d32735;
+    }
+    .auth-divider {
+      text-align: center;
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .auth-divider::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .auth-divider::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #e5e7eb;
+    }
+    .auth-divider span {
+      font-size: 12px;
+      color: #8e8e93;
+      font-weight: 600;
+      background: white;
+      padding: 0 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .btn-google {
+      width: 100%;
+      background: white;
+      border: 1px solid #e5e7eb;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      transition: background 0.15s;
+    }
+    .btn-google:hover {
+      background: #f9fafb;
+    }
+    .auth-switch {
+      text-align: center;
+      font-size: 14px;
+    }
+    .auth-switch a {
+      color: #e52e3d;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    
+    .auth-right-content {
+      max-width: 400px;
+      z-index: 1;
+    }
+    .auth-logo-large {
+      width: 180px;
+      height: 180px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .auth-right-tag {
+      color: #e52e3d;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+    .auth-right-title {
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 24px;
+    }
+    .auth-right-desc {
+      font-size: 15px;
+      color: #a1a1a6;
+      line-height: 1.6;
+    }
+    .auth-right-footer {
+      position: absolute;
+      bottom: 40px;
+      left: 40px;
+      right: 40px;
+      border-top: 1px solid #2a2a2e;
+      padding-top: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .auth-right-footer .count {
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .auth-right-footer .desc {
+      font-size: 13px;
+      color: #a1a1a6;
+    }
+
+    .mini-logo {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<script src="script.js"></script>
+<body>
+
+<div class="auth-container">
+  <!-- Left Side: Form -->
+  <div class="auth-left">
+    <div class="auth-form-wrapper" id="login-form">
+      <div class="auth-tabs">
+        <div class="auth-tab active">Đăng nhập</div>
+        <div class="auth-tab" onclick="toggleAuth('register')">Đăng ký</div>
+      </div>
+      
+      <h1 class="auth-title">Chào mừng trở lại 👋</h1>
+      <p class="auth-subtitle">Đăng nhập để tiếp tục với Socialita.</p>
+      
+      <div class="form-group">
+        <label>Email</label>
+        <input id="login-username" type="email" class="form-control" value="minhanh.le@gmail.com">
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input id="login-password" type="password" class="form-control" value="password123">
+      </div>
+      
+      <div class="auth-options">
+        <label>
+          <input type="checkbox" checked> Ghi nhớ đăng nhập
+        </label>
+        <a href="#">Quên một khẩu?</a>
+      </div>
+      
+      <button class="btn-submit" onclick="handleLogin()">Đăng nhập &rarr;</button>
+      
+      <div class="auth-divider">
+        <span>HOẶC</span>
+      </div>
+      
+      <button class="btn-google">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Đăng nhập với Google
+      </button>
+      
+      <div class="auth-switch">
+        Chưa có tài khoản? <a onclick="toggleAuth('register')">Đăng ký ngay</a>
+      </div>
+    </div>
+    
+    <div class="auth-form-wrapper" id="register-form" style="display:none;">
+      <div class="auth-tabs">
+        <div class="auth-tab" onclick="toggleAuth('login')">Đăng nhập</div>
+        <div class="auth-tab active">Đăng ký</div>
+      </div>
+      
+      <h1 class="auth-title">Tạo tài khoản mới</h1>
+      <p class="auth-subtitle">Chỉ mất chưa đến 1 phút để tham gia Socialita.</p>
+      
+      <button class="btn-google">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Đăng ký nhanh với Google
+      </button>
+      
+      <div class="auth-divider">
+        <span>HOẶC ĐIỀN THÔNG TIN</span>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Họ</label>
+          <input type="text" class="form-control" placeholder="Lê">
+        </div>
+        <div class="form-group">
+          <label>Tên</label>
+          <input type="text" class="form-control" placeholder="Minh Anh">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" placeholder="ban@email.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Số điện thoại (không bắt buộc)</label>
+        <input type="text" class="form-control" placeholder="0901 234 567">
+      </div>
+      
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" class="form-control" placeholder="Tối thiểu 8 ký tự">
+      </div>
+      
+      <div class="form-group">
+        <label>Xác nhận mật khẩu</label>
+        <input type="password" class="form-control" placeholder="Nhập lại mật khẩu">
+      </div>
+      
+      <div class="auth-options" style="margin-bottom: 16px;">
+        <label style="align-items: flex-start;">
+          <input type="checkbox" checked style="margin-top: 4px;"> 
+          <span style="line-height: 1.4;">Tôi đồng ý <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của Socialita.</span>
+        </label>
+      </div>
+      
+      <button class="btn-submit" onclick="window.location.href='index.html'">Tạo tài khoản &rarr;</button>
+      
+      <div class="auth-switch">
+        Đã có tài khoản? <a onclick="toggleAuth('login')">Đăng nhập</a>
+      </div>
+    </div>
+    
+  </div>
+  
+  <!-- Right Side: Presentation -->
+  <div class="auth-right">
+    <div class="auth-right-content">
+      <div class="auth-logo-large">
+        <svg viewBox="0 0 80 80" width="80" height="80" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 8px;">
+          <rect x="24" y="8" width="46" height="14" rx="2" fill="#0f0f11" />
+          <rect x="10" y="8" width="16" height="14" rx="2" fill="#18181c" />
+          <rect x="10" y="22" width="14" height="14" rx="1.5" fill="#18181c" />
+          <rect x="22" y="34" width="40" height="13" rx="2" fill="#0f0f11" />
+          <rect x="10" y="34" width="22" height="13" rx="2" fill="#e52e3d" />
+          <rect x="10" y="47" width="42" height="13" rx="2" fill="#e52e3d" />
+          <rect x="52" y="47" width="18" height="13" rx="2" fill="#b91c28" />
+          <rect x="10" y="60" width="50" height="13" rx="2" fill="#e52e3d" />
+          <path d="M70 8 L76 14 L76 22 L70 22 Z" fill="#050507" opacity="0.6" />
+          <path d="M62 34 L68 40 L68 47 L62 47 Z" fill="#050507" opacity="0.6" />
+          <path d="M60 60 L66 66 L66 73 L60 73 Z" fill="#991b1b" opacity="0.7" />
+        </svg>
+        <div style="color:#0f0f11; font-weight:800; font-size:18px;">Socialita</div>
+      </div>
+      <div class="auth-right-tag">CỘNG ĐỒNG TRẺ, NĂNG ĐỘNG</div>
+      <h2 class="auth-right-title">Kết nối thật.<br>Chia sẻ là chính bạn.</h2>
+      <p class="auth-right-desc">Tham gia Socialita để theo dõi bạn bè, khám phá hội nhóm và chia sẻ những khoảnh khắc của riêng bạn — mọi lúc, mọi nơi.</p>
+    </div>
+    
+    <div class="auth-right-footer">
+      <div class="count">+128.000 người dùng</div>
+      <div class="desc">đã tham gia cộng đồng Socialita trong năm nay</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleAuth(type) {
+    if (type === 'login') {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('register-form').style.display = 'none';
+    } else {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('register-form').style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>

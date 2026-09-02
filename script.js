@@ -1,5 +1,6 @@
-// ==================== INITIAL DATA & STATE ====================
+﻿// ==================== INITIAL DATA & STATE ====================
 let user = {
+  id: 1,
   name: 'Minh Anh Lê',
   bio: 'Bio - Yêu thích du lịch - Hải Phòng, VN',
   posts: 86,
@@ -14,6 +15,8 @@ let user = {
 // ==================== TOAST SYSTEM ====================
 function showToast(msg, icon = '✨') {
   const container = document.getElementById('toast-container');
+  if (!container) return;
+
   const toast = document.createElement('div');
   toast.className = 'toast-box';
   toast.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
@@ -280,12 +283,31 @@ function closeEditProfileModal() {
   document.getElementById('modal-edit-profile').classList.remove('open');
 }
 
-function handleEditProfile(e) {
+async function handleEditProfile(e) {
   e.preventDefault();
-  user.name = document.getElementById('edit-name-input').value.trim() || user.name;
-  user.bio = document.getElementById('edit-bio-input').value.trim() || user.bio;
-  user.school = document.getElementById('edit-school-input').value.trim() || user.school;
-  user.liveIn = document.getElementById('edit-livein-input').value.trim() || user.liveIn;
+  user.name = document.getElementById('edit-name-input').value.trim();
+  user.bio = document.getElementById('edit-bio-input').value.trim();
+  user.school = document.getElementById('edit-school-input').value.trim();
+  user.liveIn = document.getElementById('edit-livein-input').value.trim();
+
+  try {
+    const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: user.name,
+        bio: user.bio,
+        school: user.school,
+        liveIn: user.liveIn
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update profile');
+    }
+
 
   // Update UI everywhere
   document.querySelectorAll('.profile-user-name').forEach(el => el.textContent = user.name);
@@ -295,6 +317,12 @@ function handleEditProfile(e) {
 
   closeEditProfileModal();
   showToast('Đã lưu thay đổi trang cá nhân!');
+
+  } catch (error) {
+    console.error(error);
+    showToast('Không thể cập nhật thông tin cá nhân');
+    return;
+  }
 }
 
 // ==================== FEED FILTERS ====================
@@ -327,4 +355,60 @@ function handleFriendSearch(input) {
     const text = row.textContent.toLowerCase();
     row.style.display = text.includes(query) ? 'flex' : 'none';
   });
+}
+
+async function handleLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value.trim();
+
+  if (!username || !password) {
+    console.error('Vui lòng nhập đầy đủ thông tin đăng nhập', '⚠️');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email: username, password })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to login');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('token', data.token);
+    if (data.role === 'admin') {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'index.html';
+    }
+
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+  }
+}
+
+// --- ADMIN PANEL FUNCTIONS ---
+async function updateAdminStats() {
+  const elUsers = document.getElementById('admin-stat-users');
+  const elPosts = document.getElementById('admin-stat-posts');
+
+  try {
+    const response = await fetch('http://localhost:8080/api/admin/stats', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    const data = await response.json();
+    if (elUsers) elUsers.innerText = data.users.toLocaleString('en-US');
+    if (elPosts) elPosts.innerText = data.posts.toLocaleString('en-US');
+  } catch (error) {
+    console.error(error);
+  }
 }

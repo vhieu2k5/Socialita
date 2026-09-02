@@ -11,10 +11,10 @@ erDiagram
         varchar full_name "Họ và tên"
         varchar email UK "Email"
         varchar avatar_url "Ảnh đại diện"
-        enum role "Phân quyền (admin/user)"
-        varchar status_message "Cập nhật trạng thái"
+        varchar school "Trường học/Nơi làm việc"
+        enum roles "Phân quyền (admin/user)"
+        varchar bio "Cập nhật trạng thái"
         timestamp created_at
-        timestamp updated_at
     }
     
     POSTS {
@@ -33,7 +33,6 @@ erDiagram
         int user_id2 PK, FK "Người nhận yêu cầu"
         enum status "Trạng thái (pending/accepted)"
         timestamp created_at
-        timestamp updated_at
     }
     
     MESSAGES {
@@ -51,7 +50,6 @@ erDiagram
         int user_id FK "Người bình luận"
         text content "Nội dung bình luận"
         timestamp created_at
-        timestamp updated_at
     }
     
     REACTIONS {

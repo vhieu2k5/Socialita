@@ -16,35 +16,41 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `posts`
+-- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `posts`;
+DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `posts` (
+CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
-  `content` text NOT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `location` varchar(50) DEFAULT NULL,
-  `gradient` varchar(255) DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `username` varchar(50) DEFAULT NULL,
+  `password_hash` varchar(255) DEFAULT NULL,
+  `full_name` varchar(100) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
+  `avatar_url` varchar(50) DEFAULT NULL,
+  `roles` enum('admin','user') DEFAULT NULL,
+  `bio` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `school` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `fk_posts_user_id` (`user_id`),
-  CONSTRAINT `fk_posts_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `posts`
+-- Dumping data for table `users`
 --
 
-LOCK TABLES `posts` WRITE;
-/*!40000 ALTER TABLE `posts` DISABLE KEYS */;
-INSERT INTO `posts` VALUES (1,NULL,'Test002',NULL,'2026-08-25 01:12:27','Đà Lạt','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-08-30 03:52:00'),(2,NULL,'Test001',NULL,'2026-08-25 01:40:25','HN','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-08-30 03:52:00');
-/*!40000 ALTER TABLE `posts` ENABLE KEYS */;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+INSERT INTO `users` (`id`, `username`, `password_hash`, `full_name`, `email`, `avatar_url`, `roles`, `bio`, `created_at`, `school`) VALUES 
+(1, 'minhanh_le', 'hash_pw_1', 'Minh Anh Lê', 'minhanh.le@gmail.com', NULL, 'user', 'Yêu thích du lịch - Hải Phòng, VN', '2024-03-01 10:00:00', 'ĐH Kinh tế TP.HCM'),
+(2, 'quanghuy', 'hash_pw_2', 'Quang Huy', 'quanghuy@gmail.com', NULL, 'user', NULL, '2024-01-15 08:30:00', NULL),
+(3, 'fake_account_02', 'hash_pw_3', 'fake_account_02', 'spam999@yahoo.com', NULL, 'user', NULL, '2025-08-10 14:00:00', NULL),
+(4, 'admin_thien', 'hash_pw_4', 'Thiện', 'admin.thien@socialita.com', NULL, 'admin', 'Quản trị viên', '2023-01-01 00:00:00', NULL);
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

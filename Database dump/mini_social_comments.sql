@@ -16,35 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `posts`
+-- Table structure for table `comments`
 --
 
-DROP TABLE IF EXISTS `posts`;
+DROP TABLE IF EXISTS `comments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `posts` (
+CREATE TABLE `comments` (
   `id` int NOT NULL AUTO_INCREMENT,
+  `post_id` int DEFAULT NULL,
   `user_id` int DEFAULT NULL,
-  `content` text NOT NULL,
-  `image_url` varchar(255) DEFAULT NULL,
+  `content` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `location` varchar(50) DEFAULT NULL,
-  `gradient` varchar(255) DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `fk_posts_user_id` (`user_id`),
-  CONSTRAINT `fk_posts_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  KEY `fk_comments_post_id` (`post_id`),
+  KEY `fk_comments_user_id` (`user_id`),
+  CONSTRAINT `fk_comments_post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_comments_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `posts`
+-- Dumping data for table `comments`
 --
 
-LOCK TABLES `posts` WRITE;
-/*!40000 ALTER TABLE `posts` DISABLE KEYS */;
-INSERT INTO `posts` VALUES (1,NULL,'Test002',NULL,'2026-08-25 01:12:27','Đà Lạt','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-08-30 03:52:00'),(2,NULL,'Test001',NULL,'2026-08-25 01:40:25','HN','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-08-30 03:52:00');
-/*!40000 ALTER TABLE `posts` ENABLE KEYS */;
+LOCK TABLES `comments` WRITE;
+/*!40000 ALTER TABLE `comments` DISABLE KEYS */;
+/*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -56,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-08-30 12:04:26
+-- Dump completed on 2026-08-30 12:04:27
