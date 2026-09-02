@@ -92,15 +92,6 @@ input, textarea {
   min-width: 0;
 }
 
-/* Tab Views */
-.tab-view {
-  display: none;
-  animation: fadeIn 0.2s ease forwards;
-}
-.tab-view.active {
-  display: block;
-}
-
 /* ==================== SIDEBAR ==================== */
 .sidebar {
   width: 250px;
@@ -130,6 +121,7 @@ input, textarea {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
   transition: transform 0.2s ease;
   cursor: pointer;
+  overflow: hidden;
 }
 .logo-badge:hover {
   transform: scale(1.05);
@@ -949,14 +941,11 @@ input, textarea {
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(4px);
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
   padding: 16px;
-}
-.modal-overlay.open {
-  display: flex;
 }
 
 .modal-card {
