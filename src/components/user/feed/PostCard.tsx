@@ -35,15 +35,35 @@ export const PostCard: React.FC<PostCardProps> = ({ post }) => {
 
       <p className="post-content">{post.content}</p>
 
-      {post.mediaGradient && (
-        <div className="post-media-box" style={{ background: post.mediaGradient }}>
-          {post.location && (
-            <div className="location-tag">
-              <span>📍</span>
-              <span>{post.location}</span>
+       {post.mediaGradient && (
+        <>
+          {post.mediaGradient.includes('url(') ? (
+            /* 1. Nếu là ảnh tải lên: lấy link ảnh ra thẻ <img> để tự bung theo tỉ lệ */
+            <div className="post-media-box">
+              <img
+                src={post.mediaGradient.replace(/^url\(['"]?/, '').replace(/['"]?\).*$/, '')}
+                alt="Post attachment"
+                className="post-real-img"
+              />
+              {post.location && (
+                <div className="location-tag">
+                  <span>📍</span>
+                  <span>{post.location}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* 2. Nếu là phông màu Gradient: */
+            <div className="post-gradient-box" style={{ background: post.mediaGradient }}>
+              {post.location && (
+                <div className="location-tag">
+                  <span>📍</span>
+                  <span>{post.location}</span>
+                </div>
+              )}
             </div>
           )}
-        </div>
+        </>
       )}
 
       <div className="post-stats-row">
