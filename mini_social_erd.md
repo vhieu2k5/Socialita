@@ -13,6 +13,8 @@ erDiagram
         varchar avatar_url "Ảnh đại diện"
         varchar school "Trường học/Nơi làm việc"
         enum roles "Phân quyền (admin/user)"
+        enum status "Trạng thái (active/locked)"
+        timestamp last_login_at "Đăng nhập cuối"
         varchar bio "Cập nhật trạng thái"
         timestamp created_at
     }
@@ -24,8 +26,28 @@ erDiagram
         varchar image_url "Hình ảnh"
         varchar location "Vị trí"
         varchar gradient "Màu nền"
+        enum status "Trạng thái (active/hidden)"
         timestamp created_at
         timestamp updated_at
+    }
+    
+    REPORTS {
+        int id PK
+        int reporter_id FK "Người báo cáo"
+        int reported_user_id FK "Người bị báo cáo"
+        int reported_post_id FK "Bài viết bị báo cáo"
+        text reason "Lý do"
+        enum status "Trạng thái (pending/resolved/dismissed)"
+        timestamp created_at
+    }
+    
+    ACTIVITY_LOGS {
+        int id PK
+        varchar action "Hành động"
+        text details "Chi tiết"
+        int target_user_id FK "User liên quan"
+        int target_post_id FK "Post liên quan"
+        timestamp created_at
     }
     
     FRIENDSHIPS {

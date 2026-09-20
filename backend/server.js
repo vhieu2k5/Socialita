@@ -65,7 +65,13 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         const user = rows[0];
+        if (user.status === 'locked') {
+            return res.status(403).json({ message: "Tài khoản của bạn đã bị khóa do vi phạm tiêu chuẩn cộng đồng" });
+        }
         delete user.password_hash; // Bảo mật: không gửi mật khẩu về client
+        
+        // Cập nhật thời gian đăng nhập cuối
+        await db.query("UPDATE users SET last_login_at = NOW() WHERE id = ?", [user.id]);
 
         res.status(200).json({
             message: "Đăng nhập thành công",
@@ -113,7 +119,13 @@ app.post('/api/auth/register', async (req, res) => {
 // Lấy danh sách users (Admin - STT 11) - Đã ẩn password_hash
 app.get('/api/users', async (req, res) => {
     try {
-        const sql = "SELECT id, username, full_name, email, avatar_url, roles, bio, school, created_at FROM users ORDER BY created_at DESC";
+        const sql = `
+            SELECT u.id, u.username, u.full_name, u.email, u.avatar_url, u.roles, u.status, u.bio, u.school, u.created_at, u.last_login_at,
+                   (SELECT COUNT(*) FROM posts WHERE user_id = u.id) AS post_count,
+                   (SELECT COUNT(*) FROM reports WHERE reported_user_id = u.id) AS violation_count
+            FROM users u 
+            ORDER BY u.created_at DESC
+        `;
         const [rows] = await db.query(sql);
         res.json({ users: rows });
     } catch (error) {
@@ -126,7 +138,14 @@ app.get('/api/users', async (req, res) => {
 app.get('/api/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
-        const sql = "SELECT id, username, full_name, email, avatar_url, roles, bio, school, created_at FROM users WHERE id = ?";
+        const sql = `
+            SELECT u.id, u.username, u.full_name, u.email, u.avatar_url, u.roles, u.status, u.bio, u.school, u.created_at, u.last_login_at,
+                   (SELECT COUNT(*) FROM posts WHERE user_id = u.id) AS post_count,
+                   (SELECT COUNT(*) FROM reports WHERE reported_user_id = u.id) AS violation_count,
+                   (SELECT COUNT(*) FROM friendships WHERE (user_id1 = u.id OR user_id2 = u.id) AND status = 'accepted') AS friend_count
+            FROM users u 
+            WHERE u.id = ?
+        `;
         const [rows] = await db.query(sql, [userId]);
 
         if (rows.length === 0) {
@@ -209,7 +228,8 @@ app.delete('/api/users/:id', async (req, res) => {
 app.get('/api/posts', async (req, res) => {
     try {
         const sql = `
-            SELECT p.*, u.full_name, u.username, u.avatar_url 
+            SELECT p.*, u.full_name, u.username, u.avatar_url,
+                   (SELECT COUNT(*) FROM reports WHERE reported_post_id = p.id) AS report_count
             FROM posts p 
             LEFT JOIN users u ON p.user_id = u.id 
             ORDER BY p.created_at DESC
@@ -288,14 +308,187 @@ app.get('/api/admin/stats', async (req, res) => {
     try {
         const [[usersCount]] = await db.query("SELECT COUNT(*) AS totalUsers FROM users");
         const [[postsCount]] = await db.query("SELECT COUNT(*) AS totalPosts FROM posts");
+        const [[lockedUsersCount]] = await db.query("SELECT COUNT(*) AS totalLocked FROM users WHERE status = 'locked'");
+        const [[reportsCount]] = await db.query("SELECT COUNT(*) AS pendingReports FROM reports WHERE status = 'pending'");
 
         res.status(200).json({
             users: usersCount ? usersCount.totalUsers : 0,
-            posts: postsCount ? postsCount.totalPosts : 0
+            posts: postsCount ? postsCount.totalPosts : 0,
+            lockedUsers: lockedUsersCount ? lockedUsersCount.totalLocked : 0,
+            pendingReports: reportsCount ? reportsCount.pendingReports : 0
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Lỗi server khi lấy thống kê" });
+    }
+});
+
+/* ========================================================
+   REPORT APIS (Báo cáo vi phạm)
+======================================================== */
+// Tạo báo cáo (User)
+app.post('/api/reports', async (req, res) => {
+    try {
+        const { reporter_id, reported_user_id, reported_post_id, reason } = req.body;
+        if (!reporter_id || !reason || (!reported_user_id && !reported_post_id)) {
+            return res.status(400).json({ message: "Thiếu thông tin báo cáo" });
+        }
+        
+        const sql = "INSERT INTO reports (reporter_id, reported_user_id, reported_post_id, reason, created_at) VALUES (?, ?, ?, ?, NOW())";
+        const [result] = await db.query(sql, [reporter_id, reported_user_id || null, reported_post_id || null, reason]);
+        
+        // Lưu log
+        await db.query("INSERT INTO activity_logs (action, details) VALUES (?, ?)", ['REPORT_CREATED', `Báo cáo mới ID ${result.insertId}`]);
+
+        res.status(201).json({ message: "Gửi báo cáo thành công", reportId: result.insertId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+// Lấy danh sách báo cáo chờ duyệt (Admin)
+app.get('/api/admin/reports', async (req, res) => {
+    try {
+        const sql = `
+            SELECT r.*, 
+                   u1.username AS reporter_name, 
+                   u2.username AS reported_user_name,
+                   p.content AS reported_post_content
+            FROM reports r
+            LEFT JOIN users u1 ON r.reporter_id = u1.id
+            LEFT JOIN users u2 ON r.reported_user_id = u2.id
+            LEFT JOIN posts p ON r.reported_post_id = p.id
+            WHERE r.status = 'pending'
+            ORDER BY r.created_at DESC
+        `;
+        const [rows] = await db.query(sql);
+        res.json({ reports: rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+// Xử lý báo cáo (Admin)
+app.put('/api/admin/reports/:id', async (req, res) => {
+    try {
+        const reportId = req.params.id;
+        const { status } = req.body; // 'resolved' hoặc 'dismissed'
+        
+        const sql = "UPDATE reports SET status = ? WHERE id = ?";
+        await db.query(sql, [status, reportId]);
+        
+        await db.query("INSERT INTO activity_logs (action, details) VALUES (?, ?)", ['REPORT_RESOLVED', `Báo cáo ID ${reportId} được xử lý: ${status}`]);
+
+        res.json({ message: "Xử lý báo cáo thành công" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+/* ========================================================
+   ADMIN MANAGEMENT APIS (Quản lý User & Admin)
+======================================================== */
+// Khóa/Mở khóa tài khoản (Có lý do & ghi chú)
+app.put('/api/admin/users/:id/status', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { status, reason, note } = req.body; // 'active' hoặc 'locked'
+        
+        const sql = "UPDATE users SET status = ? WHERE id = ?";
+        await db.query(sql, [status, userId]);
+        
+        let details = `Tài khoản chuyển sang trạng thái ${status}`;
+        if (status === 'locked' && reason) {
+            details = `Khóa tài khoản vì: ${reason}. Ghi chú: ${note || ''}`;
+        }
+        
+        await db.query("INSERT INTO activity_logs (action, details, target_user_id) VALUES (?, ?, ?)", ['USER_STATUS_CHANGED', details, userId]);
+
+        res.json({ message: "Cập nhật trạng thái thành công" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+// Lấy lịch sử vi phạm của 1 user
+app.get('/api/admin/users/:id/violations', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const [rows] = await db.query("SELECT * FROM activity_logs WHERE target_user_id = ? ORDER BY created_at DESC", [userId]);
+        res.json({ violations: rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+// Lấy chi tiết nhóm lý do báo cáo của 1 bài viết
+app.get('/api/admin/posts/:id/reports', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const sql = `
+            SELECT reason, COUNT(*) as count 
+            FROM reports 
+            WHERE reported_post_id = ? 
+            GROUP BY reason
+            ORDER BY count DESC
+        `;
+        const [rows] = await db.query(sql, [postId]);
+        res.json({ report_reasons: rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+// Ẩn/Hiện bài viết
+app.put('/api/admin/posts/:id/status', async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const { status } = req.body; // 'active' hoặc 'hidden'
+        
+        const sql = "UPDATE posts SET status = ? WHERE id = ?";
+        await db.query(sql, [status, postId]);
+        
+        await db.query("INSERT INTO activity_logs (action, details, target_post_id) VALUES (?, ?, ?)", ['POST_STATUS_CHANGED', `Bài viết chuyển sang trạng thái ${status}`, postId]);
+
+        res.json({ message: "Cập nhật trạng thái bài viết thành công" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+// Cấp quyền Admin
+app.put('/api/admin/users/:id/role', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { role } = req.body; // 'admin' hoặc 'user'
+        
+        const sql = "UPDATE users SET roles = ? WHERE id = ?";
+        await db.query(sql, [role, userId]);
+        
+        await db.query("INSERT INTO activity_logs (action, details, target_user_id) VALUES (?, ?, ?)", ['ROLE_CHANGED', `Tài khoản chuyển sang quyền ${role}`, userId]);
+
+        res.json({ message: "Cập nhật phân quyền thành công" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
+// Lấy nhật ký hoạt động chung
+app.get('/api/admin/activities', async (req, res) => {
+    try {
+        const [rows] = await db.query("SELECT * FROM activity_logs ORDER BY created_at DESC LIMIT 50");
+        res.json({ activities: rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server" });
     }
 });
 
