@@ -16,31 +16,34 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `friendships`
+-- Table structure for table `activity_logs`
 --
 
-DROP TABLE IF EXISTS `friendships`;
+DROP TABLE IF EXISTS `activity_logs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `friendships` (
-  `user_id1` int NOT NULL,
-  `user_id2` int NOT NULL,
-  `status` enum('pending','accepted') DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`user_id1`,`user_id2`),
-  KEY `fk_friendships_user_id2` (`user_id2`),
-  CONSTRAINT `fk_friendships_user_id1` FOREIGN KEY (`user_id1`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_friendships_user_id2` FOREIGN KEY (`user_id2`) REFERENCES `users` (`id`) ON DELETE CASCADE
+CREATE TABLE `activity_logs` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `action` varchar(255) NOT NULL,
+  `details` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `target_user_id` int DEFAULT NULL,
+  `target_post_id` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `target_user_id` (`target_user_id`),
+  KEY `target_post_id` (`target_post_id`),
+  CONSTRAINT `activity_logs_ibfk_1` FOREIGN KEY (`target_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `activity_logs_ibfk_2` FOREIGN KEY (`target_post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `friendships`
+-- Dumping data for table `activity_logs`
 --
 
-LOCK TABLES `friendships` WRITE;
-/*!40000 ALTER TABLE `friendships` DISABLE KEYS */;
-/*!40000 ALTER TABLE `friendships` ENABLE KEYS */;
+LOCK TABLES `activity_logs` WRITE;
+/*!40000 ALTER TABLE `activity_logs` DISABLE KEYS */;
+/*!40000 ALTER TABLE `activity_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -52,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-08-30 12:04:27
+-- Dump completed on 2026-09-21  8:07:37

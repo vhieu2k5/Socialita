@@ -16,41 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `users`
+-- Table structure for table `reactions`
 --
 
-DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `reactions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `users` (
+CREATE TABLE `reactions` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) DEFAULT NULL,
-  `password_hash` varchar(255) DEFAULT NULL,
-  `full_name` varchar(100) DEFAULT NULL,
-  `email` varchar(50) DEFAULT NULL,
-  `avatar_url` varchar(50) DEFAULT NULL,
-  `roles` enum('admin','user') DEFAULT NULL,
-  `bio` varchar(50) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `school` varchar(100) DEFAULT NULL,
+  `post_id` int DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `type` enum('love','like','haha','wow','sad','angry') DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`),
-  UNIQUE KEY `email` (`email`)
+  KEY `fk_reactions_post_id` (`post_id`),
+  KEY `fk_reactions_user_id` (`user_id`),
+  CONSTRAINT `fk_reactions_post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_reactions_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `users`
+-- Dumping data for table `reactions`
 --
 
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` (`id`, `username`, `password_hash`, `full_name`, `email`, `avatar_url`, `roles`, `bio`, `created_at`, `school`) VALUES 
-(1, 'minhanh_le', 'hash_pw_1', 'Minh Anh Lê', 'minhanh.le@gmail.com', NULL, 'user', 'Yêu thích du lịch - Hải Phòng, VN', '2024-03-01 10:00:00', 'ĐH Kinh tế TP.HCM'),
-(2, 'quanghuy', 'hash_pw_2', 'Quang Huy', 'quanghuy@gmail.com', NULL, 'user', NULL, '2024-01-15 08:30:00', NULL),
-(3, 'fake_account_02', 'hash_pw_3', 'fake_account_02', 'spam999@yahoo.com', NULL, 'user', NULL, '2025-08-10 14:00:00', NULL),
-(4, 'admin_thien', 'hash_pw_4', 'Thiện', 'admin.thien@socialita.com', NULL, 'admin', 'Quản trị viên', '2023-01-01 00:00:00', NULL);
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+LOCK TABLES `reactions` WRITE;
+/*!40000 ALTER TABLE `reactions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `reactions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -62,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-08-30 12:04:26
+-- Dump completed on 2026-09-21  8:07:37
