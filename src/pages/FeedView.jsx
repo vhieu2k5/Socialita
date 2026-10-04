@@ -2,10 +2,10 @@ import React from 'react';
 import { useSocial } from '../context/SocialContext';
 import { FeedFilters } from '../components/feed/FeedFilters';
 import { PostCard } from '../components/feed/PostCard';
-import { RightWidgets } from '../components/layout/RightWidgets';
+import { LogoSvg } from '../components/ui/Logo';
 
 export const FeedView = () => {
-  const { posts, feedFilter, searchQuery } = useSocial();
+  const { posts, feedFilter, searchQuery, trends } = useSocial();
 
   const filteredPosts = posts.filter(p => {
     const matchesSearch =
@@ -18,16 +18,11 @@ export const FeedView = () => {
   });
 
   return (
-    <div className="home-view-grid">
-      <div className="home-main-col">
-        <div style={{ marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '8px' }}>
-            Bảng tin (Feed)
-          </h2>
-          <FeedFilters />
-        </div>
+    <div className="two-col-layout">
+      <div className="main-column">
+        <FeedFilters />
 
-        <div className="posts-stream">
+        <div id="feed-posts-list">
           {filteredPosts.map(post => (
             <PostCard key={post.id} post={post} />
           ))}
@@ -40,7 +35,25 @@ export const FeedView = () => {
         </div>
       </div>
 
-      <RightWidgets />
+      {/* Cột phải của FeedView theo mockup Figma */}
+      <div className="right-widgets">
+        <div className="widget-card">
+          <h3 className="widget-card-title">Xu hướng</h3>
+          {trends.map(t => (
+            <div key={t.id} className="trending-item">
+              <span className="rank">{t.rank}</span>
+              <div>
+                <div className="tag">{t.tag}</div>
+                <div className="count">{t.postCount}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <LogoSvg size={84} shadow={true} />
+        </div>
+      </div>
     </div>
   );
 };

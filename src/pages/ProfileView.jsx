@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useSocial } from '../context/SocialContext';
 import { PostCard } from '../components/feed/PostCard';
-import { Logo } from '../components/ui/Logo';
-import { getInitials } from '../utils/formatters';
+import { LogoSvg } from '../components/ui/Logo';
 
 export const ProfileView = () => {
   const { user, posts, openEditProfileModal, openCreatePostModal, uploadAvatar, showToast } = useSocial();
@@ -19,55 +18,52 @@ export const ProfileView = () => {
   };
 
   return (
-    <div style={{ maxWidth: '960px', margin: '0 auto', width: '100%' }}>
-      {/* 1. Thẻ Header Profile */}
-      <div className="widget-card" style={{ padding: '28px 32px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '28px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
-          {/* Avatar Lớn & Nút Đổi Avatar */}
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <div
-              style={{
-                width: '88px',
-                height: '88px',
-                borderRadius: '50%',
-                backgroundColor: user.avatarBg || '#35c9b0',
-                color: '#ffffff',
-                fontSize: '28px',
-                fontWeight: 800,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
-                overflow: 'hidden'
-              }}
-            >
+    <div>
+      {/* 1. THẺ PROFILE LỚN Ở TRÊN CÙNG (CĂN GIỮA TOÀN BỘ) */}
+      <div className="profile-card">
+        {/* Nút chỉnh sửa & chia sẻ ở góc trên bên phải */}
+        <div className="profile-top-actions">
+          <button className="btn-profile-action" onClick={openEditProfileModal}>
+            <span>✏️</span>
+            <span>Chỉnh sửa trang cá nhân</span>
+          </button>
+          <button className="btn-profile-action primary" onClick={openCreatePostModal}>
+            <span>↗</span>
+            <span>Chia sẻ</span>
+          </button>
+        </div>
+
+        {/* Avatar & Thông tin căn giữa */}
+        <div className="profile-center-info">
+          <div style={{ position: 'relative' }}>
+            <div className="profile-large-avatar" style={{ backgroundColor: '#35c9b0' }}>
               {user.avatar_url ? (
-                <img src={user.avatar_url} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={user.avatar_url} alt="Avt" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
-                getInitials(user.name)
+                'Avt'
               )}
             </div>
             <button
               onClick={() => avatarInputRef.current?.click()}
               style={{
                 position: 'absolute',
-                bottom: '0',
-                right: '0',
-                width: '28px',
-                height: '28px',
+                bottom: '12px',
+                right: '4px',
+                width: '24px',
+                height: '24px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e5e7eb',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '13px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                fontSize: '12px',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
                 cursor: 'pointer'
               }}
               title="Đổi ảnh đại diện"
             >
-              📷
+              +
             </button>
             <input
               type="file"
@@ -78,244 +74,130 @@ export const ProfileView = () => {
             />
           </div>
 
-          {/* Thông tin cá nhân & Thống kê */}
-          <div style={{ flex: 1, minWidth: '280px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-              <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--text-dark)' }}>
-                {user.name}
-              </h2>
-              <span style={{
-                fontSize: '11.5px',
-                fontWeight: 700,
-                color: '#16a34a',
-                backgroundColor: '#dcfce7',
-                padding: '2px 8px',
-                borderRadius: '9999px'
-              }}>
-                ✓ Đã xác minh
-              </span>
+          <h2 className="profile-user-name">{user.name}</h2>
+          <p className="profile-user-bio">{user.bio || 'Bio - Yêu thích du lịch - Hải Phòng, VN'}</p>
+
+          {/* 4 Thống kê căn giữa */}
+          <div className="profile-stats-grid">
+            <div className="profile-stat-box">
+              <div className="count">{myPosts.length || user.stats?.posts || 86}</div>
+              <div className="desc">Bài viết</div>
             </div>
-
-            <p style={{ fontSize: '13.5px', color: 'var(--text-gray)', marginBottom: '18px' }}>
-              {user.bio || 'Chưa cập nhật tiểu sử'}
-            </p>
-
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '32px',
-              padding: '14px 0',
-              borderTop: '1px solid #f3f4f6',
-              borderBottom: '1px solid #f3f4f6',
-              marginBottom: '18px'
-            }}>
-              <div>
-                <span style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-dark)', fontFamily: 'var(--font-mono)' }}>
-                  {myPosts.length || user.stats?.posts || 0}
-                </span>{' '}
-                <span style={{ fontSize: '13px', color: 'var(--text-light-gray)' }}>Bài viết</span>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-dark)', fontFamily: 'var(--font-mono)' }}>
-                  {user.stats?.friends || 0}
-                </span>{' '}
-                <span style={{ fontSize: '13px', color: 'var(--text-light-gray)' }}>Bạn bè</span>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-dark)', fontFamily: 'var(--font-mono)' }}>
-                  {user.stats?.followers || '1.4K'}
-                </span>{' '}
-                <span style={{ fontSize: '13px', color: 'var(--text-light-gray)' }}>Người theo dõi</span>
-              </div>
-
-              <div>
-                <span style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-dark)', fontFamily: 'var(--font-mono)' }}>
-                  {user.stats?.groups || 9}
-                </span>{' '}
-                <span style={{ fontSize: '13px', color: 'var(--text-light-gray)' }}>Nhóm</span>
-              </div>
+            <div className="profile-stat-box">
+              <div className="count">{user.stats?.friends || 128}</div>
+              <div className="desc">Bạn bè</div>
             </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={openEditProfileModal}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '10px',
-                  border: '1px solid #e5e7eb',
-                  backgroundColor: '#ffffff',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  color: 'var(--text-dark)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer'
-                }}
-              >
-                <span>✏️</span>
-                <span>Chỉnh sửa trang cá nhân</span>
-              </button>
-
-              <button
-                onClick={openCreatePostModal}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '10px',
-                  backgroundColor: 'var(--brand-red)',
-                  color: '#ffffff',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  cursor: 'pointer',
-                  border: 'none',
-                  boxShadow: '0 4px 12px rgba(229,46,61,0.3)'
-                }}
-              >
-                <span>+</span>
-                <span>Đăng bài mới</span>
-              </button>
+            <div className="profile-stat-box">
+              <div className="count">{user.stats?.followers || '1.4K'}</div>
+              <div className="desc">Người theo dõi</div>
+            </div>
+            <div className="profile-stat-box">
+              <div className="count">{user.stats?.groups || 9}</div>
+              <div className="desc">Hội nhóm</div>
             </div>
           </div>
         </div>
 
-        {/* 3 Subtabs */}
-        <div style={{
-          display: 'flex',
-          gap: '28px',
-          marginTop: '24px',
-          borderTop: '1px solid #f3f4f6',
-          paddingTop: '14px'
-        }}>
+        {/* Thanh chuyển tab: Bài viết / Ảnh / Video */}
+        <div className="profile-tabs-bar">
           <button
+            className={'profile-tab-btn ' + (activeSubTab === 'posts' ? 'active' : '')}
             onClick={() => setActiveSubTab('posts')}
-            style={{
-              paddingBottom: '8px',
-              fontSize: '14px',
-              fontWeight: 700,
-              background: 'none',
-              border: 'none',
-              color: activeSubTab === 'posts' ? 'var(--brand-red)' : 'var(--text-light-gray)',
-              borderBottom: activeSubTab === 'posts' ? '2.5px solid var(--brand-red)' : '2.5px solid transparent',
-              cursor: 'pointer'
-            }}
           >
             Bài viết
           </button>
-
           <button
+            className={'profile-tab-btn ' + (activeSubTab === 'photos' ? 'active' : '')}
             onClick={() => setActiveSubTab('photos')}
-            style={{
-              paddingBottom: '8px',
-              fontSize: '14px',
-              fontWeight: 700,
-              background: 'none',
-              border: 'none',
-              color: activeSubTab === 'photos' ? 'var(--brand-red)' : 'var(--text-light-gray)',
-              borderBottom: activeSubTab === 'photos' ? '2.5px solid var(--brand-red)' : '2.5px solid transparent',
-              cursor: 'pointer'
-            }}
           >
             Ảnh
           </button>
-
           <button
+            className={'profile-tab-btn ' + (activeSubTab === 'videos' ? 'active' : '')}
             onClick={() => setActiveSubTab('videos')}
-            style={{
-              paddingBottom: '8px',
-              fontSize: '14px',
-              fontWeight: 700,
-              background: 'none',
-              border: 'none',
-              color: activeSubTab === 'videos' ? 'var(--brand-red)' : 'var(--text-light-gray)',
-              borderBottom: activeSubTab === 'videos' ? '2.5px solid var(--brand-red)' : '2.5px solid transparent',
-              cursor: 'pointer'
-            }}
           >
             Video
           </button>
         </div>
       </div>
 
-      {/* 2. Nội dung Subtab */}
-      {activeSubTab === 'posts' && (
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start' }}>
-          <div style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div className="widget-card">
-              <h3 className="widget-card-title">Giới thiệu</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: 'var(--text-dark)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span>🎓</span>
-                  <span>{user.intro?.school || 'Chưa cập nhật'}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span>📍</span>
-                  <span>{user.intro?.liveIn || 'Chưa cập nhật'}</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span>📅</span>
-                  <span>{user.intro?.joinedDate || 'Thành viên mới'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="logo-card-container">
-              <Logo size="md" />
-            </div>
-          </div>
-
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {myPosts.length > 0 ? (
-              myPosts.map(post => <PostCard key={post.id} post={post} />)
-            ) : (
-              <div className="widget-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <p style={{ color: 'var(--text-gray)', marginBottom: '16px', fontSize: '14px' }}>
+      {/* 2. BỐ CỤC 2 CỘT BÊN DƯỚI PROFILE */}
+      <div className="two-col-layout">
+        {/* CỘT TRÁI: DÒNG BÀI VIẾT */}
+        <div className="main-column">
+          {activeSubTab === 'posts' && (
+            <div id="profile-posts-list">
+              {myPosts.length > 0 ? (
+                myPosts.map(post => <PostCard key={post.id} post={post} />)
+              ) : (
+                <div className="widget-card" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-gray)' }}>
                   Bạn chưa đăng bài viết nào. Hãy chia sẻ khoảnh khắc đầu tiên của bạn!
-                </p>
-                <button
-                  className="btn-create-post"
-                  onClick={openCreatePostModal}
-                  style={{ width: 'auto', padding: '10px 24px', margin: '0 auto' }}
-                >
-                  + Tạo bài viết ngay
-                </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSubTab === 'photos' && (
+            <div className="widget-card">
+              <h3 className="widget-card-title">Bộ sưu tập ảnh</h3>
+              <div className="photo-grid-6">
+                <div className="photo-square" style={{ background: '#3a3b3c' }}></div>
+                <div className="photo-square" style={{ background: '#4e4f50' }}></div>
+                <div className="photo-square" style={{ background: '#5c4419' }}></div>
+                <div className="photo-square" style={{ background: '#274a82' }}></div>
+                <div className="photo-square" style={{ background: '#5c2323' }}></div>
+                <div className="photo-square" style={{ background: '#1b5b50' }}></div>
               </div>
-            )}
+            </div>
+          )}
+
+          {activeSubTab === 'videos' && (
+            <div className="widget-card" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-gray)' }}>
+              Chưa có video nào được đăng tải.
+            </div>
+          )}
+        </div>
+
+        {/* CỘT PHẢI: LOGO 3D + GIỚI THIỆU + ẢNH */}
+        <div className="right-widgets">
+          {/* Logo 3D trôi nổi */}
+          <div style={{ textAlign: 'center' }}>
+            <LogoSvg size={84} shadow={true} />
+          </div>
+
+          {/* Card Giới thiệu */}
+          <div className="widget-card">
+            <h3 className="widget-card-title">Giới thiệu</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12.5px', color: 'var(--text-gray)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>💼</span>
+                <span>{user.intro?.school || 'Sinh viên tại ĐH Kinh tế TP.HCM'}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>📍</span>
+                <span>{user.intro?.liveIn || 'Sống tại Sài Gòn, Việt Nam'}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>📅</span>
+                <span>{user.intro?.joinedDate || 'Tham gia từ tháng 3, 2024'}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card Ảnh */}
+          <div className="widget-card">
+            <h3 className="widget-card-title">Ảnh</h3>
+            <div className="photo-grid-6">
+              <div className="photo-square" style={{ background: '#3a3b3c' }}></div>
+              <div className="photo-square" style={{ background: '#4e4f50' }}></div>
+              <div className="photo-square" style={{ background: '#5c4419' }}></div>
+              <div className="photo-square" style={{ background: '#274a82' }}></div>
+              <div className="photo-square" style={{ background: '#5c2323' }}></div>
+              <div className="photo-square" style={{ background: '#1b5b50' }}></div>
+            </div>
           </div>
         </div>
-      )}
-
-      {activeSubTab === 'photos' && (
-        <div className="widget-card">
-          <h3 className="widget-card-title">Bộ sưu tập ảnh</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '16px' }}>
-            {myPosts.filter(p => p.image_url).map((p, idx) => (
-              <img
-                key={idx}
-                src={p.image_url}
-                alt="Photo"
-                style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '12px', cursor: 'pointer' }}
-                onClick={() => showToast(`Xem ảnh #${idx + 1}`)}
-              />
-            ))}
-            {myPosts.filter(p => p.image_url).length === 0 && (
-              <div style={{ gridColumn: 'span 3', textAlign: 'center', padding: '32px', color: '#9ca3af' }}>
-                Chưa có ảnh nào được đăng tải.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {activeSubTab === 'videos' && (
-        <div className="widget-card" style={{ textAlign: 'center', padding: '48px', color: 'var(--text-gray)' }}>
-          🎬 Chưa có video nào được đăng tải.
-        </div>
-      )}
+      </div>
     </div>
   );
 };

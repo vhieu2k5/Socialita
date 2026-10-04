@@ -4,8 +4,8 @@ import { Logo } from '../ui/Logo';
 
 export const SignInForm = ({ onSwitchToSignUp }) => {
   const { login, showToast } = useSocial();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('minhanh.le@gmail.com');
+  const [password, setPassword] = useState('123456');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -21,175 +21,99 @@ export const SignInForm = ({ onSwitchToSignUp }) => {
   };
 
   return (
-    <div style={{
-      flex: 1,
-      padding: '40px 48px',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      overflowY: 'auto'
-    }}>
-      <div>
-        <div style={{
-          display: 'inline-flex',
-          backgroundColor: '#f3f4f6',
-          padding: '4px',
-          borderRadius: '9999px',
-          marginBottom: '28px'
-        }}>
-          <button
-            type="button"
-            style={{
-              padding: '6px 20px',
-              borderRadius: '9999px',
-              fontSize: '13px',
-              fontWeight: 700,
-              backgroundColor: '#ffffff',
-              color: 'var(--text-dark)',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-              cursor: 'pointer',
-              border: 'none'
-            }}
-          >
-            Đăng nhập
-          </button>
-
-          <button
-            type="button"
-            onClick={onSwitchToSignUp}
-            style={{
-              padding: '6px 20px',
-              borderRadius: '9999px',
-              fontSize: '13px',
-              fontWeight: 700,
-              backgroundColor: 'transparent',
-              color: '#8e8e93',
-              cursor: 'pointer',
-              border: 'none'
-            }}
-          >
-            Đăng ký
-          </button>
-        </div>
-
-        <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-dark)' }}>
-            Chào mừng trở lại 👋
-          </h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-light-gray)', marginTop: '4px' }}>
-            Đăng nhập để tiếp tục với Socialita.
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
-              Email hoặc Tên đăng nhập
-            </label>
-            <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '14px' }}>
-                ✉️
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                style={{ paddingLeft: '36px' }}
-                placeholder="Nhập email (ví dụ: user@gmail.com)"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '6px' }}>
-              Mật khẩu
-            </label>
-            <div style={{ position: 'relative' }}>
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '14px' }}>
-                🔒
-              </span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                className="form-control"
-                style={{ paddingLeft: '36px', paddingRight: '36px' }}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', fontSize: '14px', cursor: 'pointer', background: 'none', border: 'none' }}
-              >
-                👁️
-              </button>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', fontSize: '12.5px' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: 'var(--text-dark)' }}>
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <span>Ghi nhớ đăng nhập</span>
-            </label>
-            <button type="button" onClick={() => showToast('Chức năng quên mật khẩu')} style={{ color: 'var(--brand-red)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}>
-              Quên mật khẩu?
-            </button>
-          </div>
-
-          <div style={{
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '10px',
-            padding: '10px 14px',
-            marginBottom: '16px',
-            fontSize: '11.5px',
-            color: '#475569',
-            lineHeight: 1.5
-          }}>
-            <div style={{ fontWeight: 800, color: '#1e293b', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>💡</span> <span>Tài khoản mẫu để test nhanh:</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              <div>🛡️ <strong>Admin:</strong> <code style={{ backgroundColor: '#e2e8f0', padding: '1px 5px', borderRadius: '4px' }}>admin@gmail.com</code> | Mật khẩu: <code>123</code></div>
-              <div>👤 <strong>User:</strong> <code style={{ backgroundColor: '#e2e8f0', padding: '1px 5px', borderRadius: '4px' }}>user@gmail.com</code> | Mật khẩu: <code>123</code></div>
-            </div>
-          </div>  
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '13px',
-              borderRadius: '12px',
-              backgroundColor: 'var(--brand-red)',
-              color: '#ffffff',
-              fontSize: '14.5px',
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 14px rgba(229, 46, 61, 0.4)',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              border: 'none',
-              transition: 'all 0.15s ease'
-            }}
-          >
-            <span>{loading ? 'Đang xác thực...' : 'Đăng nhập'}</span>
-            <span>➔</span>
-          </button>
-        </form>
+    <div className="auth-form-wrapper">
+      {/* Dải chuyển tab Đăng nhập / Đăng ký */}
+      <div className="auth-tabs">
+        <div className="auth-tab active">Đăng nhập</div>
+        <div className="auth-tab" onClick={onSwitchToSignUp}>Đăng ký</div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+      <h1 className="auth-title">Chào mừng trở lại 👋</h1>
+      <p className="auth-subtitle">Đăng nhập để tiếp tục với Socialita.</p>
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Email</label>
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}>
+              ✉️
+            </span>
+            <input
+              type="text"
+              className="form-control"
+              style={{ paddingLeft: '40px' }}
+              placeholder="minhanh.le@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>Mật khẩu</label>
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}>
+              🔒
+            </span>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="form-control"
+              style={{ paddingLeft: '40px', paddingRight: '40px' }}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div className="auth-options">
+          <label>
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ accentColor: 'var(--brand-red)' }}
+            />
+            <span>Ghi nhớ đăng nhập</span>
+          </label>
+          <a href="#" onClick={(e) => { e.preventDefault(); showToast('Chức năng quên mật khẩu đang hoàn thiện', 'info'); }}>
+            Quên mật khẩu?
+          </a>
+        </div>
+
+        <button type="submit" className="btn-submit" disabled={loading}>
+          {loading ? 'Đang đăng nhập...' : 'Đăng nhập →'}
+        </button>
+
+        <div className="auth-divider">
+          <span>HOẶC</span>
+        </div>
+
+        <button
+          type="button"
+          className="btn-google"
+          onClick={() => login('user@gmail.com', '123')}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span>Đăng nhập với Google</span>
+        </button>
+
+        <div className="auth-switch">
+          Chưa có tài khoản? <a onClick={onSwitchToSignUp}>Đăng ký ngay</a>
+        </div>
+      </form>
+
+      {/* Mini logo ở dưới chân form */}
+      <div className="mini-logo">
         <Logo size="sm" showText={true} />
       </div>
     </div>

@@ -1,51 +1,59 @@
 import React from 'react';
 import { useSocial } from '../../context/SocialContext';
-import { Logo } from '../ui/Logo';
+import { LogoSvg } from '../ui/Logo';
 
-export const RightWidgets = () => {
-  const { trends, friendSuggestions, sendRequest } = useSocial();
+export const RightWidgets = ({ showLogo = true }) => {
+  const { trends, friendSuggestions, sendRequest, setTab } = useSocial();
 
   return (
-    <aside className="right-widgets">
-      {/* 3D Pixel Logo Visual Card */}
-      <div className="logo-card-container">
-        <Logo size="lg" />
-      </div>
-
-      {/* Trending Topics Widget */}
-      <div className="widget-card">
-        <h3 className="widget-card-title">Chủ đề thịnh hành</h3>
-        <div className="trending-list">
-          {trends.map(t => (
-            <div key={t.id} className="trending-item">
-              <span className="trending-rank">{t.rank}</span>
-              <div>
-                <div className="trending-tag">{t.tag}</div>
-                <div className="trending-posts-count">{t.postCount}</div>
-              </div>
-            </div>
-          ))}
+    <div className="right-widgets">
+      {/* Decorative 3D Pixel Logo floating */}
+      {showLogo && (
+        <div style={{ textAlign: 'center', padding: '10px 0' }}>
+          <LogoSvg size={84} shadow={true} />
         </div>
+      )}
+
+      {/* Xu hướng Card */}
+      <div className="widget-card">
+        <h3 className="widget-card-title">Xu hướng</h3>
+        {trends.map(t => (
+          <div key={t.id} className="trending-item">
+            <span className="rank">{t.rank}</span>
+            <div>
+              <div className="tag">{t.tag}</div>
+              <div className="count">{t.postCount}</div>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Friend Suggestions Widget */}
+      {/* Gợi ý kết bạn Card */}
       <div className="widget-card">
-        <h3 className="widget-card-title">Gợi ý kết bạn</h3>
-        <div className="suggestion-list">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <h3 className="widget-card-title" style={{ marginBottom: 0 }}>Gợi ý kết bạn</h3>
+          <button
+            style={{ fontSize: '12px', fontWeight: 700, color: 'var(--brand-red)', background: 'none', border: 'none', cursor: 'pointer' }}
+            onClick={() => setTab('friends')}
+          >
+            Xem tất cả
+          </button>
+        </div>
+
+        <div>
           {friendSuggestions.map(s => (
             <div key={s.id} className="suggestion-item">
-              <div className="suggestion-user-info">
-                <div className="avatar-circle-sm" style={{ backgroundColor: s.avatarBg || '#74b9ff' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="avatar-circle" style={{ background: s.avatarBg || '#ff7675', width: '36px', height: '36px', fontSize: '12px' }}>
                   {s.name[0]}
                 </div>
                 <div>
-                  <div className="suggestion-name">{s.name}</div>
-                  <div className="mutual-count">{s.mutualFriends} bạn chung</div>
+                  <div style={{ fontSize: '13px', fontWeight: 700 }}>{s.name}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-light-gray)' }}>{s.mutualFriends || 0} bạn chung</div>
                 </div>
               </div>
-
               <button
-                className={`btn-add-friend ${s.requested ? 'requested' : ''}`}
+                className="btn-add-friend"
                 onClick={() => sendRequest(s.id)}
                 disabled={s.requested}
               >
@@ -55,6 +63,6 @@ export const RightWidgets = () => {
           ))}
         </div>
       </div>
-    </aside>
+    </div>
   );
 };

@@ -14,12 +14,12 @@ export const HomeView = () => {
   );
 
   return (
-    <div className="home-view-grid">
-      <div className="home-main-col">
+    <div className="two-col-layout">
+      <div className="main-column">
         <WelcomeBanner />
         <StoryRail />
 
-        <div className="posts-stream">
+        <div id="home-posts-list">
           {filteredPosts.map(post => (
             <PostCard key={post.id} post={post} />
           ))}
@@ -32,7 +32,7 @@ export const HomeView = () => {
         </div>
       </div>
 
-      <RightWidgets />
+      <RightWidgets showLogo={true} />
     </div>
   );
 };
