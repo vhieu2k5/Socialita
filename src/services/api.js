@@ -30,7 +30,11 @@ async function request(endpoint, options = {}) {
     }
     return data;
   } catch (err) {
-    console.warn(`[API Error] ${endpoint}:`, err.message);
+    if (err.message === 'Failed to fetch') {
+      console.info(`[Socialita API] Không thể kết nối Backend (${API_BASE}). Đang dùng dữ liệu mẫu offline.`);
+    } else {
+      console.warn(`[API Error] ${endpoint}:`, err.message);
+    }
     throw err;
   }
 }

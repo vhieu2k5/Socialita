@@ -35,11 +35,14 @@ export const Topbar = () => {
       </div>
 
       {/* Các nút hành động bên phải */}
-      <div className="topbar-actions" style={{ position: 'relative' }}>
+      <div className="topbar-actions" style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
         {/* Nút Tin nhắn */}
         <button
           className={'icon-btn-white ' + (isMessagesOpen ? 'active' : '')}
-          onClick={toggleMessages}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleMessages();
+          }}
           title="Tin nhắn"
         >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +54,10 @@ export const Topbar = () => {
         {/* Nút Thông báo */}
         <button
           className={'icon-btn-white ' + (isNotificationsOpen ? 'active' : '')}
-          onClick={toggleNotifications}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleNotifications();
+          }}
           title="Thông báo"
         >
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
