@@ -829,6 +829,12 @@
           <span style="flex: 1; text-align: left;">Quản lý bài viết</span>
           <span class="menu-badge" id="sidebar-badge-posts">18</span>
         </button>
+
+        <!-- Xem giao diện người dùng -->
+        <button class="sidebar-menu-btn" onclick="window.location.href='home.html'" style="margin-top: 14px; border: 1px dashed rgba(255,255,255,0.2);">
+          <span style="font-size: 16px;">🏠</span>
+          <span style="flex: 1; text-align: left;">Vào mạng xã hội</span>
+        </button>
       </div>
     </div>
 
@@ -2028,6 +2034,19 @@
 
     // ==================== KHỞI TẠO TỰ ĐỘNG ====================
     document.addEventListener('DOMContentLoaded', () => {
+      // 0. Kiểm tra quyền Admin
+      try {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        if (!currentUser || currentUser.roles !== 'admin') {
+          alert('Tài khoản của bạn không có quyền truy cập trang quản trị hệ thống!');
+          window.location.href = 'index.html';
+          return;
+        }
+      } catch (err) {
+        window.location.href = 'index.html';
+        return;
+      }
+
       renderUsersTable();
       renderPostsTable();
 

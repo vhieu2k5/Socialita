@@ -7,7 +7,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -34,7 +34,7 @@ CREATE TABLE `messages` (
   KEY `fk_messages_receiver_id` (`receiver_id`),
   CONSTRAINT `fk_messages_receiver_id` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_messages_sender_id` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,6 +43,7 @@ CREATE TABLE `messages` (
 
 LOCK TABLES `messages` WRITE;
 /*!40000 ALTER TABLE `messages` DISABLE KEYS */;
+INSERT INTO `messages` VALUES (1,2,1,'Chào Minh Anh! Hôm nay hệ thống Socialita chạy mượt không bạn?',1,'2026-09-28 01:35:00'),(2,1,2,'Chào Huy! Mượt lắm luôn, các tính năng tương tác bài viết và chat đều ổn định.',1,'2026-09-28 01:37:00'),(3,2,1,'Tuyệt vời quá! Giao diện tông đỏ đen trông hiện đại và rất cuốn hút.',1,'2026-09-28 01:40:00'),(4,1,2,'Cảm ơn bạn nhé! Bạn cùng trải nghiệm thêm xem cần cải thiện gì cứ nhắn mình nha 😊',0,'2026-09-28 01:42:00'),(5,6,1,'Minh Anh ơi, cuối tuần này có rảnh đi cafe không?',1,'2026-09-27 11:00:00'),(6,1,6,'Okie bạn ơi, chiều thứ 7 hẹn ở Phố Cổ nhé!',0,'2026-09-27 11:15:00'),(7,1,2,'Xin chào, test tin nhắn!',0,'2026-09-28 03:50:59'),(8,1,6,'Hi',0,'2026-09-28 03:59:19'),(9,1,2,'Tin nhắn kiểm thử tự động giữa User 1 và User 2',0,'2026-10-04 04:27:56'),(10,1,2,'Tin nhắn kiểm thử tự động giữa User 1 và User 2',0,'2026-10-04 04:29:15'),(11,1,6,'Chào bạn nha',0,'2026-10-04 04:31:54'),(12,1,7,'Hi',0,'2026-10-04 04:34:24');
 /*!40000 ALTER TABLE `messages` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-21  8:07:37
+-- Dump completed on 2026-10-04 11:42:22

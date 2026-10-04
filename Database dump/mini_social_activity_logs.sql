@@ -7,7 +7,7 @@
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -34,7 +34,7 @@ CREATE TABLE `activity_logs` (
   KEY `target_post_id` (`target_post_id`),
   CONSTRAINT `activity_logs_ibfk_1` FOREIGN KEY (`target_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `activity_logs_ibfk_2` FOREIGN KEY (`target_post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,6 +43,7 @@ CREATE TABLE `activity_logs` (
 
 LOCK TABLES `activity_logs` WRITE;
 /*!40000 ALTER TABLE `activity_logs` DISABLE KEYS */;
+INSERT INTO `activity_logs` VALUES (1,'USER_REGISTERED','Người dùng Minh Anh đăng ký tài khoản mới','2024-01-10 01:00:00',1,NULL),(2,'POST_CREATED','Minh Anh đăng bài viết chào mừng Socialita','2026-09-28 01:30:00',1,1),(3,'REPORT_CREATED','Minh Anh báo cáo bài viết ID #5 vi phạm tiêu chuẩn spam','2026-09-28 00:30:00',1,5),(4,'REPORT_CREATED','Quang Huy báo cáo tài khoản fake_account_02 vi phạm','2026-09-28 01:00:00',2,NULL),(8,'POST_DELETED','Bài viết ID #7 đã được xóa','2026-09-28 03:52:03',NULL,NULL),(10,'USER_DELETED','Quản trị viên đã xóa tài khoản ID #8','2026-09-28 03:52:10',NULL,NULL);
 /*!40000 ALTER TABLE `activity_logs` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +56,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-09-21  8:07:37
+-- Dump completed on 2026-10-04 11:42:22

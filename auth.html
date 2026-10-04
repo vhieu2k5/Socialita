@@ -399,6 +399,8 @@
   </div>
 </div>
 
+<div class="toast-container" id="toast-container"></div>
+<script src="script.js"></script>
 <script>
   function toggleAuth(type) {
     if (type === 'login') {
@@ -409,7 +411,17 @@
       document.getElementById('register-form').style.display = 'block';
     }
   }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const loginForm = document.getElementById('login-form');
+      if (loginForm && loginForm.style.display !== 'none') {
+        handleLogin();
+      } else {
+        handleRegister();
+      }
+    }
+  });
 </script>
-<div class="toast-container" id="toast-container"></div>
 </body>
 </html>

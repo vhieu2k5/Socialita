@@ -80,6 +80,13 @@
             <span>Cài đặt</span>
           </button>
 
+          <button class="sidebar-item admin-sidebar-item" id="sidebar-admin-link" style="display:none;" onclick="window.location.href='admin.html'">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Trang Admin</span>
+          </button>
+
           <button class="sidebar-item" onclick="handleLogout()">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -109,13 +116,21 @@
           <input type="text" class="search-input" placeholder="Tìm bạn bè, hội nhóm, bài viết..." oninput="handleMainSearch(this)">
         </div>
 
-        <div class="topbar-actions">
-          <button class="icon-btn-white" onclick="showToast('Bạn có 3 tin nhắn chưa đọc!')" title="Tin nhắn">
+        <div class="topbar-actions" style="position:relative;">
+          <button class="icon-btn-white" onclick="toggleConversationsDropdown()" title="Tin nhắn">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <span class="red-dot"></span>
+            <span class="red-dot" id="unread-messages-dot" style="display:none;"></span>
           </button>
+
+          <!-- Dropdown hội thoại gần đây -->
+          <div class="conversations-dropdown" id="conversations-dropdown">
+            <div class="conv-header">Tin nhắn gần đây</div>
+            <div id="conversations-list-container">
+              <div style="padding:16px; text-align:center; font-size:12.5px; color:var(--text-gray);">Đang tải cuộc trò chuyện...</div>
+            </div>
+          </div>
 
           <button class="icon-btn-white" onclick="showToast('Bạn có 5 thông báo mới!')" title="Thông báo">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -306,37 +321,17 @@
                   <button style="font-size:12px; font-weight:700; color:var(--brand-red);" onclick="switchTab('friends')">Xem tất cả</button>
                 </div>
 
-                <div class="suggestion-item">
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <div class="avatar-circle" style="background:#ff7675; width:36px; height:36px; font-size:12px;">N</div>
-                    <div>
-                      <div style="font-size:13px; font-weight:700;">Ngọc Bích</div>
-                      <div style="font-size:11px; color:var(--text-light-gray);">6 bạn chung</div>
+                <div id="friend-suggestions-list">
+                  <div class="suggestion-item">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <div class="avatar-circle" style="background:#ff7675; width:36px; height:36px; font-size:12px;">N</div>
+                      <div>
+                        <div style="font-size:13px; font-weight:700;">Ngọc Bích</div>
+                        <div style="font-size:11px; color:var(--text-light-gray);">Gợi ý cho bạn</div>
+                      </div>
                     </div>
+                    <button class="btn-add-friend" onclick="sendFriendRequest(this, 3, 'Ngọc Bích')">Kết bạn</button>
                   </div>
-                  <button class="btn-add-friend" onclick="sendFriendRequest(this, 'Ngọc Bích')">Kết bạn</button>
-                </div>
-
-                <div class="suggestion-item">
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <div class="avatar-circle" style="background:#74b9ff; width:36px; height:36px; font-size:12px;">T</div>
-                    <div>
-                      <div style="font-size:13px; font-weight:700;">Tấn Phát</div>
-                      <div style="font-size:11px; color:var(--text-light-gray);">3 bạn chung</div>
-                    </div>
-                  </div>
-                  <button class="btn-add-friend" onclick="sendFriendRequest(this, 'Tấn Phát')">Kết bạn</button>
-                </div>
-
-                <div class="suggestion-item">
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <div class="avatar-circle" style="background:#55efc4; width:36px; height:36px; font-size:12px;">H</div>
-                    <div>
-                      <div style="font-size:13px; font-weight:700;">Hải Đăng</div>
-                      <div style="font-size:11px; color:var(--text-light-gray);">9 bạn chung</div>
-                    </div>
-                  </div>
-                  <button class="btn-add-friend" onclick="sendFriendRequest(this, 'Hải Đăng')">Kết bạn</button>
                 </div>
               </div>
             </div>
@@ -689,7 +684,7 @@
               <!-- Section 2: Lời mời kết bạn -->
               <div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                  <h3 class="widget-card-title" style="margin-bottom:0;">Lời mời kết bạn (5)</h3>
+                  <h3 class="widget-card-title" style="margin-bottom:0;">Lời mời kết bạn (<span id="friend-requests-count">0</span>)</h3>
                   <button style="font-size:12px; font-weight:700; color:var(--brand-red);" onclick="showToast('Xem tất cả lời mời kết bạn')">Xem tất cả</button>
                 </div>
 
@@ -817,8 +812,20 @@
         </div>
 
         <div class="form-group">
+          <label>Hình ảnh đính kèm (Tùy chọn)</label>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <input type="file" id="create-post-image-file" accept="image/*" class="form-control" style="padding:6px;" onchange="handlePostImageSelect(this)">
+            <input type="text" id="create-post-image-url" class="form-control" placeholder="Hoặc dán liên kết URL ảnh..." oninput="handlePostImageUrlInput(this)">
+            <div id="create-post-image-preview-wrapper" style="display:none; position:relative; max-height:180px; overflow:hidden; border-radius:8px; border:1px solid var(--border-light); margin-top:4px;">
+              <img id="create-post-image-preview" src="" style="width:100%; height:180px; object-fit:cover; display:block;">
+              <button type="button" onclick="clearPostImageSelection()" style="position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.6); color:#fff; border-radius:50%; width:24px; height:24px; font-weight:bold; font-size:12px;">✕</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-            <label style="margin-bottom:0;">Màu nền Banner</label>
+            <label style="margin-bottom:0;">Màu nền Banner (Khi không dùng ảnh)</label>
             <label style="font-size:12px; color:var(--text-gray); display:flex; align-items:center; gap:4px; cursor:pointer;">
               <input type="checkbox" id="create-post-has-media" checked>
               <span>Kèm hình nền</span>
@@ -876,6 +883,27 @@
         </div>
       </form>
     </div>
+  </div>
+
+  <!-- ==================== FLOATING MESSENGER CHAT BOX ==================== -->
+  <div class="messenger-dock" id="messenger-dock">
+    <div class="messenger-header">
+      <div class="messenger-user-info">
+        <div class="messenger-avatar" id="messenger-partner-avatar">Q</div>
+        <div>
+          <div class="messenger-name" id="messenger-partner-name">Quang Huy</div>
+          <div class="messenger-status">Đang hoạt động</div>
+        </div>
+      </div>
+      <button class="messenger-close-btn" onclick="closeChatBox()">✕</button>
+    </div>
+    <div class="messenger-messages-body" id="messenger-messages-body">
+      <!-- Chat bubbles loaded dynamically -->
+    </div>
+    <form class="messenger-footer" onsubmit="handleSendChatMessage(event)">
+      <input type="text" class="messenger-input" id="messenger-input" placeholder="Nhập tin nhắn..." autocomplete="off">
+      <button type="submit" class="messenger-send-btn">Gửi</button>
+    </form>
   </div>
 
   <!-- Toast Notification Container -->
