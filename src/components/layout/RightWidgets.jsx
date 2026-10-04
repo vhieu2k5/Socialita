@@ -1,16 +1,24 @@
 import React from 'react';
 import { useSocial } from '../../context/SocialContext';
-import { LogoSvg } from '../ui/Logo';
 
 export const RightWidgets = ({ showLogo = true }) => {
   const { trends, friendSuggestions, sendRequest, setTab } = useSocial();
 
   return (
     <div className="right-widgets">
-      {/* Decorative 3D Pixel Logo floating */}
+      {/* Decorative Logo with logo.png */}
       {showLogo && (
         <div style={{ textAlign: 'center', padding: '10px 0' }}>
-          <LogoSvg size={84} shadow={true} />
+          <img
+            src="/logo.png"
+            alt="Socialita Logo"
+            style={{
+              width: '84px',
+              height: '84px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 8px 16px rgba(229,46,61,0.3))'
+            }}
+          />
         </div>
       )}
 

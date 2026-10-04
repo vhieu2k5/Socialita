@@ -2,7 +2,6 @@ import React from 'react';
 import { useSocial } from '../context/SocialContext';
 import { FeedFilters } from '../components/feed/FeedFilters';
 import { PostCard } from '../components/feed/PostCard';
-import { LogoSvg } from '../components/ui/Logo';
 
 export const FeedView = () => {
   const { posts, feedFilter, searchQuery, trends } = useSocial();
@@ -51,7 +50,16 @@ export const FeedView = () => {
         </div>
 
         <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <LogoSvg size={84} shadow={true} />
+          <img
+            src="/logo.png"
+            alt="Socialita Logo"
+            style={{
+              width: '84px',
+              height: '84px',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 8px 16px rgba(229,46,61,0.3))'
+            }}
+          />
         </div>
       </div>
     </div>

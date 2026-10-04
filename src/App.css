@@ -1560,18 +1560,18 @@ input, textarea {
     }
   
 
-/* Custom enhancements for perfect layout */
+/* Enhancements for Auth Layout */
 .auth-container {
   display: flex;
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
   background: #ffffff;
 }
 .auth-left {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 40px;
+  padding: 40px 24px;
   justify-content: center;
   align-items: center;
   position: relative;
@@ -1592,14 +1592,14 @@ input, textarea {
 }
 .auth-form-wrapper {
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
 }
 .mini-logo {
-  margin-top: 32px;
+  margin-top: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-weight: 800;
   font-size: 14px;
 }
@@ -1618,3 +1618,4 @@ input, textarea {
 .strength-segment.active {
   background: #e52e3d;
 }
+

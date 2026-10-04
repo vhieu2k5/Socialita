@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useSocial } from '../context/SocialContext';
 import { PostCard } from '../components/feed/PostCard';
-import { LogoSvg } from '../components/ui/Logo';
 
 export const ProfileView = () => {
   const { user, posts, openEditProfileModal, openCreatePostModal, uploadAvatar, showToast } = useSocial();
@@ -162,7 +161,16 @@ export const ProfileView = () => {
         <div className="right-widgets">
           {/* Logo 3D trôi nổi */}
           <div style={{ textAlign: 'center' }}>
-            <LogoSvg size={84} shadow={true} />
+            <img
+              src="/logo.png"
+              alt="Socialita Logo"
+              style={{
+                width: '84px',
+                height: '84px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 8px 16px rgba(229,46,61,0.3))'
+              }}
+            />
           </div>
 
           {/* Card Giới thiệu */}

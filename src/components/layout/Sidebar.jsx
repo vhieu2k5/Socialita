@@ -38,8 +38,8 @@ export const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div>
-        <div className="logo-badge" onClick={() => setTab('home')}>
-          <Logo size="sm" />
+        <div className="logo-badge" onClick={() => setTab('home')} title="Trang chủ Socialita">
+          <img src="/logo.png" alt="Socialita Logo" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
         </div>
 
         <div className="sidebar-section-title">ĐIỀU HƯỚNG</div>

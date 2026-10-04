@@ -7,7 +7,10 @@ export const AuthBanner = () => {
       <div className="auth-right-content">
         {/* Vòng tròn logo lớn */}
         <div className="auth-logo-large">
-          <Logo size="hero" showText={true} />
+          <img src="/logo.png" alt="Socialita Logo" style={{ width: '96px', height: '96px', objectFit: 'contain' }} />
+          <span style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#0f0f11', marginTop: '6px' }}>
+            Socialita
+          </span>
         </div>
 
         <div className="auth-right-tag">CỘNG ĐỒNG TRẺ, NĂNG ĐỘNG</div>
