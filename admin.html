@@ -3,1019 +3,2102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Socialita — Admin Panel</title>
+  <title>Socialita — Quản Trị Hệ Thống (Admin Panel)</title>
   <link rel="stylesheet" href="style.css">
   <style>
+    /* ========================================================
+       ADMIN FIGMA PIXEL-PERFECT STYLES
+       Khớp 100% bản thiết kế Figma (media_1791085085751.png)
+    ======================================================== */
     :root {
-      --admin-bg: #f9fafb;
-      --admin-sidebar: #111113;
-      --admin-card: #ffffff;
-      --admin-border: #e5e7eb;
-      --admin-text: #18181c;
-      --admin-text-light: #6b7280;
-      --admin-primary: #e52e3d;
+      --admin-bg-page: #f6f4ee;
+      --admin-sidebar-bg: #111113;
+      --admin-sidebar-border: #1f1f23;
+      --admin-text-dark: #18181c;
+      --admin-text-gray: #636366;
+      --admin-text-light: #8e8e93;
+      --admin-card-bg: #ffffff;
+      --admin-border-light: #e5e7eb;
+      --admin-red-primary: #e52e3d;
+      --admin-red-hover: #d32735;
+      --admin-green: #16a34a;
+      --admin-green-bg: #dcfce7;
+      --admin-orange: #d97706;
+      --admin-orange-bg: #fef3c7;
+      --admin-red-bg: #fee2e2;
     }
-    
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      background: var(--admin-bg);
-    }
-    
-    .admin-layout {
+      font-family: var(--font-family, 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif);
+      background-color: var(--admin-bg-page);
+      color: var(--admin-text-dark);
+      min-height: 100vh;
       display: flex;
-      height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
-    
-    /* Sidebar */
+
+    button {
+      font-family: inherit;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+
+    input, select, textarea {
+      font-family: inherit;
+    }
+
+    /* ==================== 1. SIDEBAR ĐEN ==================== */
     .admin-sidebar {
       width: 260px;
-      background: var(--admin-sidebar);
-      color: white;
+      background-color: var(--admin-sidebar-bg);
+      color: #ffffff;
+      height: 100vh;
+      position: sticky;
+      top: 0;
       display: flex;
       flex-direction: column;
-      flex-shrink: 0;
-    }
-    .admin-logo-area {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border-bottom: 1px solid #2a2a2e;
-    }
-    .admin-badge {
-      background: rgba(229, 46, 61, 0.1);
-      color: var(--admin-primary);
-      font-size: 11px;
-      font-weight: 800;
-      padding: 4px 8px;
-      border-radius: 4px;
-      margin-top: 12px;
-      letter-spacing: 1px;
-    }
-    .admin-nav-group {
+      justify-content: space-between;
       padding: 24px 16px;
-      flex: 1;
+      flex-shrink: 0;
+      border-right: 1px solid var(--admin-sidebar-border);
+      user-select: none;
+      z-index: 20;
     }
-    .admin-nav-title {
-      font-size: 11px;
-      color: #6b7280;
-      font-weight: 700;
-      margin-bottom: 12px;
-      padding: 0 12px;
+
+    /* Logo Tròn Socialita & Badge Admin Panel */
+    .sidebar-header {
+      text-align: center;
+      margin-bottom: 24px;
     }
-    .admin-nav-item {
+
+    .logo-circle {
+      width: 76px;
+      height: 76px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      overflow: hidden;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 8px;
-      color: #9ca3af;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 4px;
-      transition: all 0.2s;
+      justify-content: center;
+      margin: 0 auto 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
       cursor: pointer;
     }
-    .admin-nav-item:hover {
-      background: #1f2937;
-      color: white;
+
+    .admin-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #241416;
+      border: 1px solid #4a1d24;
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-size: 10.5px;
+      font-weight: 800;
+      color: var(--admin-red-primary);
+      letter-spacing: 0.08em;
     }
-    .admin-nav-item.active {
-      background: var(--admin-primary);
-      color: white;
+
+    .admin-badge-pill .red-dot-badge {
+      width: 6px;
+      height: 6px;
+      background-color: var(--admin-red-primary);
+      border-radius: 50%;
     }
-    .admin-nav-badge {
-      margin-left: auto;
-      background: #374151;
-      color: #d1d5db;
+
+    .sidebar-nav-title {
       font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 12px;
+      font-weight: 700;
+      color: var(--admin-text-gray);
+      letter-spacing: 0.08em;
+      padding: 0 12px;
+      margin-bottom: 8px;
     }
-    .admin-nav-item.active .admin-nav-badge {
-      background: white;
-      color: var(--admin-primary);
+
+    .sidebar-nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    .admin-user {
-      padding: 16px;
-      border-top: 1px solid #2a2a2e;
+
+    .sidebar-menu-btn {
       display: flex;
       align-items: center;
       gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background-color: transparent;
+      color: #a1a1a6;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: none;
+      transition: all 0.15s ease;
+      width: 100%;
+      text-align: left;
     }
-    .admin-user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #10b981;
+
+    .sidebar-menu-btn:hover:not(.active) {
+      background-color: #1a1a1e;
+      color: #ffffff;
     }
-    
-    /* Main Content */
-    .admin-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+
+    .sidebar-menu-btn.active {
+      background-color: var(--admin-red-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(229, 46, 61, 0.35);
     }
-    .admin-header {
-      height: 70px;
-      background: var(--admin-card);
-      border-bottom: 1px solid var(--admin-border);
+
+    .sidebar-menu-btn .menu-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background-color: #242428;
+      color: #8e8e93;
+      margin-left: auto;
+    }
+
+    .sidebar-menu-btn.active .menu-badge {
+      background-color: #ffffff;
+      color: var(--admin-red-primary);
+    }
+
+    /* Footer Sidebar: Admin Profile & Logout */
+    .sidebar-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
-      flex-shrink: 0;
+      padding-top: 16px;
+      border-top: 1px solid #242428;
     }
-    .admin-header h1 {
-      font-size: 20px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .admin-header-actions {
+
+    .admin-profile-info {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 10px;
     }
-    .admin-content {
+
+    .admin-avatar-initial {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: #2a2a30;
+      border: 1.5px solid #3e3e46;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .logout-btn {
+      color: #8e8e93;
+      font-size: 18px;
+      padding: 6px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: color 0.15s ease;
+    }
+
+    .logout-btn:hover {
+      color: var(--admin-red-primary);
+    }
+
+    /* ==================== 2. MAIN CONTAINER ==================== */
+    .admin-main-wrapper {
       flex: 1;
-      padding: 32px;
+      padding: 36px 44px;
       overflow-y: auto;
+      height: 100vh;
+      max-width: 1320px;
     }
-    
-    /* View: Tổng quan */
-    .stats-grid {
+
+    /* Top Header Bar */
+    .admin-top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .admin-top-header h1 {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--admin-text-dark);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .admin-header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .bell-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ffffff;
+      border: 1px solid var(--admin-border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: background 0.15s ease;
+    }
+
+    .bell-btn:hover {
+      background-color: #f9fafb;
+    }
+
+    .bell-btn .red-dot {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      width: 7px;
+      height: 7px;
+      background-color: var(--admin-red-primary);
+      border-radius: 50%;
+    }
+
+    .blue-avatar-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #38bdf8;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ==================== 3. CARDS & WIDGETS ==================== */
+    .widget-card {
+      background-color: var(--admin-card-bg);
+      border: 1px solid var(--admin-border-light);
+      border-radius: 16px;
+      padding: 20px 22px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.15s ease;
+    }
+
+    .widget-card:hover {
+      border-color: #d1d5db;
+    }
+
+    /* Stat Cards 4 hàng ngang */
+    .stats-cards-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+      gap: 16px;
       margin-bottom: 32px;
     }
-    .stat-card {
-      background: var(--admin-card);
-      border: 1px solid var(--admin-border);
-      border-radius: 12px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .stat-card-title {
-      font-size: 13px;
-      color: var(--admin-text-light);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .stat-card-value {
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--admin-text);
-    }
-    .stat-card-sub {
-      font-size: 12px;
-      color: #10b981;
-      font-weight: 600;
-    }
-    
-    .dashboard-row {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 24px;
-    }
-    .panel {
-      background: var(--admin-card);
-      border: 1px solid var(--admin-border);
-      border-radius: 12px;
-      padding: 24px;
-    }
-    .panel-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: space-between;
-    }
-    .activity-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .activity-item {
-      display: flex;
-      gap: 12px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--admin-border);
-    }
-    .activity-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    .activity-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      margin-top: 6px;
-    }
-    .activity-content h4 {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .activity-content p {
-      font-size: 13px;
-      color: var(--admin-text-light);
-    }
-    .quick-action-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--admin-border);
-      border-radius: 8px;
-      background: white;
-      margin-bottom: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--admin-text);
-      transition: all 0.2s;
-    }
-    .quick-action-btn:hover {
-      border-color: var(--admin-primary);
-      color: var(--admin-primary);
-    }
-    
-    /* View: Management Tables */
-    .filter-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .filter-tabs {
-      display: flex;
-      background: #f3f4f6;
-      border-radius: 8px;
-      padding: 4px;
-    }
-    .filter-tab {
-      padding: 6px 16px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--admin-text-light);
+
+    .stat-card-inner {
       cursor: pointer;
     }
-    .filter-tab.active {
-      background: white;
-      color: var(--admin-text);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+    .stat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
     }
-    .table-container {
-      background: var(--admin-card);
-      border: 1px solid var(--admin-border);
+
+    .stat-card-icon {
+      font-size: 22px;
+    }
+
+    .stat-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      line-height: 1.2;
+    }
+
+    .stat-pill.green {
+      background-color: var(--admin-green-bg);
+      color: var(--admin-green);
+    }
+
+    .stat-pill.red {
+      background-color: var(--admin-red-bg);
+      color: var(--admin-red-primary);
+    }
+
+    .stat-pill.red-light {
+      background-color: #fef2f2;
+      color: var(--admin-red-primary);
+    }
+
+    .stat-card-value {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--admin-text-dark);
+      font-family: var(--font-mono, 'JetBrains Mono', monospace);
+      line-height: 1;
+    }
+
+    .stat-card-label {
+      font-size: 12.5px;
+      color: var(--admin-text-light);
+      margin-top: 8px;
+    }
+
+    /* Two columns: Hoạt động gần đây & Thao tác nhanh */
+    .overview-two-cols {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .col-recent-activities {
+      flex: 1.8;
+    }
+
+    .col-quick-actions {
+      flex: 1.2;
+    }
+
+    .activity-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid #f3f4f6;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .activity-row:last-child {
+      border-bottom: none;
+    }
+
+    .activity-row:hover {
+      background-color: #fafaf9;
+    }
+
+    .quick-action-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      border-radius: 14px;
+      background: #ffffff;
+      border: 1px solid var(--admin-border-light);
+      transition: all 0.15s ease;
+    }
+
+    .quick-action-card:hover {
+      border-color: var(--admin-red-primary);
+      transform: translateY(-1px);
+    }
+
+    /* ==================== 4. BANNER 5 BƯỚC QUY TRÌNH FIGMA ==================== */
+    .five-steps-banner {
+      background-color: #ffffff;
+      border: 1px solid var(--admin-border-light);
       border-radius: 12px;
-      overflow: hidden;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11.5px;
+      color: var(--admin-text-light);
+      overflow-x: auto;
+      white-space: nowrap;
     }
-    .admin-table {
+
+    .step-active-pill {
+      background-color: var(--admin-red-primary);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ==================== 5. SEARCH & FILTER BAR ==================== */
+    .admin-filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-box {
+      position: relative;
+      width: 280px;
+    }
+
+    .search-input-box input {
+      width: 100%;
+      padding: 9px 14px 9px 36px;
+      border-radius: 10px;
+      border: 1px solid var(--admin-border-light);
+      background-color: #ffffff;
+      font-size: 13px;
+      color: var(--admin-text-dark);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .search-input-box input:focus {
+      border-color: var(--admin-red-primary);
+    }
+
+    .search-input-box .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--admin-text-light);
+      pointer-events: none;
+    }
+
+    .filter-tabs-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      background-color: #ffffff;
+      color: #6b7280;
+      border: 1px solid var(--admin-border-light);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-pill-btn:hover {
+      border-color: #9ca3af;
+      color: var(--admin-text-dark);
+    }
+
+    .filter-pill-btn.active {
+      background-color: #18181c;
+      color: #ffffff;
+      border-color: #18181c;
+    }
+
+    /* ==================== 6. DATA TABLES ==================== */
+    .table-card-wrapper {
+      background-color: #ffffff;
+      border: 1px solid var(--admin-border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      margin-bottom: 24px;
+    }
+
+    .admin-data-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
     }
-    .admin-table th {
-      background: #f9fafb;
-      padding: 12px 24px;
+
+    .admin-data-table th {
+      padding: 14px 20px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       color: var(--admin-text-light);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid var(--admin-border);
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid #f3f4f6;
+      background-color: #fafafa;
     }
-    .admin-table td {
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--admin-border);
-      font-size: 14px;
+
+    .admin-data-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 13.5px;
       vertical-align: middle;
     }
-    .admin-table tr:hover td {
-      background: #f9fafb;
+
+    .admin-data-table tr:last-child td {
+      border-bottom: none;
     }
-    .user-cell {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+
+    .admin-data-table tr:hover td {
+      background-color: #fbfbfa;
     }
-    .user-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 12px;
-      color: white;
-    }
-    .status-badge {
+
+    .badge-status-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
     }
-    .status-active {
-      background: #d1fae5;
-      color: #065f46;
+
+    .badge-status-pill.active {
+      background-color: var(--admin-green-bg);
+      color: var(--admin-green);
     }
-    .status-locked {
-      background: #fee2e2;
-      color: #991b1b;
+
+    .badge-status-pill.locked {
+      background-color: #f3f4f6;
+      color: #6b7280;
     }
-    .status-warning {
-      background: #fef3c7;
-      color: #92400e;
+
+    .badge-status-pill.reported {
+      background-color: var(--admin-orange-bg);
+      color: var(--admin-orange);
     }
-    .action-icons {
-      display: flex;
-      gap: 8px;
+
+    .badge-status-pill.danger {
+      background-color: var(--admin-red-bg);
+      color: var(--admin-red-primary);
     }
-    .icon-btn {
+
+    .action-icon-btn {
       width: 32px;
       height: 32px;
-      border-radius: 6px;
-      border: 1px solid var(--admin-border);
-      background: white;
-      display: flex;
+      border-radius: 8px;
+      border: 1px solid var(--admin-border-light);
+      background-color: #ffffff;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--admin-text-light);
+      color: #6b7280;
       cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 14px;
     }
-    .icon-btn:hover {
-      background: #f3f4f6;
-      color: var(--admin-text);
+
+    .action-icon-btn:hover {
+      background-color: #f3f4f6;
+      color: var(--admin-text-dark);
+      border-color: #d1d5db;
     }
-    
-    /* Sliding Panel for User Details */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 100;
-      display: none;
+
+    .action-icon-btn.delete-hover:hover {
+      background-color: var(--admin-red-bg);
+      color: var(--admin-red-primary);
+      border-color: #fca5a5;
     }
-    .side-panel {
-      position: fixed;
-      top: 0;
-      right: -400px;
-      width: 400px;
-      height: 100vh;
-      background: white;
-      z-index: 101;
-      box-shadow: -4px 0 24px rgba(0,0,0,0.1);
-      transition: right 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    .side-panel.open {
-      right: 0;
-    }
-    .panel-header {
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--admin-border);
+
+    /* Pagination */
+    .table-pagination-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 14px 20px;
+      border-top: 1px solid #f3f4f6;
+      font-size: 12.5px;
+      color: var(--admin-text-light);
+      background-color: #ffffff;
     }
-    .panel-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
+
+    .pagination-buttons {
+      display: flex;
+      gap: 6px;
     }
-    .panel-user-header {
+
+    .page-btn {
+      padding: 5px 11px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 700;
+      border: 1px solid var(--admin-border-light);
+      background-color: #ffffff;
+      color: var(--admin-text-dark);
+      cursor: pointer;
+    }
+
+    .page-btn.active {
+      background-color: #18181c;
+      color: #ffffff;
+      border-color: #18181c;
+    }
+
+    /* ==================== 7. USER DETAIL DRAWER (SLIDE RIGHT) ==================== */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(3px);
+      z-index: 100;
+      display: none;
+      justify-content: flex-end;
+      animation: fadeIn 0.15s ease;
+    }
+
+    .drawer-backdrop.open {
+      display: flex;
+    }
+
+    .drawer-slide-content {
+      width: 420px;
+      max-width: 90vw;
+      height: 100%;
+      background-color: #ffffff;
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-      margin-bottom: 24px;
+      justify-content: space-between;
+      padding: 24px 28px;
+      overflow-y: auto;
     }
-    .panel-user-header .user-avatar {
-      width: 64px;
-      height: 64px;
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
-    .panel-stats {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--admin-border);
-      padding-bottom: 24px;
-    }
-    .panel-stat-item {
-      text-align: center;
-    }
-    .panel-stat-item .val {
-      font-size: 18px;
+
+    .drawer-subtab-btn {
+      font-size: 13px;
       font-weight: 700;
-    }
-    .panel-stat-item .lbl {
-      font-size: 12px;
-      color: var(--admin-text-light);
-    }
-    .panel-tabs {
-      display: flex;
-      gap: 16px;
-      border-bottom: 1px solid var(--admin-border);
-      margin-bottom: 16px;
-    }
-    .panel-tab {
-      padding: 8px 0;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--admin-text-light);
+      color: #8e8e93;
+      border-bottom: 2.5px solid transparent;
+      padding-bottom: 8px;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
     }
-    .panel-tab.active {
-      color: var(--admin-primary);
-      border-bottom-color: var(--admin-primary);
+
+    .drawer-subtab-btn.active {
+      color: var(--admin-text-dark);
+      border-bottom-color: var(--admin-red-primary);
     }
-    .panel-footer {
-      padding: 16px 24px;
-      border-top: 1px solid var(--admin-border);
-      display: flex;
-      gap: 12px;
-    }
-    .btn-outline {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid var(--admin-border);
-      background: white;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .btn-danger {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      background: var(--admin-primary);
-      color: white;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    
-    /* Modal */
-    .modal-container {
+
+    /* ==================== 8. POPUP MODALS ==================== */
+    .modal-backdrop {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      border-radius: 12px;
-      width: 400px;
-      padding: 24px;
-      z-index: 102;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 120;
       display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.15s ease;
     }
-    .modal-container.active {
-      display: block;
+
+    .modal-backdrop.open {
+      display: flex;
     }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 700;
+
+    .modal-card-box {
+      background-color: #ffffff;
+      border-radius: 16px;
+      width: 480px;
+      max-width: 95vw;
+      padding: 24px 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.2s ease;
+    }
+
+    .modal-icon-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      color: #991b1b;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
     }
-    .modal-desc {
-      font-size: 14px;
-      color: var(--admin-text-light);
-      margin-bottom: 16px;
-      line-height: 1.5;
+
+    .modal-icon-badge.red {
+      background-color: var(--admin-red-bg);
+      color: var(--admin-red-primary);
     }
-    .modal-actions {
+
+    .modal-icon-badge.dark {
+      background-color: #18181c;
+      color: #ffffff;
+      font-weight: 800;
+    }
+
+    /* ==================== 9. TOAST ==================== */
+    .toast-shelf {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 150;
       display: flex;
-      gap: 12px;
-      justify-content: flex-end;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
     }
-    
-    /* Util classes */
-    .hidden { display: none !important; }
+
+    .toast-msg {
+      background: #18181c;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #2a2a2e;
+      animation: slideUp 0.2s ease forwards;
+    }
+
+    .toast-msg.error {
+      border-left: 4px solid var(--admin-red-primary);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(16px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
 
-<div class="admin-layout">
-  <!-- Sidebar -->
-  <div class="admin-sidebar">
-    <div class="admin-logo-area">
-      <svg viewBox="0 0 80 80" width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg" style="background:white; border-radius:50%; padding:4px;">
-        <rect x="24" y="8" width="46" height="14" rx="2" fill="#0f0f11" />
-        <rect x="10" y="8" width="16" height="14" rx="2" fill="#18181c" />
-        <rect x="10" y="22" width="14" height="14" rx="1.5" fill="#18181c" />
-        <rect x="22" y="34" width="40" height="13" rx="2" fill="#0f0f11" />
-        <rect x="10" y="34" width="22" height="13" rx="2" fill="#e52e3d" />
-        <rect x="10" y="47" width="42" height="13" rx="2" fill="#e52e3d" />
-        <rect x="52" y="47" width="18" height="13" rx="2" fill="#b91c28" />
-        <rect x="10" y="60" width="50" height="13" rx="2" fill="#e52e3d" />
-      </svg>
-      <div class="admin-badge">• ADMIN PANEL</div>
-    </div>
-    
-    <div class="admin-nav-group">
-      <div class="admin-nav-title">ĐIỀU HƯỚNG</div>
-      <a class="admin-nav-item active" onclick="switchAdminTab('overview', this)">
-        <span>📊</span> Tổng quan
-      </a>
-      <a class="admin-nav-item" onclick="switchAdminTab('users', this)">
-        <span>👥</span> Quản lý người dùng
-        <span class="admin-nav-badge">1.2K</span>
-      </a>
-      <a class="admin-nav-item" onclick="switchAdminTab('posts', this)">
-        <span>📝</span> Quản lý bài viết
-        <span class="admin-nav-badge">18</span>
-      </a>
-    </div>
-    
-    <div class="admin-user">
-      <div class="admin-user-avatar"></div>
-      <div>
-        <div style="font-size:13px; font-weight:700;">Admin — Thiện</div>
-        <div style="font-size:11px; color:#9ca3af;">Quản trị viên</div>
-      </div>
-      <span style="margin-left:auto; cursor:pointer;">🚪</span>
-    </div>
-  </div>
+  <!-- ========================================================
+       1. SIDEBAR ĐEN (Chuẩn 100% Figma)
+  ======================================================== -->
+  <aside class="admin-sidebar">
+    <div>
+      <!-- Logo Tròn Socialita & Badge Admin Panel -->
+      <div class="sidebar-header">
+        <div class="logo-circle" onclick="switchAdminTab('overview')" title="Socialita Admin">
+          <!-- Logo SVG Socialita Chuẩn -->
+          <svg viewBox="0 0 80 80" width="46" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="24" y="8" width="46" height="14" rx="2" fill="#0f0f11" />
+            <rect x="10" y="8" width="16" height="14" rx="2" fill="#18181c" />
+            <rect x="10" y="22" width="14" height="14" rx="1.5" fill="#18181c" />
+            <rect x="22" y="34" width="40" height="13" rx="2" fill="#0f0f11" />
+            <rect x="10" y="34" width="22" height="13" rx="2" fill="#e52e3d" />
+            <rect x="10" y="47" width="42" height="13" rx="2" fill="#e52e3d" />
+            <rect x="52" y="47" width="18" height="13" rx="2" fill="#b91c28" />
+            <rect x="10" y="60" width="50" height="13" rx="2" fill="#e52e3d" />
+          </svg>
+        </div>
 
-  <!-- Main Content -->
-  <div class="admin-main">
-    <div class="admin-header">
-      <h1 id="header-title">TỔNG QUAN</h1>
-      <div class="admin-header-actions">
-        <div style="position:relative; cursor:pointer;">
-          <span style="font-size:20px;">🔔</span>
-          <span style="position:absolute; top:0; right:0; width:8px; height:8px; background:var(--admin-primary); border-radius:50%;"></span>
+        <div class="admin-badge-pill">
+          <span class="red-dot-badge"></span>
+          <span>ADMIN PANEL</span>
         </div>
-        <div class="user-avatar" style="background:#3b82f6;"></div>
+      </div>
+
+      <!-- Menu Điều Hướng -->
+      <div class="sidebar-nav-title">ĐIỀU HƯỚNG</div>
+      <div class="sidebar-nav-menu">
+        <!-- Tab 1: Tổng quan -->
+        <button class="sidebar-menu-btn active" id="btn-nav-overview" onclick="switchAdminTab('overview')">
+          <span style="font-size: 16px;">⊞</span>
+          <span>Tổng quan</span>
+        </button>
+
+        <!-- Tab 2: Quản lý người dùng -->
+        <button class="sidebar-menu-btn" id="btn-nav-users" onclick="switchAdminTab('users')">
+          <span style="font-size: 16px;">👥</span>
+          <span style="flex: 1; text-align: left;">Quản lý người dùng</span>
+          <span class="menu-badge" id="sidebar-badge-users">1.2K</span>
+        </button>
+
+        <!-- Tab 3: Quản lý bài viết -->
+        <button class="sidebar-menu-btn" id="btn-nav-posts" onclick="switchAdminTab('posts')">
+          <span style="font-size: 16px;">≡</span>
+          <span style="flex: 1; text-align: left;">Quản lý bài viết</span>
+          <span class="menu-badge" id="sidebar-badge-posts">18</span>
+        </button>
       </div>
     </div>
+
+    <!-- Footer: Thông tin Admin & Nút Đăng xuất -->
+    <div class="sidebar-footer">
+      <div class="admin-profile-info">
+        <div class="admin-avatar-initial">T</div>
+        <div>
+          <div style="font-size: 13.5px; font-weight: 800; color: #ffffff;">Admin — Thiện</div>
+          <div style="font-size: 11px; color: #8e8e93;">Quản trị viên</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="handleAdminLogout()" title="Đăng xuất khỏi hệ thống">
+        ➔
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========================================================
+       2. KHUNG NỘI DUNG CHÍNH (MAIN WRAPPER)
+  ======================================================== -->
+  <main class="admin-main-wrapper" id="admin-main-wrapper">
     
-    <div class="admin-content">
+    <!-- Top Header: Tiêu đề + Chuông + Avatar xanh -->
+    <header class="admin-top-header">
+      <h1 id="page-main-title">TỔNG QUAN</h1>
+      <div class="admin-header-right">
+        <button class="bell-btn" onclick="showAdminToast('Không có thông báo mới')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #4b5563;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span class="red-dot"></span>
+        </button>
+        <div class="blue-avatar-circle" title="Admin Avatar"></div>
+      </div>
+    </header>
+
+    <!-- ========================================================
+         VIEW 1: TỔNG QUAN (OVERVIEW TAB)
+    ======================================================== -->
+    <section id="view-overview" style="display: block;">
       
-      <!-- Tab: Tổng quan -->
-      <div id="tab-overview">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-card-title"><span>👥</span> Tổng người dùng</div>
-            <div id="admin-stat-users" class="stat-card-value">1,248</div>
-            <div class="stat-card-sub">+12% trong tháng</div>
+      <!-- 4 Thẻ Thống Kê Hàng Ngang -->
+      <div class="stats-cards-grid">
+        <!-- Card 1: Tổng người dùng -->
+        <div class="widget-card stat-card-inner" onclick="switchAdminTab('users')">
+          <div class="stat-card-header">
+            <span class="stat-card-icon">👥</span>
+            <span class="stat-pill green">+3.2%</span>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title"><span>📝</span> Tổng bài viết</div>
-            <div id="admin-stat-posts" class="stat-card-value">4,930</div>
-            <div class="stat-card-sub">+8% trong tháng</div>
+          <div class="stat-card-value" id="stat-total-users">1,248</div>
+          <div class="stat-card-label">Tổng người dùng</div>
+        </div>
+
+        <!-- Card 2: Tổng bài viết -->
+        <div class="widget-card stat-card-inner" onclick="switchAdminTab('posts')">
+          <div class="stat-card-header">
+            <span class="stat-card-icon">📄</span>
+            <span class="stat-pill green">+18</span>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title"><span>⚠️</span> Báo cáo vi phạm</div>
-            <div id="admin-stat-reports" class="stat-card-value" style="color:var(--admin-primary);">7</div>
-            <div class="stat-card-sub" style="color:var(--admin-text-light);">Cần xử lý</div>
+          <div class="stat-card-value" id="stat-total-posts">4,930</div>
+          <div class="stat-card-label">Tổng bài viết</div>
+        </div>
+
+        <!-- Card 3: Báo cáo vi phạm -->
+        <div class="widget-card stat-card-inner" onclick="switchAdminTab('posts')">
+          <div class="stat-card-header">
+            <span class="stat-card-icon">⚠️</span>
+            <span class="stat-pill red">Cần xử lý</span>
           </div>
-          <div class="stat-card">
-            <div class="stat-card-title"><span>🔒</span> Tài khoản bị khóa</div>
-            <div id="admin-stat-locked" class="stat-card-value">12</div>
-            <div class="stat-card-sub" style="color:var(--admin-text-light);">Tài khoản bị cấm</div>
+          <div class="stat-card-value" id="stat-total-reports">7</div>
+          <div class="stat-card-label">Báo cáo vi phạm chờ duyệt</div>
+        </div>
+
+        <!-- Card 4: Tài khoản bị khóa -->
+        <div class="widget-card stat-card-inner" onclick="switchAdminTab('users')">
+          <div class="stat-card-header">
+            <span class="stat-card-icon">🔒</span>
+            <span class="stat-pill red-light">Đã khóa</span>
+          </div>
+          <div class="stat-card-value" id="stat-total-locked">12</div>
+          <div class="stat-card-label">Tài khoản bị khóa</div>
+        </div>
+      </div>
+
+      <!-- Bố Cục 2 Cột Phía Dưới -->
+      <div class="overview-two-cols">
+        <!-- Cột Trái: Hoạt động gần đây -->
+        <div class="col-recent-activities widget-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="fontSize: 15px; font-weight: 800; color: var(--admin-text-dark); margin: 0;">
+              Hoạt động gần đây
+            </h3>
+            <button onclick="showAdminToast('Mở toàn bộ nhật ký hệ thống')" style="font-size: 12px; font-weight: 700; color: var(--admin-red-primary);">
+              Xem nhật ký
+            </button>
+          </div>
+
+          <div id="recent-activities-list">
+            <!-- Item 1 -->
+            <div class="activity-row" onclick="openPostModalById('ap-1')">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #e52e3d; margin-top: 6px; flex-shrink: 0;"></span>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">Bài viết bị báo cáo x3</div>
+                  <div style="font-size: 12px; color: var(--admin-text-light); margin-top: 2px;">"Cuối tuần này lớp mình..." — bởi Quang Huy</div>
+                </div>
+              </div>
+              <span style="font-size: 12px; color: var(--admin-text-light); font-weight: 600;">08:14</span>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="activity-row" onclick="switchAdminTab('users')">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; margin-top: 6px; flex-shrink: 0;"></span>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">Người dùng mới đăng ký</div>
+                  <div style="font-size: 12px; color: var(--admin-text-light); margin-top: 2px;">Bảo Trân (@baotran) vừa tạo tài khoản</div>
+                </div>
+              </div>
+              <span style="font-size: 12px; color: var(--admin-text-light); font-weight: 600;">07:52</span>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="activity-row" onclick="switchAdminTab('posts')">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; margin-top: 6px; flex-shrink: 0;"></span>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">12 bài viết mới trong 1 giờ qua</div>
+                  <div style="font-size: 12px; color: var(--admin-text-light); margin-top: 2px;">Chủ yếu từ hội nhóm Du lịch & Nhiếp ảnh</div>
+                </div>
+              </div>
+              <span style="font-size: 12px; color: var(--admin-text-light); font-weight: 600;">07:10</span>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="activity-row" onclick="openUserDrawerById('u-3')">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #e52e3d; margin-top: 6px; flex-shrink: 0;"></span>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">Tài khoản bị khóa</div>
+                  <div style="font-size: 12px; color: var(--admin-text-light); margin-top: 2px;">@fake_account_02 — vi phạm spam</div>
+                </div>
+              </div>
+              <span style="font-size: 12px; color: var(--admin-text-light); font-weight: 600;">Hôm qua</span>
+            </div>
+
+            <!-- Item 5 -->
+            <div class="activity-row" onclick="showAdminToast('Nhóm Runner Sài Gòn')">
+              <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; margin-top: 6px; flex-shrink: 0;"></span>
+                <div>
+                  <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">Hội nhóm mới được tạo</div>
+                  <div style="font-size: 12px; color: var(--admin-text-light); margin-top: 2px;">"Runner Sài Gòn" bởi Hải Đăng</div>
+                </div>
+              </div>
+              <span style="font-size: 12px; color: var(--admin-text-light); font-weight: 600;">Hôm qua</span>
+            </div>
           </div>
         </div>
-        
-        <div class="dashboard-row">
-          <div class="panel">
-            <div class="panel-title">Hoạt động gần đây</div>
-            <div class="activity-list">
-              <div class="activity-item">
-                <div class="activity-dot"></div>
-                <div class="activity-content">
-                  <h4>Bài viết bị báo cáo x3</h4>
-                  <p>"Cuối tuần này lớp mình..." - bởi Quang Huy</p>
-                </div>
-                <div style="margin-left:auto; font-size:12px; color:var(--admin-text-light);">08:34</div>
+
+        <!-- Cột Phải: Thao tác nhanh -->
+        <div class="col-quick-actions">
+          <h3 style="font-size: 15px; font-weight: 800; color: var(--admin-text-dark); margin-bottom: 14px;">
+            Thao tác nhanh
+          </h3>
+
+          <div>
+            <!-- Action 1 -->
+            <div class="quick-action-card" onclick="switchAdminTab('users')">
+              <span style="font-size: 20px; color: var(--admin-red-primary);">👤</span>
+              <div>
+                <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">Duyệt tài khoản báo cáo</div>
+                <div style="font-size: 11.5px; color: var(--admin-text-light); margin-top: 2px;">3 người dùng bị tố cáo spam</div>
               </div>
-              <div class="activity-item">
-                <div class="activity-dot" style="background:#3b82f6;"></div>
-                <div class="activity-content">
-                  <h4>Người dùng mới đăng ký</h4>
-                  <p>Bảo Trân (@baotran) vừa tạo tài khoản</p>
-                </div>
-                <div style="margin-left:auto; font-size:12px; color:var(--admin-text-light);">07:12</div>
+            </div>
+
+            <!-- Action 2 -->
+            <div class="quick-action-card" onclick="openPostModalById('ap-1')">
+              <span style="font-size: 20px; color: var(--admin-red-primary);">📄</span>
+              <div>
+                <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">Xử lý bài viết bị báo cáo</div>
+                <div style="font-size: 11.5px; color: var(--admin-text-light); margin-top: 2px;">7 bài viết đang chờ kiểm duyệt</div>
               </div>
-              <div class="activity-item">
-                <div class="activity-dot" style="background:#f59e0b;"></div>
-                <div class="activity-content">
-                  <h4>Tài khoản bị khóa</h4>
-                  <p>@fake_account_02 vì vi phạm spam</p>
-                </div>
-                <div style="margin-left:auto; font-size:12px; color:var(--admin-text-light);">Hôm qua</div>
+            </div>
+
+            <!-- Action 3 -->
+            <div class="quick-action-card" onclick="showAdminToast('Mở bảng cấp quyền quản trị viên')">
+              <span style="font-size: 20px; color: var(--admin-red-primary); font-weight: 900;">+</span>
+              <div>
+                <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark);">Thêm quản trị viên</div>
+                <div style="font-size: 11.5px; color: var(--admin-text-light); margin-top: 2px;">Cấp quyền cho thành viên team</div>
               </div>
             </div>
           </div>
-          
-          <div class="panel">
-            <div class="panel-title">Thao tác nhanh</div>
-            <button class="quick-action-btn">
-              <span style="color:var(--admin-primary);">⚠️</span> Duyệt bài viết bị báo cáo
-            </button>
-            <button class="quick-action-btn">
-              <span style="color:var(--admin-primary);">🗑️</span> Xử lý tài khoản spam
-            </button>
-            <button class="quick-action-btn">
-              <span style="color:#10b981;">➕</span> Thêm quản trị viên
-            </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 2: QUẢN LÝ NGƯỜI DÙNG (USERS TAB)
+    ======================================================== -->
+    <section id="view-users" style="display: none;">
+      
+      <!-- Thanh Hướng dẫn Quy trình 5 Bước chuẩn Figma -->
+      <div class="five-steps-banner">
+        <span class="step-active-pill">
+          <span>1</span> Xem danh sách
+        </span>
+        <span>➔</span>
+        <span>2. Mở chi tiết tài khoản</span>
+        <span>➔</span>
+        <span>3. Chọn hành động (khóa / xóa)</span>
+        <span>➔</span>
+        <span>4. Xác nhận & ghi lý do</span>
+        <span>➔</span>
+        <span>5. Hệ thống cập nhật</span>
+      </div>
+
+      <!-- Thanh Tìm kiếm & Bộ lọc -->
+      <div class="admin-filter-bar">
+        <div class="search-input-box">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="user-search-input" placeholder="Tìm theo tên hoặc email" oninput="renderUsersTable()">
+        </div>
+
+        <div class="filter-tabs-group" id="user-filter-group">
+          <button class="filter-pill-btn active" data-filter="all" onclick="setUserFilter('all', this)">Tất cả (1.248)</button>
+          <button class="filter-pill-btn" data-filter="active" onclick="setUserFilter('active', this)">Đang hoạt động</button>
+          <button class="filter-pill-btn" data-filter="locked" onclick="setUserFilter('locked', this)">Đã khóa (12)</button>
+          <button class="filter-pill-btn" data-filter="reported" onclick="setUserFilter('reported', this)">Bị báo cáo (5)</button>
+        </div>
+      </div>
+
+      <!-- Bảng Danh Sách Người Dùng -->
+      <div class="table-card-wrapper">
+        <table class="admin-data-table">
+          <thead>
+            <tr>
+              <th>NGƯỜI DÙNG</th>
+              <th>NGÀY THAM GIA</th>
+              <th>BÀI VIẾT</th>
+              <th>VI PHẠM</th>
+              <th>TRẠNG THÁI</th>
+              <th style="text-align: right;">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody id="users-table-body">
+            <!-- Render qua JavaScript -->
+          </tbody>
+        </table>
+
+        <!-- Phân trang -->
+        <div class="table-pagination-footer">
+          <span>Hiển thị 1 - 5 trên 1.248 người dùng</span>
+          <div class="pagination-buttons">
+            <button class="page-btn">&lt;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">&gt;</button>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 3: QUẢN LÝ BÀI VIẾT (POSTS TAB)
+    ======================================================== -->
+    <section id="view-posts" style="display: none;">
       
-      <!-- Tab: Quản lý người dùng -->
-      <div id="tab-users" class="hidden">
-        <div class="filter-bar">
-          <input type="text" placeholder="🔍 Tìm theo tên hoặc email" style="padding:8px 16px; border:1px solid var(--admin-border); border-radius:8px; width:250px;">
-          <div class="filter-tabs">
-            <div class="filter-tab active">Tất cả (1,248)</div>
-            <div class="filter-tab">Đang hoạt động (712)</div>
-            <div class="filter-tab">Đã khóa (12)</div>
-            <div class="filter-tab">Bị báo cáo (5)</div>
-          </div>
+      <!-- Thanh Tìm kiếm & Bộ lọc Bài viết -->
+      <div class="admin-filter-bar">
+        <div class="search-input-box" style="width: 320px;">
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text" id="post-search-input" placeholder="Tìm theo nội dung, tác giả..." oninput="renderPostsTable()">
         </div>
-        
-        <div class="table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>NGƯỜI DÙNG</th>
-                <th>NGÀY THAM GIA</th>
-                <th>BÀI VIẾT</th>
-                <th>VI PHẠM</th>
-                <th>TRẠNG THÁI</th>
-                <th>THAO TÁC</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar" style="background:#e879f9;">M</div>
-                    <div>
-                      <div style="font-weight:700;">Minh Anh Lê</div>
-                      <div style="font-size:12px; color:var(--admin-text-light);">minhanh.le@gmail.com</div>
-                    </div>
-                  </div>
-                </td>
-                <td>03/2024</td>
-                <td>86</td>
-                <td>2</td>
-                <td><span class="status-badge status-active">Hoạt động</span></td>
-                <td>
-                  <div class="action-icons">
-                    <button class="icon-btn" onclick="openUserPanel('Minh Anh Lê')">👁️</button>
-                    <button class="icon-btn" onclick="openModal('lock')">🔒</button>
-                    <button class="icon-btn" onclick="openModal('delete')">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar" style="background:#38bdf8;">Q</div>
-                    <div>
-                      <div style="font-weight:700;">Quang Huy</div>
-                      <div style="font-size:12px; color:var(--admin-text-light);">quanghuy@gmail.com</div>
-                    </div>
-                  </div>
-                </td>
-                <td>01/2024</td>
-                <td>142</td>
-                <td>1</td>
-                <td><span class="status-badge status-active">Hoạt động</span></td>
-                <td>
-                  <div class="action-icons">
-                    <button class="icon-btn" onclick="openUserPanel('Quang Huy')">👁️</button>
-                    <button class="icon-btn">🔒</button>
-                    <button class="icon-btn">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar" style="background:#fbbf24;">F</div>
-                    <div>
-                      <div style="font-weight:700;">fake_account_02</div>
-                      <div style="font-size:12px; color:var(--admin-text-light);">spam999@yahoo.com</div>
-                    </div>
-                  </div>
-                </td>
-                <td>08/2025</td>
-                <td>9</td>
-                <td>8</td>
-                <td><span class="status-badge status-locked">Đã khóa</span></td>
-                <td>
-                  <div class="action-icons">
-                    <button class="icon-btn">👁️</button>
-                    <button class="icon-btn">🔓</button>
-                    <button class="icon-btn">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+
+        <div class="filter-tabs-group" id="post-filter-group">
+          <button class="filter-pill-btn active" data-filter="all" onclick="setPostFilter('all', this)">Tất cả (4.930)</button>
+          <button class="filter-pill-btn" data-filter="reported" onclick="setPostFilter('reported', this)">Chờ xử lý (7)</button>
+          <button class="filter-pill-btn" data-filter="visible" onclick="setPostFilter('visible', this)">Đang hiển thị</button>
+          <button class="filter-pill-btn" data-filter="hidden" onclick="setPostFilter('hidden', this)">Đã ẩn</button>
         </div>
       </div>
-      
-      <!-- Tab: Quản lý bài viết -->
-      <div id="tab-posts" class="hidden">
-        <div class="filter-bar">
-          <input type="text" placeholder="🔍 Tìm theo nội dung..." style="padding:8px 16px; border:1px solid var(--admin-border); border-radius:8px; width:250px;">
-          <div class="filter-tabs">
-            <div class="filter-tab active">Tất cả bài viết</div>
-            <div class="filter-tab">Bị báo cáo (7)</div>
-            <div class="filter-tab">Đã ẩn (32)</div>
+
+      <!-- Bảng Danh Sách Bài Viết -->
+      <div class="table-card-wrapper">
+        <table class="admin-data-table">
+          <thead>
+            <tr>
+              <th style="width: 45%;">TÁC GIẢ & NỘI DUNG</th>
+              <th>THỜI GIAN</th>
+              <th>BÁO CÁO VI PHẠM</th>
+              <th>TRẠNG THÁI</th>
+              <th style="text-align: right;">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody id="posts-table-body">
+            <!-- Render qua JavaScript -->
+          </tbody>
+        </table>
+
+        <!-- Phân trang -->
+        <div class="table-pagination-footer">
+          <span>Hiển thị 1 - 4 trên 4.930 bài viết</span>
+          <div class="pagination-buttons">
+            <button class="page-btn">&lt;</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">&gt;</button>
           </div>
         </div>
-        
-        <div class="table-container">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>NỘI DUNG</th>
-                <th>TÁC GIẢ</th>
-                <th>THỜI GIAN</th>
-                <th>TRẠNG THÁI</th>
-                <th>THAO TÁC</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">"Cuối tuần này lớp mình tổ chức đi Đà Lạt..."</td>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar" style="background:#38bdf8;">Q</div>
-                    <span style="font-weight:600; font-size:13px;">Quang Huy</span>
-                  </div>
-                </td>
-                <td>2 giờ trước</td>
-                <td><span class="status-badge status-warning">Bị báo cáo x3</span></td>
-                <td>
-                  <div class="action-icons">
-                    <button class="icon-btn" onclick="openPostModal()">👁️</button>
-                    <button class="icon-btn">🚫</button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">"Một buổi chiều bình yên tại góc cafe quen thuộc..."</td>
-                <td>
-                  <div class="user-cell">
-                    <div class="user-avatar" style="background:#a78bfa;">H</div>
-                    <span style="font-weight:600; font-size:13px;">Hải Yến</span>
-                  </div>
-                </td>
-                <td>5 giờ trước</td>
-                <td><span class="status-badge status-active">Bình thường</span></td>
-                <td>
-                  <div class="action-icons">
-                    <button class="icon-btn">👁️</button>
-                    <button class="icon-btn">🚫</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       3. DRAWER CHI TIẾT NGƯỜI DÙNG (SLIDE RIGHT)
+       Khớp Panel 4, 6, 7 trong ảnh
+  ======================================================== -->
+  <div class="drawer-backdrop" id="user-drawer" onclick="handleDrawerBackdropClick(event)">
+    <div class="drawer-slide-content">
+      <div>
+        <!-- Header Drawer -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h3 style="font-size: 15px; font-weight: 800; color: var(--admin-text-dark); margin: 0;">
+            Chi tiết tài khoản
+          </h3>
+          <button onclick="closeUserDrawer()" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e5e7eb; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #6b7280; cursor: pointer;">
+            ✕
+          </button>
+        </div>
+
+        <!-- Avatar, Tên & Trạng Thái -->
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 24px;">
+          <div id="drawer-avatar" style="width: 76px; height: 76px; border-radius: 50%; background-color: #35c9b0; color: #ffffff; font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.1);">
+            M
+          </div>
+          <h2 id="drawer-name" style="font-size: 18px; font-weight: 800; color: var(--admin-text-dark); margin: 0 0 4px;">
+            Minh Anh Lê
+          </h2>
+          <div id="drawer-email" style="font-size: 12.5px; color: #8e8e93; margin-bottom: 10px;">
+            minhanh.le@gmail.com
+          </div>
+          <span id="drawer-status-badge" class="badge-status-pill active">
+            Hoạt động
+          </span>
+        </div>
+
+        <!-- 3 Chỉ Số: BÀI VIẾT | BẠN BÈ | VI PHẠM -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; background-color: #ffffff; border: 1px solid #f3f4f6; border-radius: 12px; padding: 12px 6px; margin-bottom: 20px;">
+          <div>
+            <div id="drawer-stat-posts" style="font-size: 18px; font-weight: 900; font-family: var(--font-mono, monospace); color: var(--admin-text-dark);">
+              86
+            </div>
+            <div style="font-size: 10.5px; font-weight: 700; color: #8e8e93; text-transform: uppercase; margin-top: 2px;">
+              BÀI VIẾT
+            </div>
+          </div>
+          <div style="border-left: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb;">
+            <div id="drawer-stat-friends" style="font-size: 18px; font-weight: 900; font-family: var(--font-mono, monospace); color: var(--admin-text-dark);">
+              128
+            </div>
+            <div style="font-size: 10.5px; font-weight: 700; color: #8e8e93; text-transform: uppercase; margin-top: 2px;">
+              BẠN BÈ
+            </div>
+          </div>
+          <div>
+            <div id="drawer-stat-violations" style="font-size: 18px; font-weight: 900; font-family: var(--font-mono, monospace); color: var(--admin-text-dark);">
+              0
+            </div>
+            <div style="font-size: 10.5px; font-weight: 700; color: #8e8e93; text-transform: uppercase; margin-top: 2px;">
+              VI PHẠM
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Subtabs: Thông tin | Bài viết | Lịch sử vi phạm -->
+        <div style="display: flex; gap: 24px; border-bottom: 1px solid #f3f4f6; margin-bottom: 20px;">
+          <button class="drawer-subtab-btn active" id="btn-subtab-info" onclick="switchDrawerSubtab('info')">
+            Thông tin
+          </button>
+          <button class="drawer-subtab-btn" id="btn-subtab-posts" onclick="switchDrawerSubtab('posts')">
+            Bài viết
+          </button>
+          <button class="drawer-subtab-btn" id="btn-subtab-violations" onclick="switchDrawerSubtab('violations')">
+            Lịch sử vi phạm
+          </button>
+        </div>
+
+        <!-- SUBTAB 1: THÔNG TIN TÀI KHOẢN -->
+        <div id="drawer-subtab-content-info" style="display: flex; flex-direction: column; gap: 14px; font-size: 13px; color: var(--admin-text-dark);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span>📅</span>
+            <span id="drawer-info-joined">Tham gia từ tháng 03/2024</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span>📍</span>
+            <span id="drawer-info-location">Sài Gòn, Việt Nam</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span>✉️</span>
+            <span>Email đã xác thực</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span>🕒</span>
+            <span id="drawer-info-lastlogin">Đăng nhập gần nhất: 2 giờ trước</span>
+          </div>
+        </div>
+
+        <!-- SUBTAB 2: BÀI VIẾT (Panel 6 trong ảnh) -->
+        <div id="drawer-subtab-content-posts" style="display: none; flex-direction: column; gap: 16px;">
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #9ca3af; margin-top: 6px; flex-shrink: 0;"></span>
+            <div>
+              <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark); line-height: 1.4;">
+                Vừa hoàn thành đồ án môn học...
+              </div>
+              <div style="font-size: 12px; color: #8e8e93; margin-top: 2px;">
+                152 lượt thích · 24 bình luận
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #9ca3af; margin-top: 6px; flex-shrink: 0;"></span>
+            <div>
+              <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark); line-height: 1.4;">
+                Cà phê sáng thứ 7 cùng hội bạn thân
+              </div>
+              <div style="font-size: 12px; color: #8e8e93; margin-top: 2px;">
+                88 lượt thích · 9 bình luận
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUBTAB 3: LỊCH SỬ VI PHẠM (Panel 7 trong ảnh) -->
+        <div id="drawer-subtab-content-violations" style="display: none;">
+          <div id="drawer-violations-list" style="display: flex; flex-direction: column; gap: 16px;">
+            <!-- Render động -->
+          </div>
         </div>
       </div>
-      
+
+      <!-- Bottom Action Buttons: Khóa / Mở khóa & Xóa -->
+      <div style="display: flex; gap: 12px; padding-top: 20px; border-top: 1px solid #f3f4f6;">
+        <button id="drawer-btn-lock" onclick="handleDrawerLockClick()" style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff; font-size: 13px; font-weight: 700; color: var(--admin-text-dark); display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+          <span>🔒</span>
+          <span id="drawer-lock-text">Khóa tài khoản</span>
+        </button>
+        <button onclick="handleDrawerDeleteClick()" style="flex: 1; padding: 10px; border-radius: 10px; background-color: var(--admin-red-primary); color: #ffffff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(229,46,61,0.3);">
+          <span>🗑️</span>
+          <span>Xóa</span>
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Sliding Panel: User Details -->
-<div class="overlay" id="main-overlay" onclick="closePanels()"></div>
-
-<div class="side-panel" id="user-panel">
-  <div class="panel-header">
-    <h3 style="font-size:16px; font-weight:700;">Chi tiết tài khoản</h3>
-    <button class="icon-btn" onclick="closePanels()">✕</button>
-  </div>
-  <div class="panel-body">
-    <div class="panel-user-header">
-      <div class="user-avatar" id="panel-avatar" style="background:#e879f9;">M</div>
-      <h2 style="font-size:18px; font-weight:800; margin-bottom:4px;" id="panel-name">Minh Anh Lê</h2>
-      <p style="font-size:13px; color:var(--admin-text-light); margin-bottom:8px;">minhanh.le@gmail.com</p>
-      <span class="status-badge status-active">Hoạt động</span>
-    </div>
-    
-    <div class="panel-stats">
-      <div class="panel-stat-item">
-        <div class="val">86</div>
-        <div class="lbl">Bài viết</div>
-      </div>
-      <div class="panel-stat-item">
-        <div class="val">128</div>
-        <div class="lbl">Bạn bè</div>
-      </div>
-      <div class="panel-stat-item">
-        <div class="val" style="color:var(--admin-primary);">2</div>
-        <div class="lbl">Vi phạm</div>
-      </div>
-    </div>
-    
-    <div class="panel-tabs">
-      <div class="panel-tab active" onclick="switchPanelTab('posts', this)">Bài viết</div>
-      <div class="panel-tab" onclick="switchPanelTab('violations', this)">Lịch sử vi phạm</div>
-    </div>
-    
-    <div id="panel-tab-posts">
-      <div style="padding:12px; border:1px solid var(--admin-border); border-radius:8px; margin-bottom:12px;">
-        <p style="font-size:13px; font-weight:600; margin-bottom:8px;">"Một ngày tuyệt vời tại Phú Quốc..."</p>
-        <span style="font-size:11px; color:var(--admin-text-light);">3 ngày trước</span>
-      </div>
-      <div style="padding:12px; border:1px solid var(--admin-border); border-radius:8px;">
-        <p style="font-size:13px; font-weight:600; margin-bottom:8px;">"Cà phê sáng thứ 7 cùng hội bạn thân"</p>
-        <span style="font-size:11px; color:var(--admin-text-light);">1 tuần trước</span>
-      </div>
-    </div>
-    
-    <div id="panel-tab-violations" class="hidden">
-      <div style="padding:12px; border:1px solid var(--admin-primary); background:var(--admin-primary); background-opacity:0.05; border-radius:8px; color:#991b1b; display:flex; gap:8px;">
-        <span>⚠️</span>
+  <!-- ========================================================
+       4. MODAL KHÓA TÀI KHOẢN (LOCK USER MODAL)
+       Khớp Panel 8 trong ảnh
+  ======================================================== -->
+  <div class="modal-backdrop" id="modal-lock-user">
+    <div class="modal-card-box">
+      <!-- Header -->
+      <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px;">
+        <div class="modal-icon-badge red">
+          🔒
+        </div>
         <div>
-          <p style="font-size:13px; font-weight:600; margin-bottom:4px;">Bài viết vi phạm spam</p>
-          <span style="font-size:11px;">10/05/2024 — Cảnh cáo lần 1</span>
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--admin-text-dark); margin: 0 0 4px;">
+            Khóa tài khoản người dùng?
+          </h3>
+          <p id="lock-modal-subtitle" style="font-size: 12.5px; color: #6b7280; margin: 0; line-height: 1.4;">
+            Người dùng sẽ không thể đăng nhập cho đến khi được mở khóa lại.
+          </p>
         </div>
       </div>
-    </div>
-    
-  </div>
-  <div class="panel-footer">
-    <button class="btn-outline" onclick="openModal('lock')">Khóa tài khoản</button>
-    <button class="btn-danger" onclick="openModal('delete')">Xóa</button>
-  </div>
-</div>
 
-<!-- Modal Lock Account -->
-<div class="modal-container" id="modal-lock">
-  <div class="modal-title"><span>🔒</span> Khóa tài khoản người dùng?</div>
-  <p class="modal-desc">Người dùng sẽ không thể đăng nhập cho đến khi được mở khóa lại.</p>
-  
-  <div style="margin-bottom:16px;">
-    <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Lý do khóa (tùy chọn)</label>
-    <textarea style="width:100%; border:1px solid var(--admin-border); border-radius:8px; padding:8px; font-family:inherit; font-size:13px;" rows="3" placeholder="Mô tả lý do khóa để người dùng biết..."></textarea>
-  </div>
-  
-  <div class="modal-actions">
-    <button class="btn-outline" style="width:auto; padding:8px 16px;" onclick="closeModal('modal-lock')">Hủy</button>
-    <button class="btn-danger" style="width:auto; padding:8px 16px;">Xác nhận khóa</button>
-  </div>
-</div>
+      <!-- Form chọn lý do & ghi chú -->
+      <form onsubmit="submitLockUserForm(event)">
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: var(--admin-text-dark); margin-bottom: 6px;">
+            Lý do khóa tài khoản
+          </label>
+          <select id="lock-reason-select" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff; font-size: 13px; color: var(--admin-text-dark); outline: none;">
+            <option value="Spam / quảng cáo trái phép">Spam / quảng cáo trái phép</option>
+            <option value="Ngôn từ gây thù ghét / xúc phạm">Ngôn từ gây thù ghét / xúc phạm</option>
+            <option value="Giả mạo danh tính">Giả mạo danh tính</option>
+            <option value="Nội dung độc hại / vi phạm pháp luật">Nội dung độc hại / vi phạm pháp luật</option>
+            <option value="Khác">Khác</option>
+          </select>
+        </div>
 
-<!-- Modal Delete Account -->
-<div class="modal-container" id="modal-delete">
-  <div class="modal-title"><span>⚠️</span> Xóa vĩnh viễn tài khoản?</div>
-  <p class="modal-desc">Toàn bộ bài viết, bình luận và dữ liệu liên quan sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.</p>
-  
-  <label style="display:flex; gap:8px; align-items:center; font-size:13px; margin-bottom:20px; font-weight:600;">
-    <input type="checkbox"> Tôi hiểu hành động này không thể hoàn tác và xác nhận xóa tài khoản này.
-  </label>
-  
-  <div class="modal-actions">
-    <button class="btn-outline" style="width:auto; padding:8px 16px;" onclick="closeModal('modal-delete')">Hủy</button>
-    <button class="btn-danger" style="width:auto; padding:8px 16px;">Xóa vĩnh viễn</button>
-  </div>
-</div>
+        <div style="margin-bottom: 24px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: var(--admin-text-dark); margin-bottom: 6px;">
+            Ghi chú thêm (tùy chọn)
+          </label>
+          <textarea id="lock-note-textarea" rows="3" placeholder="Nhập ghi chú cho quản trị viên..." style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #e5e7eb; font-size: 13px; outline: none; resize: none;"></textarea>
+        </div>
 
-<!-- Modal Post Details -->
-<div class="modal-container" id="modal-post" style="width:500px;">
-  <div class="modal-title" style="color:var(--admin-text);">📝 Chi tiết bài viết</div>
-  
-  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
-    <div class="user-avatar" style="background:#38bdf8;">Q</div>
-    <div>
-      <div style="font-weight:700; font-size:14px;">Quang Huy</div>
-      <div style="font-size:12px; color:var(--admin-text-light);">2 giờ trước · Đã bị báo cáo x3</div>
+        <!-- 2 Nút Hành động -->
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button type="button" onclick="closeLockModal()" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff; font-size: 13px; font-weight: 700; color: var(--admin-text-dark); cursor: pointer;">
+            Hủy
+          </button>
+          <button type="submit" style="padding: 10px 20px; border-radius: 10px; background-color: var(--admin-red-primary); color: #ffffff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(229,46,61,0.3);">
+            Khóa tài khoản
+          </button>
+        </div>
+      </form>
     </div>
   </div>
-  
-  <div style="background:#f9fafb; padding:16px; border-radius:8px; border:1px solid var(--admin-border); font-size:14px; margin-bottom:16px;">
-    "Cuối tuần này lớp mình tổ chức đi Đà Lạt, ai muốn tham gia thì để lại bình luận nhé! 🌿 #DuLichCuoiTuan"
-  </div>
-  
-  <div style="background:#fef2f2; border:1px solid #fca5a5; padding:12px; border-radius:8px; margin-bottom:20px;">
-    <h4 style="font-size:13px; color:#991b1b; margin-bottom:8px;">Chi tiết báo cáo:</h4>
-    <ul style="font-size:12px; color:#991b1b; padding-left:16px; margin:0;">
-      <li>2 người dùng báo cáo spam</li>
-      <li>1 người dùng báo cáo từ ngữ thù địch</li>
-    </ul>
-  </div>
-  
-  <div class="modal-actions">
-    <button class="btn-outline" style="width:auto; padding:8px 16px;" onclick="closeModal('modal-post')">Đóng</button>
-    <button class="btn-danger" style="width:auto; padding:8px 16px; background:#f59e0b;">Ẩn bài viết</button>
-    <button class="btn-danger" style="width:auto; padding:8px 16px;">Xóa bài viết</button>
-  </div>
-</div>
 
-<script>
-  function switchAdminTab(tabId, element) {
-    // Hide all tabs
-    document.getElementById('tab-overview').classList.add('hidden');
-    document.getElementById('tab-users').classList.add('hidden');
-    document.getElementById('tab-posts').classList.add('hidden');
-    
-    // Show selected tab
-    document.getElementById('tab-' + tabId).classList.remove('hidden');
-    
-    // Update active nav item
-    const navItems = document.querySelectorAll('.admin-nav-item');
-    navItems.forEach(item => item.classList.remove('active'));
-    element.classList.add('active');
-    
-    // Update Header Title
-    const titles = {
-      'overview': 'TỔNG QUAN',
-      'users': 'QUẢN LÝ NGƯỜI DÙNG',
-      'posts': 'QUẢN LÝ BÀI VIẾT'
-    };
-    document.getElementById('header-title').innerText = titles[tabId];
-  }
-  
-  function openUserPanel(userName) {
-    document.getElementById('panel-name').innerText = userName;
-    document.getElementById('panel-avatar').innerText = userName.charAt(0);
-    document.getElementById('main-overlay').style.display = 'block';
-    document.getElementById('user-panel').classList.add('open');
-  }
-  
-  function closePanels() {
-    document.getElementById('main-overlay').style.display = 'none';
-    document.getElementById('user-panel').classList.remove('open');
-    document.querySelectorAll('.modal-container').forEach(m => m.classList.remove('active'));
-  }
-  
-  function openModal(type) {
-    // Close panel if open but keep overlay, actually let's just make sure overlay is shown
-    document.getElementById('main-overlay').style.display = 'block';
-    document.getElementById('modal-' + type).classList.add('active');
-  }
-  
-  function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('active');
-    // If side panel is open, keep overlay
-    if (!document.getElementById('user-panel').classList.contains('open')) {
-      document.getElementById('main-overlay').style.display = 'none';
+  <!-- ========================================================
+       5. MODAL XÓA TÀI KHOẢN (DELETE USER MODAL)
+  ======================================================== -->
+  <div class="modal-backdrop" id="modal-delete-user">
+    <div class="modal-card-box">
+      <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px;">
+        <div class="modal-icon-badge red">
+          ⚠️
+        </div>
+        <div>
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--admin-text-dark); margin: 0 0 4px;">
+            Xóa vĩnh viễn tài khoản?
+          </h3>
+          <p id="delete-modal-subtitle" style="font-size: 12.5px; color: #6b7280; margin: 0; line-height: 1.4;">
+            Toàn bộ bài viết, bình luận và dữ liệu liên quan sẽ bị xóa và không thể khôi phục.
+          </p>
+        </div>
+      </div>
+
+      <!-- Checkbox xác nhận nguy hiểm -->
+      <div style="background-color: #f9fafb; border: 1px solid #f3f4f6; border-radius: 10px; padding: 12px 14px; margin-bottom: 22px;">
+        <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; color: var(--admin-text-dark); cursor: pointer; line-height: 1.4;">
+          <input type="checkbox" id="delete-confirm-checkbox" style="margin-top: 2px;">
+          <span>Tôi hiểu hành động này không thể hoàn tác và xác nhận xóa tài khoản này.</span>
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" onclick="closeDeleteModal()" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff; font-size: 13px; font-weight: 700; color: var(--admin-text-dark); cursor: pointer;">
+          Hủy
+        </button>
+        <button type="button" onclick="confirmDeleteUser()" style="padding: 10px 20px; border-radius: 10px; background-color: var(--admin-red-primary); color: #ffffff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(229,46,61,0.3);">
+          Xóa vĩnh viễn
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       6. MODAL CHI TIẾT BÀI VIẾT (POST DETAIL MODAL)
+       Khớp Panel 5 trong ảnh
+  ======================================================== -->
+  <div class="modal-backdrop" id="modal-post-detail">
+    <div class="modal-card-box" style="width: 520px;">
+      <!-- Header với Icon Bài viết Đen -->
+      <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px;">
+        <div class="modal-icon-badge dark">
+          ≡
+        </div>
+        <div>
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--admin-text-dark); margin: 0 0 4px;">
+            Chi tiết bài viết
+          </h3>
+          <p id="post-modal-author-time" style="font-size: 12px; color: #8e8e93; margin: 0;">
+            Đăng bởi <span style="font-weight: 700; color: var(--admin-text-dark);" id="post-modal-author">fake_account_02</span> · <span id="post-modal-time">2 giờ trước</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Nội dung bài viết -->
+      <div id="post-modal-content" style="font-size: 13.5px; font-weight: 600; color: var(--admin-text-dark); line-height: 1.5; background: #fafafa; padding: 14px 16px; border-radius: 10px; border: 1px solid #f3f4f6; margin-bottom: 18px;">
+        Bán tài khoản game giá rẻ, ib zalo... liên hệ ngay kẻo hết ưu đãi!!
+      </div>
+
+      <!-- Báo cáo vi phạm chi tiết -->
+      <div style="margin-bottom: 22px;">
+        <div style="font-size: 12px; font-weight: 700; color: #8e8e93; text-transform: uppercase; margin-bottom: 8px;">
+          BÁO CÁO VI PHẠM CHI TIẾT (<span id="post-modal-report-count">6</span>)
+        </div>
+        <div id="post-modal-reports-list" style="display: flex; flex-direction: column; gap: 6px;">
+          <!-- Render động -->
+        </div>
+      </div>
+
+      <!-- Các Nút Hành Động -->
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" onclick="closePostModal()" style="padding: 10px 16px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff; font-size: 13px; font-weight: 700; color: var(--admin-text-dark); cursor: pointer;">
+          Đóng
+        </button>
+        <button type="button" id="post-modal-toggle-hide-btn" onclick="confirmToggleHidePost()" style="padding: 10px 18px; border-radius: 10px; background-color: var(--admin-red-primary); color: #ffffff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(229,46,61,0.3);">
+          Ẩn bài viết
+        </button>
+        <button type="button" onclick="confirmDeletePostFromModal()" style="padding: 10px 14px; border-radius: 10px; border: 1px solid #fee2e2; background-color: #fff1f2; color: var(--admin-red-primary); font-size: 13px; font-weight: 700; cursor: pointer;">
+          Xóa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container Toast Thông Báo -->
+  <div class="toast-shelf" id="toast-shelf"></div>
+
+  <!-- ========================================================
+       7. LOGIC JAVASCRIPT THUẦN (STANDALONE + BACKEND SYNC)
+  ======================================================== -->
+  <script>
+    // ==================== INITIAL DATA ====================
+    let usersData = [
+      {
+        id: 'u-1',
+        name: 'Minh Anh Lê',
+        email: 'minhanh.le@gmail.com',
+        joinedDate: '03/2024',
+        postsCount: 86,
+        friendsCount: 128,
+        violationsCount: 0,
+        status: 'Hoạt động',
+        location: 'Sài Gòn, Việt Nam',
+        lastLogin: '2 giờ trước',
+        avatarBg: '#35c9b0',
+        violationsList: []
+      },
+      {
+        id: 'u-2',
+        name: 'Quang Huy',
+        email: 'quanghuy92@gmail.com',
+        joinedDate: '07/2024',
+        postsCount: 142,
+        friendsCount: 210,
+        violationsCount: 1,
+        status: 'Hoạt động',
+        location: 'Hà Nội, Việt Nam',
+        lastLogin: '4 giờ trước',
+        avatarBg: '#3b82f6',
+        violationsList: [
+          { id: 'v-2', reason: 'Ngôn từ chưa phù hợp', dateAndAdmin: '02/09/2026 — bởi Admin Thiện' }
+        ]
+      },
+      {
+        id: 'u-3',
+        name: 'fake_account_02',
+        email: 'fakeacc02@mail.com',
+        joinedDate: '01/2025',
+        postsCount: 9,
+        friendsCount: 14,
+        violationsCount: 6,
+        status: 'Đã khóa',
+        location: 'Không xác định',
+        lastLogin: 'Hôm qua',
+        avatarBg: '#9ca3af',
+        violationsList: [
+          { id: 'v-3', reason: 'Spam / quảng cáo trái phép', dateAndAdmin: 'Hôm qua — bởi Admin Thiện' },
+          { id: 'v-4', reason: 'Giả mạo danh tính người khác', dateAndAdmin: '20/08/2026 — bởi Admin Thiện' }
+        ]
+      },
+      {
+        id: 'u-4',
+        name: 'Hải Yến',
+        email: 'haiyen.photo@gmail.com',
+        joinedDate: '05/2024',
+        postsCount: 63,
+        friendsCount: 96,
+        violationsCount: 0,
+        status: 'Hoạt động',
+        location: 'Đà Nẵng, Việt Nam',
+        lastLogin: '1 ngày trước',
+        avatarBg: '#a855f7',
+        violationsList: []
+      },
+      {
+        id: 'u-5',
+        name: 'Thu Trang',
+        email: 'thutrang.spam@mail.com',
+        joinedDate: '02/2025',
+        postsCount: 21,
+        friendsCount: 45,
+        violationsCount: 3,
+        status: 'Bị báo cáo',
+        location: 'Hải Phòng, Việt Nam',
+        lastLogin: '30 phút trước',
+        avatarBg: '#ec4899',
+        violationsList: [
+          { id: 'v-5', reason: 'Chia sẻ tin giả chưa kiểm chứng', dateAndAdmin: '18/09/2026 — bởi Admin Thiện' }
+        ]
+      }
+    ];
+
+    let postsData = [
+      {
+        id: 'ap-1',
+        content: 'Bán tài khoản game giá rẻ, ib zalo... liên hệ ngay kẻo hết ưu đãi!!',
+        authorName: 'fake_account_02',
+        authorHandle: '@fakeacc02',
+        postedTime: '2 giờ trước',
+        reportsCount: 6,
+        reportsBreakdown: [
+          { reason: 'Spam / quảng cáo trái phép', count: 4 },
+          { reason: 'Nội dung lừa đảo', count: 2 }
+        ],
+        status: 'Chờ xử lý'
+      },
+      {
+        id: 'ap-2',
+        content: 'Tin đồn: trường sắp đóng cửa vì lý do XYZ (chưa xác thực nguồn)',
+        authorName: 'Thu Trang',
+        authorHandle: '@thutrang',
+        postedTime: '5 giờ trước',
+        reportsCount: 3,
+        reportsBreakdown: [
+          { reason: 'Tin giả / Tin chưa kiểm chứng', count: 3 }
+        ],
+        status: 'Chờ xử lý'
+      },
+      {
+        id: 'ap-3',
+        content: 'Cuối tuần này lớp mình tổ chức đi Đà Lạt, ai muốn tham gia...',
+        authorName: 'Quang Huy',
+        authorHandle: '@quanghuy',
+        postedTime: '1 ngày trước',
+        reportsCount: 0,
+        status: 'Đang hiển thị'
+      },
+      {
+        id: 'ap-4',
+        content: 'Bộ ảnh chụp Sài Gòn lúc hoàng hôn hôm qua, mọi người góp ý giúp mình...',
+        authorName: 'Hải Yến',
+        authorHandle: '@haiyen',
+        postedTime: '2 ngày trước',
+        reportsCount: 0,
+        status: 'Đã ẩn'
+      }
+    ];
+
+    let currentAdminTab = 'overview';
+    let currentUserFilter = 'all';
+    let currentPostFilter = 'all';
+    let selectedUserId = null;
+    let selectedPostId = null;
+    let pendingLockUserId = null;
+    let pendingDeleteUserId = null;
+
+    // ==================== TOAST SYSTEM ====================
+    function showAdminToast(msg, type = 'info') {
+      const shelf = document.getElementById('toast-shelf');
+      if (!shelf) return;
+      const toast = document.createElement('div');
+      toast.className = `toast-msg ${type === 'error' ? 'error' : ''}`;
+      toast.innerHTML = `<span>${type === 'error' ? '⚠️' : '✨'}</span><span>${msg}</span>`;
+      shelf.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.2s ease';
+        setTimeout(() => toast.remove(), 200);
+      }, 2500);
     }
-  }
-  
-  function openPostModal() {
-    document.getElementById('main-overlay').style.display = 'block';
-    document.getElementById('modal-post').classList.add('active');
-  }
-  
-  function switchPanelTab(tab, element) {
-    document.getElementById('panel-tab-posts').classList.add('hidden');
-    document.getElementById('panel-tab-violations').classList.add('hidden');
-    
-    document.getElementById('panel-tab-' + tab).classList.remove('hidden');
-    
-    const tabs = element.parentElement.children;
-    for(let t of tabs) {
-      t.classList.remove('active');
+
+    // ==================== TAB NAVIGATION ====================
+    function switchAdminTab(tabName) {
+      currentAdminTab = tabName;
+
+      // Update sidebar buttons
+      document.querySelectorAll('.sidebar-menu-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-nav-${tabName}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      // Update Views
+      document.getElementById('view-overview').style.display = tabName === 'overview' ? 'block' : 'none';
+      document.getElementById('view-users').style.display = tabName === 'users' ? 'block' : 'none';
+      document.getElementById('view-posts').style.display = tabName === 'posts' ? 'block' : 'none';
+
+      // Update Header Title
+      const titleEl = document.getElementById('page-main-title');
+      if (tabName === 'overview') titleEl.textContent = 'TỔNG QUAN';
+      if (tabName === 'users') titleEl.textContent = 'QUẢN LÝ NGƯỜI DÙNG';
+      if (tabName === 'posts') titleEl.textContent = 'QUẢN LÝ BÀI VIẾT';
+
+      // Scroll to top
+      document.getElementById('admin-main-wrapper').scrollTop = 0;
+
+      // Render tab-specific tables
+      if (tabName === 'users') renderUsersTable();
+      if (tabName === 'posts') renderPostsTable();
     }
-    element.classList.add('active');
-  }
-</script>
-<script src="script.js"></script>
-<script>
-  // Gọi hàm cập nhật dữ liệu ngay khi trang Admin vừa tải xong
-  window.addEventListener('DOMContentLoaded', () => {
-    updateAdminStats();
-  });
-</script>
+
+    // ==================== RENDER USERS TABLE ====================
+    function setUserFilter(filter, btn) {
+      currentUserFilter = filter;
+      document.querySelectorAll('#user-filter-group .filter-pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderUsersTable();
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById('users-table-body');
+      if (!tbody) return;
+
+      const searchTerm = (document.getElementById('user-search-input')?.value || '').toLowerCase().trim();
+
+      const filtered = usersData.filter(u => {
+        const matchSearch = u.name.toLowerCase().includes(searchTerm) || u.email.toLowerCase().includes(searchTerm);
+        if (!matchSearch) return false;
+
+        if (currentUserFilter === 'active') return u.status === 'Hoạt động';
+        if (currentUserFilter === 'locked') return u.status === 'Đã khóa';
+        if (currentUserFilter === 'reported') return u.status === 'Bị báo cáo';
+        return true;
+      });
+
+      tbody.innerHTML = '';
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #8e8e93; padding: 32px;">Không tìm thấy người dùng phù hợp.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(u => {
+        const tr = document.createElement('tr');
+        
+        let statusBadgeClass = 'active';
+        if (u.status === 'Đã khóa') statusBadgeClass = 'locked';
+        if (u.status === 'Bị báo cáo') statusBadgeClass = 'reported';
+
+        tr.innerHTML = `
+          <td>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 36px; height: 36px; border-radius: 50%; background-color: ${u.avatarBg}; color: #ffffff; font-weight: 800; font-size: 14px; display: flex; align-items: center; justify-content: center;">
+                ${u.name.charAt(0)}
+              </div>
+              <div>
+                <div style="font-weight: 800; color: var(--admin-text-dark); cursor: pointer;" onclick="openUserDrawerById('${u.id}')">${u.name}</div>
+                <div style="font-size: 12px; color: var(--admin-text-light);">${u.email}</div>
+              </div>
+            </div>
+          </td>
+          <td>${u.joinedDate}</td>
+          <td>${u.postsCount} bài</td>
+          <td style="font-weight: 700; color: ${u.violationsCount > 0 ? 'var(--admin-red-primary)' : 'var(--admin-text-dark)'};">
+            ${u.violationsCount}
+          </td>
+          <td>
+            <span class="badge-status-pill ${statusBadgeClass}">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background-color: currentColor;"></span>
+              <span>${u.status}</span>
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px;">
+              <button class="action-icon-btn" title="Xem chi tiết" onclick="openUserDrawerById('${u.id}')">👁️</button>
+              <button class="action-icon-btn" title="${u.status === 'Đã khóa' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}" onclick="triggerLockUser('${u.id}')">🔒</button>
+              <button class="action-icon-btn delete-hover" title="Xóa tài khoản" onclick="triggerDeleteUser('${u.id}')">🗑️</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==================== RENDER POSTS TABLE ====================
+    function setPostFilter(filter, btn) {
+      currentPostFilter = filter;
+      document.querySelectorAll('#post-filter-group .filter-pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPostsTable();
+    }
+
+    function renderPostsTable() {
+      const tbody = document.getElementById('posts-table-body');
+      if (!tbody) return;
+
+      const searchTerm = (document.getElementById('post-search-input')?.value || '').toLowerCase().trim();
+
+      const filtered = postsData.filter(p => {
+        const matchSearch = p.content.toLowerCase().includes(searchTerm) || p.authorName.toLowerCase().includes(searchTerm);
+        if (!matchSearch) return false;
+
+        if (currentPostFilter === 'reported') return (p.reportsCount > 0 || p.status === 'Chờ xử lý');
+        if (currentPostFilter === 'visible') return p.status === 'Đang hiển thị';
+        if (currentPostFilter === 'hidden') return p.status === 'Đã ẩn';
+        return true;
+      });
+
+      tbody.innerHTML = '';
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #8e8e93; padding: 32px;">Không tìm thấy bài viết phù hợp.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(p => {
+        const tr = document.createElement('tr');
+        
+        let statusBadgeClass = 'active';
+        if (p.status === 'Chờ xử lý') statusBadgeClass = 'reported';
+        if (p.status === 'Đã ẩn') statusBadgeClass = 'locked';
+
+        tr.innerHTML = `
+          <td>
+            <div>
+              <div style="font-weight: 700; color: var(--admin-text-dark); margin-bottom: 2px;">
+                ${p.authorName} <span style="font-size: 12px; font-weight: normal; color: var(--admin-text-light);">${p.authorHandle || ''}</span>
+              </div>
+              <div style="font-size: 13px; color: #4b5563; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${p.content}
+              </div>
+            </div>
+          </td>
+          <td style="color: var(--admin-text-light); font-size: 13px;">${p.postedTime}</td>
+          <td>
+            ${p.reportsCount > 0 
+              ? `<span class="badge-status-pill danger" style="cursor:pointer;" onclick="openPostModalById('${p.id}')">⚠️ ${p.reportsCount} báo cáo</span>` 
+              : `<span style="color: var(--admin-text-light); font-size: 13px;">0</span>`}
+          </td>
+          <td>
+            <span class="badge-status-pill ${statusBadgeClass}">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background-color: currentColor;"></span>
+              <span>${p.status}</span>
+            </span>
+          </td>
+          <td style="text-align: right;">
+            <div style="display: inline-flex; gap: 6px;">
+              <button class="action-icon-btn" title="Xem chi tiết báo cáo" onclick="openPostModalById('${p.id}')">👁️</button>
+              <button class="action-icon-btn" title="${p.status === 'Đã ẩn' ? 'Bỏ ẩn bài viết' : 'Ẩn bài viết'}" onclick="toggleHidePost('${p.id}')">
+                ${p.status === 'Đã ẩn' ? '👁️‍🗨️' : '🚫'}
+              </button>
+              <button class="action-icon-btn delete-hover" title="Xóa vĩnh viễn" onclick="deletePost('${p.id}')">🗑️</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ==================== DRAWER CHI TIẾT NGƯỜI DÙNG ====================
+    function openUserDrawerById(userId) {
+      const u = usersData.find(item => item.id === userId);
+      if (!u) return;
+
+      selectedUserId = userId;
+      document.getElementById('drawer-name').textContent = u.name;
+      document.getElementById('drawer-email').textContent = u.email;
+      document.getElementById('drawer-avatar').textContent = u.name.charAt(0);
+      document.getElementById('drawer-avatar').style.backgroundColor = u.avatarBg;
+
+      const badgeEl = document.getElementById('drawer-status-badge');
+      badgeEl.className = `badge-status-pill ${u.status === 'Hoạt động' ? 'active' : u.status === 'Đã khóa' ? 'locked' : 'reported'}`;
+      badgeEl.textContent = u.status;
+
+      document.getElementById('drawer-stat-posts').textContent = u.postsCount;
+      document.getElementById('drawer-stat-friends').textContent = u.friendsCount || 128;
+      document.getElementById('drawer-stat-violations').textContent = u.violationsCount;
+      document.getElementById('drawer-stat-violations').style.color = u.violationsCount > 0 ? 'var(--admin-red-primary)' : 'var(--admin-text-dark)';
+
+      document.getElementById('drawer-info-joined').textContent = `Tham gia từ tháng ${u.joinedDate}`;
+      document.getElementById('drawer-info-location').textContent = u.location || 'Sài Gòn, Việt Nam';
+      document.getElementById('drawer-info-lastlogin').textContent = `Đăng nhập gần nhất: ${u.lastLogin || '2 giờ trước'}`;
+
+      document.getElementById('drawer-lock-text').textContent = u.status === 'Đã khóa' ? 'Mở khóa tài khoản' : 'Khóa tài khoản';
+
+      // Render violations subtab
+      const vList = document.getElementById('drawer-violations-list');
+      if (u.violationsList && u.violationsList.length > 0) {
+        vList.innerHTML = u.violationsList.map(viol => `
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--admin-red-primary); margin-top: 6px; flex-shrink: 0;"></span>
+            <div>
+              <div style="font-size: 13.5px; font-weight: 800; color: var(--admin-text-dark); line-height: 1.4;">${viol.reason}</div>
+              <div style="font-size: 12px; color: #8e8e93; margin-top: 2px;">${viol.dateAndAdmin}</div>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        vList.innerHTML = `<div style="font-size: 13px; color: #16a34a; background-color: #dcfce7; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600;">✓ Tài khoản sạch, chưa có lịch sử vi phạm nào.</div>`;
+      }
+
+      switchDrawerSubtab('info');
+      document.getElementById('user-drawer').classList.add('open');
+    }
+
+    function closeUserDrawer() {
+      document.getElementById('user-drawer').classList.remove('open');
+      selectedUserId = null;
+    }
+
+    function handleDrawerBackdropClick(e) {
+      if (e.target.id === 'user-drawer') {
+        closeUserDrawer();
+      }
+    }
+
+    function switchDrawerSubtab(tabName) {
+      document.querySelectorAll('.drawer-subtab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById(`btn-subtab-${tabName}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.getElementById('drawer-subtab-content-info').style.display = tabName === 'info' ? 'flex' : 'none';
+      document.getElementById('drawer-subtab-content-posts').style.display = tabName === 'posts' ? 'flex' : 'none';
+      document.getElementById('drawer-subtab-content-violations').style.display = tabName === 'violations' ? 'block' : 'none';
+    }
+
+    function handleDrawerLockClick() {
+      if (!selectedUserId) return;
+      triggerLockUser(selectedUserId);
+    }
+
+    function handleDrawerDeleteClick() {
+      if (!selectedUserId) return;
+      triggerDeleteUser(selectedUserId);
+    }
+
+    // ==================== MODAL KHÓA TÀI KHOẢN ====================
+    function triggerLockUser(userId) {
+      const u = usersData.find(item => item.id === userId);
+      if (!u) return;
+
+      if (u.status === 'Đã khóa') {
+        // Mở khóa trực tiếp
+        u.status = 'Hoạt động';
+        if (u.dbId) {
+          fetch(`http://localhost:8080/api/admin/users/${u.dbId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'active' })
+          }).catch(() => {});
+        }
+        showAdminToast(`Đã mở khóa tài khoản của ${u.name}`);
+        renderUsersTable();
+        if (selectedUserId === userId) openUserDrawerById(userId);
+        return;
+      }
+
+      // Hiện Modal Khóa
+      pendingLockUserId = userId;
+      document.getElementById('lock-modal-subtitle').textContent = `${u.name} sẽ không thể đăng nhập cho đến khi được mở khóa lại.`;
+      document.getElementById('lock-note-textarea').value = '';
+      document.getElementById('modal-lock-user').classList.add('open');
+    }
+
+    function closeLockModal() {
+      document.getElementById('modal-lock-user').classList.remove('open');
+      pendingLockUserId = null;
+    }
+
+    function submitLockUserForm(e) {
+      e.preventDefault();
+      if (!pendingLockUserId) return;
+
+      const reason = document.getElementById('lock-reason-select').value;
+      const note = document.getElementById('lock-note-textarea').value.trim();
+
+      const u = usersData.find(item => item.id === pendingLockUserId);
+      if (u) {
+        u.status = 'Đã khóa';
+        u.violationsCount += 1;
+        if (!u.violationsList) u.violationsList = [];
+        u.violationsList.unshift({
+          id: `v-${Date.now()}`,
+          reason: `Tài khoản bị khóa: ${reason}${note ? ` (${note})` : ''}`,
+          dateAndAdmin: `Hôm nay — bởi Admin Thiện`
+        });
+
+        if (u.dbId) {
+          fetch(`http://localhost:8080/api/admin/users/${u.dbId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'locked', reason, note })
+          }).catch(() => {});
+        }
+
+        showAdminToast(`Đã khóa tài khoản ${u.name} (${reason})`, 'error');
+        renderUsersTable();
+        if (selectedUserId === pendingLockUserId) openUserDrawerById(pendingLockUserId);
+      }
+
+      closeLockModal();
+    }
+
+    // ==================== MODAL XÓA TÀI KHOẢN ====================
+    function triggerDeleteUser(userId) {
+      const u = usersData.find(item => item.id === userId);
+      if (!u) return;
+
+      pendingDeleteUserId = userId;
+      document.getElementById('delete-modal-subtitle').textContent = `Toàn bộ bài viết, bình luận và dữ liệu liên quan của ${u.name} sẽ bị xóa và không thể khôi phục.`;
+      document.getElementById('delete-confirm-checkbox').checked = false;
+      document.getElementById('modal-delete-user').classList.add('open');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('modal-delete-user').classList.remove('open');
+      pendingDeleteUserId = null;
+    }
+
+    function confirmDeleteUser() {
+      const confirmed = document.getElementById('delete-confirm-checkbox').checked;
+      if (!confirmed) {
+        showAdminToast('Vui lòng tích chọn xác nhận để tiếp tục', 'error');
+        return;
+      }
+
+      if (pendingDeleteUserId) {
+        const u = usersData.find(item => item.id === pendingDeleteUserId);
+        usersData = usersData.filter(item => item.id !== pendingDeleteUserId);
+        showAdminToast(`Đã xóa vĩnh viễn tài khoản của ${u ? u.name : 'người dùng'}`, 'error');
+        renderUsersTable();
+        if (selectedUserId === pendingDeleteUserId) closeUserDrawer();
+      }
+
+      closeDeleteModal();
+    }
+
+    // ==================== MODAL CHI TIẾT BÀI VIẾT ====================
+    function openPostModalById(postId) {
+      const p = postsData.find(item => item.id === postId);
+      if (!p) return;
+
+      selectedPostId = postId;
+      document.getElementById('post-modal-author').textContent = p.authorName;
+      document.getElementById('post-modal-time').textContent = p.postedTime;
+      document.getElementById('post-modal-content').textContent = p.content;
+      document.getElementById('post-modal-report-count').textContent = p.reportsCount;
+
+      const toggleBtn = document.getElementById('post-modal-toggle-hide-btn');
+      toggleBtn.textContent = p.status === 'Đã ẩn' ? 'Bỏ ẩn bài viết' : 'Ẩn bài viết';
+
+      const rList = document.getElementById('post-modal-reports-list');
+      if (p.reportsBreakdown && p.reportsBreakdown.length > 0) {
+        rList.innerHTML = p.reportsBreakdown.map(r => `
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #fafafa; padding: 8px 12px; border-radius: 8px; font-size: 13px;">
+            <span style="color: var(--admin-text-dark);">${r.reason}</span>
+            <span style="font-weight: 700; color: var(--admin-red-primary);">${r.count} lượt</span>
+          </div>
+        `).join('');
+      } else {
+        rList.innerHTML = `<div style="font-size: 12.5px; color: #8e8e93; font-style: italic;">Không có báo cáo vi phạm chi tiết.</div>`;
+      }
+
+      document.getElementById('modal-post-detail').classList.add('open');
+    }
+
+    function closePostModal() {
+      document.getElementById('modal-post-detail').classList.remove('open');
+      selectedPostId = null;
+    }
+
+    function toggleHidePost(postId) {
+      const p = postsData.find(item => item.id === postId);
+      if (!p) return;
+
+      const nextStatus = p.status === 'Đã ẩn' ? 'Đang hiển thị' : 'Đã ẩn';
+      p.status = nextStatus;
+
+      if (p.dbId) {
+        fetch(`http://localhost:8080/api/admin/posts/${p.dbId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: nextStatus === 'Đã ẩn' ? 'hidden' : 'active' })
+        }).catch(() => {});
+      }
+
+      showAdminToast(`Đã ${nextStatus === 'Đã ẩn' ? 'ẩn' : 'bỏ ẩn'} bài viết`);
+      renderPostsTable();
+    }
+
+    function confirmToggleHidePost() {
+      if (!selectedPostId) return;
+      toggleHidePost(selectedPostId);
+      closePostModal();
+    }
+
+    function deletePost(postId) {
+      postsData = postsData.filter(item => item.id !== postId);
+      showAdminToast('Đã xóa vĩnh viễn bài viết khỏi hệ thống!', 'error');
+      renderPostsTable();
+    }
+
+    function confirmDeletePostFromModal() {
+      if (!selectedPostId) return;
+      deletePost(selectedPostId);
+      closePostModal();
+    }
+
+    // ==================== LOGOUT ====================
+    function handleAdminLogout() {
+      if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi Admin Panel?')) {
+        window.location.href = 'index.html';
+      }
+    }
+
+    // ==================== KHỞI TẠO TỰ ĐỘNG ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderUsersTable();
+      renderPostsTable();
+
+      // 1. Đồng bộ số liệu thống kê tổng quan
+      fetch('http://localhost:8080/api/admin/stats')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.totalUsers) {
+            document.getElementById('stat-total-users').textContent = data.totalUsers.toLocaleString();
+            document.getElementById('sidebar-badge-users').textContent = `${(data.totalUsers / 1000).toFixed(1)}K`;
+          }
+          if (data && data.totalPosts) {
+            document.getElementById('stat-total-posts').textContent = data.totalPosts.toLocaleString();
+            document.getElementById('sidebar-badge-posts').textContent = data.totalPosts;
+          }
+          if (data && data.pendingReports !== undefined) {
+            document.getElementById('stat-total-reports').textContent = data.pendingReports;
+          }
+          if (data && data.lockedUsers !== undefined) {
+            document.getElementById('stat-total-locked').textContent = data.lockedUsers;
+          }
+        })
+        .catch(() => {});
+
+      // 2. Đồng bộ danh sách người dùng từ MySQL
+      fetch('http://localhost:8080/api/users')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.users && data.users.length > 0) {
+            const avatarColors = ['#35c9b0', '#3b82f6', '#9ca3af', '#a855f7', '#ec4899', '#f59e0b', '#10b981'];
+            usersData = data.users.map((u, idx) => ({
+              id: `u-${u.id}`,
+              dbId: u.id,
+              name: u.full_name || u.username,
+              email: u.email,
+              joinedDate: u.created_at ? new Date(u.created_at).toLocaleDateString('vi-VN', {month: '2-digit', year: 'numeric'}) : '03/2024',
+              postsCount: 0,
+              friendsCount: 128,
+              violationsCount: u.status === 'locked' ? 1 : 0,
+              status: u.status === 'locked' ? 'Đã khóa' : 'Hoạt động',
+              location: u.liveIn || 'Sài Gòn, Việt Nam',
+              lastLogin: u.last_login_at ? 'Hôm nay' : '2 giờ trước',
+              avatarBg: avatarColors[idx % avatarColors.length],
+              violationsList: u.status === 'locked' ? [{ id: 'v-1', reason: 'Tài khoản bị khóa bởi quản trị viên', dateAndAdmin: 'Hôm nay — bởi Admin' }] : []
+            }));
+            renderUsersTable();
+          }
+        })
+        .catch(() => {});
+
+      // 3. Đồng bộ danh sách bài viết từ MySQL
+      fetch('http://localhost:8080/api/posts')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.posts && data.posts.length > 0) {
+            postsData = data.posts.map(p => ({
+              id: `ap-${p.id}`,
+              dbId: p.id,
+              content: p.content,
+              authorName: p.full_name || p.username || 'Người dùng',
+              authorHandle: `@${p.username || 'user'}`,
+              postedTime: p.created_at ? new Date(p.created_at).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) : 'Vừa xong',
+              reportsCount: p.report_count || 0,
+              reportsBreakdown: p.report_count > 0 ? [{ reason: 'Báo cáo vi phạm tiêu chuẩn cộng đồng', count: p.report_count }] : [],
+              status: p.status === 'hidden' ? 'Đã ẩn' : (p.report_count > 0 ? 'Chờ xử lý' : 'Đang hiển thị')
+            }));
+            renderPostsTable();
+          }
+        })
+        .catch(() => {});
+    });
+  </script>
 </body>
 </html>
