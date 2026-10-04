@@ -1,5 +1,4 @@
 import React from 'react';
-import { Logo } from '../ui/Logo';
 import { useSocial } from '../../context/SocialContext';
 
 export const AdminSidebar = ({
@@ -8,7 +7,7 @@ export const AdminSidebar = ({
   usersCountBadge = '1.2K',
   postsCountBadge = 18
 }) => {
-  const { logout } = useSocial();
+  const { logout, user } = useSocial();
 
   return (
     <aside style={{
@@ -27,7 +26,7 @@ export const AdminSidebar = ({
       userSelect: 'none'
     }}>
       <div>
-        {/* 1. Logo Tròn Socialita & Badge Admin Panel */}
+        {/* 1. Logo Tròn Socialita & Badge Admin Panel chuẩn Figma */}
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
             width: '76px',
@@ -39,21 +38,36 @@ export const AdminSidebar = ({
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 12px',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+            margin: '0 auto 10px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
+            cursor: 'pointer'
           }}>
-            <Logo size="sm" showText={false} />
+            <img
+              src="/logo.png"
+              alt="Socialita Logo"
+              style={{ width: '48px', height: '48px', objectFit: 'contain' }}
+            />
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 800,
+              fontFamily: 'var(--font-mono)',
+              color: '#0f0f11',
+              marginTop: '1px',
+              letterSpacing: '-0.02em'
+            }}>
+              Socialita
+            </span>
           </div>
 
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            backgroundColor: 'rgba(229, 46, 61, 0.15)',
-            border: '1px solid rgba(229, 46, 61, 0.4)',
-            padding: '3px 10px',
+            backgroundColor: '#241416',
+            border: '1px solid #4a1d24',
+            padding: '4px 14px',
             borderRadius: '9999px',
-            fontSize: '11px',
+            fontSize: '10.5px',
             fontWeight: 800,
             color: 'var(--brand-red)',
             letterSpacing: '0.08em'
@@ -63,132 +77,163 @@ export const AdminSidebar = ({
           </div>
         </div>
 
-        {/* 2. Menu Điều Hướng Admin */}
-        <div style={{ fontSize: '11px', fontWeight: 800, color: '#636366', padding: '0 12px', marginBottom: '8px', letterSpacing: '0.06em' }}>
-          QUẢN TRỊ VIÊN
+        {/* 2. Menu Điều Hướng */}
+        <div style={{
+          fontSize: '11px',
+          fontWeight: 700,
+          color: '#636366',
+          letterSpacing: '0.08em',
+          padding: '0 12px',
+          marginBottom: '8px'
+        }}>
+          ĐIỀU HƯỚNG
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {/* Tab 1: Tổng quan */}
           <button
             onClick={() => onSelectTab('overview')}
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              gap: '12px',
               width: '100%',
-              padding: '10px 14px',
-              borderRadius: '10px',
+              padding: '12px 14px',
+              borderRadius: '12px',
               backgroundColor: currentTab === 'overview' ? '#e52e3d' : 'transparent',
-              color: currentTab === 'overview' ? '#ffffff' : '#a1a1aa',
+              color: currentTab === 'overview' ? '#ffffff' : '#a1a1a6',
               fontSize: '13.5px',
               fontWeight: 700,
               cursor: 'pointer',
               border: 'none',
+              boxShadow: currentTab === 'overview' ? '0 4px 14px rgba(229, 46, 61, 0.35)' : 'none',
               transition: 'all 0.15s ease'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '16px' }}>📊</span>
-              <span>Tổng quan</span>
-            </div>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <span>Tổng quan</span>
           </button>
 
+          {/* Tab 2: Quản lý người dùng */}
           <button
             onClick={() => onSelectTab('users')}
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              gap: '12px',
               width: '100%',
-              padding: '10px 14px',
-              borderRadius: '10px',
+              padding: '12px 14px',
+              borderRadius: '12px',
               backgroundColor: currentTab === 'users' ? '#e52e3d' : 'transparent',
-              color: currentTab === 'users' ? '#ffffff' : '#a1a1aa',
+              color: currentTab === 'users' ? '#ffffff' : '#a1a1a6',
               fontSize: '13.5px',
               fontWeight: 700,
               cursor: 'pointer',
               border: 'none',
+              boxShadow: currentTab === 'users' ? '0 4px 14px rgba(229, 46, 61, 0.35)' : 'none',
               transition: 'all 0.15s ease'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '16px' }}>👥</span>
-              <span>Người dùng</span>
-            </div>
-            {usersCountBadge && (
-              <span style={{
-                backgroundColor: currentTab === 'users' ? 'rgba(0,0,0,0.2)' : '#27272a',
-                padding: '2px 8px',
-                borderRadius: '9999px',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: '#ffffff'
-              }}>
-                {usersCountBadge}
-              </span>
-            )}
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span style={{ flex: 1, textAlign: 'left' }}>Quản lý người dùng</span>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              backgroundColor: currentTab === 'users' ? '#ffffff' : '#242428',
+              color: currentTab === 'users' ? '#e52e3d' : '#8e8e93'
+            }}>
+              {usersCountBadge}
+            </span>
           </button>
 
+          {/* Tab 3: Quản lý bài viết */}
           <button
             onClick={() => onSelectTab('posts')}
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
+              gap: '12px',
               width: '100%',
-              padding: '10px 14px',
-              borderRadius: '10px',
+              padding: '12px 14px',
+              borderRadius: '12px',
               backgroundColor: currentTab === 'posts' ? '#e52e3d' : 'transparent',
-              color: currentTab === 'posts' ? '#ffffff' : '#a1a1aa',
+              color: currentTab === 'posts' ? '#ffffff' : '#a1a1a6',
               fontSize: '13.5px',
               fontWeight: 700,
               cursor: 'pointer',
               border: 'none',
+              boxShadow: currentTab === 'posts' ? '0 4px 14px rgba(229, 46, 61, 0.35)' : 'none',
               transition: 'all 0.15s ease'
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '16px' }}>📄</span>
-              <span>Bài viết</span>
-            </div>
-            {postsCountBadge && (
-              <span style={{
-                backgroundColor: currentTab === 'posts' ? 'rgba(0,0,0,0.2)' : '#27272a',
-                padding: '2px 8px',
-                borderRadius: '9999px',
-                fontSize: '11px',
-                fontWeight: 700,
-                color: '#ffffff'
-              }}>
-                {postsCountBadge}
-              </span>
-            )}
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span style={{ flex: 1, textAlign: 'left' }}>Quản lý bài viết</span>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              backgroundColor: currentTab === 'posts' ? '#ffffff' : '#242428',
+              color: currentTab === 'posts' ? '#e52e3d' : '#8e8e93'
+            }}>
+              {postsCountBadge}
+            </span>
           </button>
         </div>
       </div>
 
-      {/* 3. Nút Đăng Xuất */}
-      <div>
-        <button
-          onClick={logout}
-          style={{
+      {/* Footer: Thông tin Admin & Nút Đăng xuất */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingTop: '16px',
+        borderTop: '1px solid #242428'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            backgroundColor: '#2a2a30',
+            border: '1.5px solid #3e3e46',
             display: 'flex',
             alignItems: 'center',
-            gap: '10px',
-            width: '100%',
-            padding: '11px 14px',
-            borderRadius: '10px',
-            backgroundColor: '#1f1f23',
-            color: '#ef4444',
-            fontSize: '13px',
-            fontWeight: 700,
+            justifyContent: 'center',
+            fontSize: '14px',
+            fontWeight: 800,
+            color: '#ffffff'
+          }}>
+            {user?.name?.[0] || 'A'}
+          </div>
+          <div>
+            <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#ffffff' }}>
+              {user?.name || 'Admin — Socialita'}
+            </div>
+            <div style={{ fontSize: '11px', color: '#8e8e93' }}>Quản trị viên</div>
+          </div>
+        </div>
+        <button
+          onClick={logout}
+          title="Đăng xuất khỏi hệ thống"
+          style={{
+            color: '#8e8e93',
+            fontSize: '18px',
+            padding: '6px',
+            borderRadius: '8px',
             cursor: 'pointer',
-            border: '1px solid #27272a',
-            transition: 'all 0.15s ease'
+            transition: 'color 0.15s ease'
           }}
         >
-          <span>🚪</span>
-          <span>Đăng xuất Admin</span>
+          ➔
         </button>
       </div>
     </aside>

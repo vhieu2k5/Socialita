@@ -21,7 +21,7 @@ export const AdminDashboard = () => {
         padding: '36px 44px',
         overflowY: 'auto',
         height: '100vh',
-        maxWidth: '1280px'
+        maxWidth: '1320px'
       }}>
         {currentTab === 'overview' && <OverviewTab onNavigateTab={setCurrentTab} />}
         {currentTab === 'users' && <UsersTab />}
