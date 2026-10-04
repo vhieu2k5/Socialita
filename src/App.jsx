@@ -13,11 +13,12 @@ import { FriendsView } from './pages/FriendsView';
 import { GroupsView } from './pages/GroupsView';
 import { CreatePostModal } from './components/modals/CreatePostModal';
 import { EditProfileModal } from './components/modals/EditProfileModal';
+import { ChatBox } from './components/chat/ChatBox';
 
 export const App = () => {
-  const { currentUser, tab } = useSocial();
+  const { currentUser, tab, closeDrawers } = useSocial();
 
-  // 1. Nếu chưa đăng nhập: Hiện trang Đăng nhập / Đăng ký
+  // 1. Chưa đăng nhập: Màn hình Auth
   if (!currentUser) {
     return (
       <>
@@ -27,7 +28,7 @@ export const App = () => {
     );
   }
 
-  // 2. Nếu đăng nhập tài khoản vai trò Admin: Hiện Admin Dashboard
+  // 2. Tài khoản vai trò Admin: Admin Dashboard
   if (currentUser.role === 'admin') {
     return (
       <>
@@ -37,10 +38,10 @@ export const App = () => {
     );
   }
 
-  // 3. Nếu là người dùng thường: Hiện Giao diện Mạng xã hội User
+  // 3. Người dùng bình thường: User Dashboard
   return (
     <>
-      <div className="socialita-app">
+      <div className="socialita-app" onClick={closeDrawers}>
         <Sidebar />
         <div className="main-wrapper" id="main-wrapper">
           <Topbar />
@@ -55,6 +56,9 @@ export const App = () => {
 
         <CreatePostModal />
         <EditProfileModal />
+
+        {/* Hộp chat nổi góc dưới bên phải chuẩn Facebook Messenger Web */}
+        <ChatBox />
       </div>
       <ToastContainer />
     </>

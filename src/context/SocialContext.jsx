@@ -14,6 +14,150 @@ import {
 
 const SocialContext = createContext(undefined);
 
+const INITIAL_ACTIVE_USERS = [
+  { id: 'u1', name: 'Hải Yến', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop', isOnline: true },
+  { id: 'u2', name: 'Đức Anh', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', isOnline: true },
+  { id: 'u3', name: 'Thuỳ Linh', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop', isOnline: true },
+  { id: 'u4', name: 'Bảo Trân', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop', isOnline: true },
+  { id: 'u5', name: 'Tấn Phát', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', isOnline: true }
+];
+
+const INITIAL_CONVERSATIONS = [
+  {
+    id: 'conv-1',
+    name: 'Quang Huy',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+    isOnline: true,
+    isGroup: false,
+    time: '2 phút',
+    unread: 2,
+    lastMessage: 'Ê, mai đi Đà Lạt nhớ mang theo áo k',
+    messages: [
+      { id: 1, sender: 'Quang Huy', text: 'Hôm nay chuẩn bị đồ đi du lịch chưa ông?', time: '14:20', isMe: false },
+      { id: 2, sender: 'Bạn', text: 'Gần xong rồi ông ơi, đang soạn balo!', time: '14:22', isMe: true },
+      { id: 3, sender: 'Quang Huy', text: 'Ê, mai đi Đà Lạt nhớ mang theo áo khoác ấm nhé!', time: '14:25', isMe: false }
+    ]
+  },
+  {
+    id: 'conv-2',
+    name: 'Nhóm: Đồ án Web',
+    avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&h=100&fit=crop',
+    isOnline: true,
+    isGroup: true,
+    time: '14 phút',
+    unread: 5,
+    lastMessage: 'Hải Đăng: Mình vừa đẩy code lên nh',
+    messages: [
+      { id: 1, sender: 'Minh Tuấn', text: 'Mọi người test phần backend chưa?', time: '10:15', isMe: false },
+      { id: 2, sender: 'Hải Đăng', text: 'Mình vừa đẩy code lên nhánh mới rồi nhé!', time: '10:30', isMe: false }
+    ]
+  },
+  {
+    id: 'conv-3',
+    name: 'Hải Yến',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+    isOnline: true,
+    isGroup: false,
+    time: '1 giờ',
+    unread: 0,
+    lastMessage: '✓ Bạn: Ảnh đẹp lắm, gửi thêm mình xin và',
+    messages: [
+      { id: 1, sender: 'Hải Yến', text: 'Ảnh hôm nọ chụp ở trường nè bạn!', time: '09:12', isMe: false },
+      { id: 2, sender: 'Bạn', text: 'Ảnh đẹp lắm, gửi thêm mình xin vài tấm nữa nha', time: '09:15', isMe: true }
+    ]
+  },
+  {
+    id: 'conv-4',
+    name: 'Bảo Trân',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
+    isOnline: true,
+    isGroup: false,
+    time: '3 giờ',
+    unread: 1,
+    lastMessage: 'Video call tối nay lúc 8h nha 🎥',
+    messages: [
+      { id: 1, sender: 'Bảo Trân', text: 'Tối nay rảnh họp nhóm online không?', time: '08:00', isMe: false },
+      { id: 2, sender: 'Bảo Trân', text: 'Video call tối nay lúc 8h nha 🎥', time: '08:05', isMe: false }
+    ]
+  },
+  {
+    id: 'conv-5',
+    name: 'Đức Anh',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    isOnline: false,
+    isIdle: true,
+    isGroup: false,
+    isMuted: true,
+    time: '5 giờ',
+    unread: 0,
+    lastMessage: '🔇 Bạn: Ok để mình xem lại lịch',
+    messages: [
+      { id: 1, sender: 'Đức Anh', text: 'Cuối tuần này rảnh cafe không ông?', time: 'Hôm qua', isMe: false },
+      { id: 2, sender: 'Bạn', text: 'Ok để mình xem lại lịch rồi báo lại nha', time: 'Hôm qua', isMe: true }
+    ]
+  }
+];
+
+const INITIAL_NOTIFICATIONS = [
+  {
+    id: 'notif-1',
+    user: 'Lê Minh Anh',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
+    type: 'like',
+    icon: '❤️',
+    iconBg: '#e52e3d',
+    content: 'đã thích bài viết của bạn: "Check-in Hải Phòng cuối tuần..."',
+    time: '5 phút trước',
+    unread: true
+  },
+  {
+    id: 'notif-2',
+    user: 'Quang Huy',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+    type: 'comment',
+    icon: '💬',
+    iconBg: '#3b82f6',
+    content: 'đã bình luận về bài viết của bạn: "Quá đỉnh luôn bạn ơi!"',
+    time: '25 phút trước',
+    unread: true
+  },
+  {
+    id: 'notif-3',
+    user: 'Thuỳ Linh',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
+    type: 'friend',
+    icon: '👥',
+    iconBg: '#10b981',
+    content: 'đã gửi lời mời kết bạn cho bạn',
+    time: '1 giờ trước',
+    unread: true,
+    isFriendReq: true
+  },
+  {
+    id: 'notif-4',
+    user: 'Bảo Trân',
+    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
+    type: 'mention',
+    icon: '🏷️',
+    iconBg: '#8b5cf6',
+    content: 'đã nhắc đến bạn trong một bình luận ở Hội nhóm sinh viên',
+    time: '3 giờ trước',
+    unread: false
+  },
+  {
+    id: 'notif-5',
+    user: 'Socialita',
+    avatar: '/logo.png',
+    type: 'system',
+    icon: '🔔',
+    iconBg: '#18181c',
+    content: 'Chào mừng bạn đến với Socialita! Hãy hoàn thiện hồ sơ để kết nối cùng bạn bè.',
+    time: 'Hôm qua',
+    unread: false
+  }
+];
+
+
 export const SocialProvider = ({ children }) => {
   // 1. Quản lý phiên người dùng đăng nhập
   const [currentUser, setCurrentUser] = useState(() => {
@@ -57,6 +201,113 @@ export const SocialProvider = ({ children }) => {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
+
+  // State Tin nhắn & Thông báo (FE chuẩn Facebook Web)
+  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [activeChat, setActiveChat] = useState(null);
+  const [conversations, setConversations] = useState(INITIAL_CONVERSATIONS);
+  const [activeUsers, setActiveUsers] = useState(INITIAL_ACTIVE_USERS);
+  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+
+  const unreadMessagesCount = conversations.reduce((acc, c) => acc + (c.unread || 0), 0);
+  const unreadNotificationsCount = notifications.filter(n => n.unread).length;
+
+  const toggleMessages = () => {
+    setIsMessagesOpen(prev => !prev);
+    setIsNotificationsOpen(false);
+  };
+
+  const toggleNotifications = () => {
+    setIsNotificationsOpen(prev => !prev);
+    setIsMessagesOpen(false);
+  };
+
+  const closeDrawers = () => {
+    setIsMessagesOpen(false);
+    setIsNotificationsOpen(false);
+  };
+
+  const openChat = (conv) => {
+    setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, unread: 0 } : c));
+    setActiveChat({ ...conv, unread: 0 });
+    setIsMessagesOpen(false);
+  };
+
+  const closeChat = () => {
+    setActiveChat(null);
+  };
+
+  const sendMessage = (convId, text) => {
+    const newMsg = {
+      id: Date.now(),
+      sender: user.name || 'Bạn',
+      text,
+      time: 'Vừa xong',
+      isMe: true
+    };
+
+    setConversations(prev => prev.map(c => {
+      if (c.id === convId) {
+        return {
+          ...c,
+          lastMessage: 'Bạn: ' + text,
+          time: 'Vừa xong',
+          messages: [...(c.messages || []), newMsg]
+        };
+      }
+      return c;
+    }));
+
+    if (activeChat && activeChat.id === convId) {
+      setActiveChat(prev => ({
+        ...prev,
+        lastMessage: 'Bạn: ' + text,
+        messages: [...(prev.messages || []), newMsg]
+      }));
+
+      // Mô phỏng người kia trả lời sau 1.2s để giao diện sống động
+      setTimeout(() => {
+        const replyMsg = {
+          id: Date.now() + 1,
+          sender: activeChat.name,
+          text: 'Ok bạn nha, mình nhận được tin nhắn rồi!',
+          time: 'Vừa xong',
+          isMe: false
+        };
+        setConversations(prev => prev.map(c => {
+          if (c.id === convId) {
+            return {
+              ...c,
+              lastMessage: replyMsg.text,
+              time: 'Vừa xong',
+              messages: [...(c.messages || []), replyMsg]
+            };
+          }
+          return c;
+        }));
+        setActiveChat(prev => {
+          if (prev && prev.id === convId) {
+            return {
+              ...prev,
+              lastMessage: replyMsg.text,
+              messages: [...(prev.messages || []), replyMsg]
+            };
+          }
+          return prev;
+        });
+      }, 1200);
+    }
+  };
+
+  const markNotificationAsRead = (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
 
   const showToast = (msg, type = 'success') => {
     const id = Date.now().toString() + Math.random().toString();
@@ -410,7 +661,25 @@ export const SocialProvider = ({ children }) => {
         openEditProfileModal: () => setIsEditProfileModalOpen(true),
         closeEditProfileModal: () => setIsEditProfileModalOpen(false),
         toasts,
-        showToast
+        showToast,
+        isMessagesOpen,
+        setIsMessagesOpen,
+        isNotificationsOpen,
+        setIsNotificationsOpen,
+        activeChat,
+        conversations,
+        activeUsers,
+        notifications,
+        unreadMessagesCount,
+        unreadNotificationsCount,
+        toggleMessages,
+        toggleNotifications,
+        closeDrawers,
+        openChat,
+        closeChat,
+        sendMessage,
+        markNotificationAsRead,
+        markAllNotificationsAsRead
       }}
     >
       {children}
