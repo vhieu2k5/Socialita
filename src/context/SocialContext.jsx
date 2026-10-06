@@ -30,7 +30,7 @@ const INITIAL_CONVERSATIONS = [
     isOnline: true,
     isGroup: false,
     time: '2 phút',
-    unread: 2,
+    unread: 0,
     lastMessage: 'Ê, mai đi Đà Lạt nhớ mang theo áo k',
     messages: [
       { id: 1, sender: 'Quang Huy', text: 'Hôm nay chuẩn bị đồ đi du lịch chưa ông?', time: '14:20', isMe: false },
@@ -74,10 +74,10 @@ const INITIAL_CONVERSATIONS = [
     isGroup: false,
     time: '3 giờ',
     unread: 1,
-    lastMessage: 'Video call tối nay lúc 8h nha 🎥',
+    lastMessage: 'Video call tối nay lúc 8h nha 📹',
     messages: [
       { id: 1, sender: 'Bảo Trân', text: 'Tối nay rảnh họp nhóm online không?', time: '08:00', isMe: false },
-      { id: 2, sender: 'Bảo Trân', text: 'Video call tối nay lúc 8h nha 🎥', time: '08:05', isMe: false }
+      { id: 2, sender: 'Bảo Trân', text: 'Video call tối nay lúc 8h nha 📹', time: '08:05', isMe: false }
     ]
   },
   {
@@ -90,10 +90,28 @@ const INITIAL_CONVERSATIONS = [
     isMuted: true,
     time: '5 giờ',
     unread: 0,
-    lastMessage: '🔇 Bạn: Ok để mình xem lại lịch',
+    lastMessage: '⟲ Bạn: Ok để mình xem lại lịch',
     messages: [
       { id: 1, sender: 'Đức Anh', text: 'Cuối tuần này rảnh cafe không ông?', time: 'Hôm qua', isMe: false },
       { id: 2, sender: 'Bạn', text: 'Ok để mình xem lại lịch rồi báo lại nha', time: 'Hôm qua', isMe: true }
+    ]
+  },
+  {
+    id: 'conv-6',
+    name: 'Lan Anh',
+    avatar: '',
+    avatarBg: '#dc2626',
+    isOnline: true,
+    isGroup: false,
+    time: 'Hôm qua',
+    unread: 0,
+    lastMessage: 'Bạn: Test',
+    messages: [
+      { id: 1, sender: 'Lan Anh', text: 'Minh Anh ơi, cuối tuần này có rảnh đi cafe không?', time: '18:00', isMe: false },
+      { id: 2, sender: 'Bạn', text: 'Okie bạn ơi, chiều thứ 7 hẹn ở Phố Cổ nhé!', time: '18:15', isMe: true },
+      { id: 3, sender: 'Bạn', text: 'Hi', time: '10:59', isMe: true },
+      { id: 4, sender: 'Bạn', text: 'Chào bạn nha', time: '11:31', isMe: true },
+      { id: 5, sender: 'Bạn', text: 'Test', time: '08:04', isMe: true }
     ]
   }
 ];
@@ -239,11 +257,13 @@ export const SocialProvider = ({ children }) => {
   };
 
   const sendMessage = (convId, text) => {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     const newMsg = {
       id: Date.now(),
       sender: user.name || 'Bạn',
       text,
-      time: 'Vừa xong',
+      time: timeStr,
       isMe: true
     };
 
@@ -252,7 +272,7 @@ export const SocialProvider = ({ children }) => {
         return {
           ...c,
           lastMessage: 'Bạn: ' + text,
-          time: 'Vừa xong',
+          time: timeStr,
           messages: [...(c.messages || []), newMsg]
         };
       }
@@ -268,11 +288,13 @@ export const SocialProvider = ({ children }) => {
 
       // Mô phỏng người kia trả lời sau 1.2s để giao diện sống động
       setTimeout(() => {
+        const replyNow = new Date();
+        const replyTime = `${String(replyNow.getHours()).padStart(2, '0')}:${String(replyNow.getMinutes()).padStart(2, '0')}`;
         const replyMsg = {
           id: Date.now() + 1,
           sender: activeChat.name,
           text: 'Ok bạn nha, mình nhận được tin nhắn rồi!',
-          time: 'Vừa xong',
+          time: replyTime,
           isMe: false
         };
         setConversations(prev => prev.map(c => {
@@ -280,7 +302,7 @@ export const SocialProvider = ({ children }) => {
             return {
               ...c,
               lastMessage: replyMsg.text,
-              time: 'Vừa xong',
+              time: replyTime,
               messages: [...(c.messages || []), replyMsg]
             };
           }

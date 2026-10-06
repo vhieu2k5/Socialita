@@ -1,6 +1,65 @@
 import React, { useState } from 'react';
 import { useSocial } from '../../context/SocialContext';
 
+const ConvAvatar = ({ conv }) => {
+  const [imgError, setImgError] = useState(false);
+  const initial = (conv.name || '?').charAt(0).toUpperCase();
+
+  return (
+    <div className="conv-avatar-col">
+      {conv.avatar && !imgError ? (
+        <img
+          src={conv.avatar}
+          alt={conv.name}
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <div
+          className="conv-avatar-initial"
+          style={{ backgroundColor: conv.avatarBg || '#dc2626' }}
+        >
+          {initial}
+        </div>
+      )}
+      {conv.isGroup ? (
+        <span className="group-badge-icon" title="Nhóm chat">👥</span>
+      ) : conv.isIdle ? (
+        <span className="idle-badge" title="Tạm vắng"></span>
+      ) : (
+        <span className="online-badge" title="Đang hoạt động"></span>
+      )}
+    </div>
+  );
+};
+
+const ActiveUserAvatar = ({ user, onClick }) => {
+  const [imgError, setImgError] = useState(false);
+  const initial = (user.name || '?').charAt(0).toUpperCase();
+
+  return (
+    <div className="active-user-item" onClick={onClick}>
+      <div className="avatar-wrapper-online">
+        {user.avatar && !imgError ? (
+          <img
+            src={user.avatar}
+            alt={user.name}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div
+            className="conv-avatar-initial"
+            style={{ backgroundColor: user.avatarBg || '#dc2626' }}
+          >
+            {initial}
+          </div>
+        )}
+        <span className="online-badge"></span>
+      </div>
+      <span className="active-user-name">{user.name}</span>
+    </div>
+  );
+};
+
 export const MessagesDrawer = ({ isOpen, onClose }) => {
   const { conversations, activeUsers, openChat } = useSocial();
   const [search, setSearch] = useState('');
@@ -46,7 +105,7 @@ export const MessagesDrawer = ({ isOpen, onClose }) => {
         </div>
       </div>
 
-      {/* 3. Dải tab chuyển: Tất cả | Chưa đọc • 3 | Nhóm chat */}
+      {/* 3. Dải tab chuyển: Tất cả | Chưa đọc • 2 | Nhóm chat */}
       <div className="drawer-filter-tabs">
         <button
           className={'drawer-pill ' + (filterTab === 'all' ? 'active' : '')}
@@ -68,17 +127,17 @@ export const MessagesDrawer = ({ isOpen, onClose }) => {
         </button>
       </div>
 
-      {/* 4. Dải người dùng Đang hoạt động (Horizontal avatars) */}
+      {/* 4. Dải người dùng Đang hoạt động */}
       <div className="active-users-section">
         <div className="active-status-header">
           <span className="active-green-dot"></span>
-          <span>ĐANG HOẠT ĐỘNG • {activeUsers.length}</span>
+          <span>• ĐANG HOẠT ĐỘNG • {activeUsers.length}</span>
         </div>
         <div className="active-users-slider">
           {activeUsers.map(user => (
-            <div
+            <ActiveUserAvatar
               key={user.id}
-              className="active-user-item"
+              user={user}
               onClick={() => {
                 const existing = conversations.find(c => c.name === user.name);
                 if (existing) {
@@ -95,13 +154,7 @@ export const MessagesDrawer = ({ isOpen, onClose }) => {
                   });
                 }
               }}
-            >
-              <div className="avatar-wrapper-online">
-                <img src={user.avatar} alt={user.name} />
-                <span className="online-badge"></span>
-              </div>
-              <span className="active-user-name">{user.name}</span>
-            </div>
+            />
           ))}
         </div>
       </div>
@@ -117,16 +170,7 @@ export const MessagesDrawer = ({ isOpen, onClose }) => {
               onClick={() => openChat(conv)}
             >
               {/* Cột Avatar có chấm trạng thái */}
-              <div className="conv-avatar-col">
-                <img src={conv.avatar} alt={conv.name} />
-                {conv.isGroup ? (
-                  <span className="group-badge-icon" title="Nhóm chat">👥</span>
-                ) : conv.isIdle ? (
-                  <span className="idle-badge" title="Tạm vắng"></span>
-                ) : (
-                  <span className="online-badge" title="Đang hoạt động"></span>
-                )}
-              </div>
+              <ConvAvatar conv={conv} />
 
               {/* Cột Tên, Tin nhắn & Thời gian */}
               <div className="conv-info-col">

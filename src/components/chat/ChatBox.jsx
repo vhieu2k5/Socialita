@@ -4,7 +4,7 @@ import { useSocial } from '../../context/SocialContext';
 export const ChatBox = () => {
   const { activeChat, closeChat, sendMessage } = useSocial();
   const [inputText, setInputText] = useState('');
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -12,10 +12,12 @@ export const ChatBox = () => {
   };
 
   useEffect(() => {
-    if (!isMinimized) {
-      scrollToBottom();
-    }
-  }, [activeChat?.messages, isMinimized]);
+    setAvatarError(false);
+  }, [activeChat?.id]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [activeChat?.messages]);
 
   if (!activeChat) return null;
 
@@ -26,83 +28,90 @@ export const ChatBox = () => {
     setInputText('');
   };
 
+  const initialLetter = (activeChat.name || '?').charAt(0).toUpperCase();
+
   return (
-    <div className={'chat-box-floating ' + (isMinimized ? 'minimized' : '')}>
-      {/* Header */}
-      <div className="chat-box-header" onClick={() => setIsMinimized(!isMinimized)}>
+    <div className="chat-box-floating">
+      {/* Header đen chuẩn ảnh 2 */}
+      <div className="chat-box-header">
         <div className="chat-contact-info">
           <div className="chat-avatar-wrap">
-            <img src={activeChat.avatar} alt={activeChat.name} />
-            <span className="chat-online-dot"></span>
+            {activeChat.avatar && !avatarError ? (
+              <img
+                src={activeChat.avatar}
+                alt={activeChat.name}
+                onError={() => setAvatarError(true)}
+              />
+            ) : (
+              <div
+                className="chat-avatar-initial"
+                style={{ backgroundColor: activeChat.avatarBg || '#dc2626' }}
+              >
+                {initialLetter}
+              </div>
+            )}
           </div>
           <div>
             <div className="chat-contact-name">{activeChat.name}</div>
             <div className="chat-status-text">
-              {activeChat.isGroup ? 'Nhóm trò chuyện' : 'Đang hoạt động'}
+              <span className="chat-online-dot"></span>
+              <span>{activeChat.isGroup ? 'Nhóm trò chuyện' : 'Đang hoạt động'}</span>
             </div>
           </div>
         </div>
 
-        <div className="chat-controls" onClick={(e) => e.stopPropagation()}>
-          <button
-            className="chat-ctrl-btn"
-            onClick={() => setIsMinimized(!isMinimized)}
-            title={isMinimized ? 'Mở rộng' : 'Thu nhỏ'}
-          >
-            {isMinimized ? '▲' : '─'}
+        <div className="chat-controls">
+          <button className="chat-close-btn" onClick={closeChat} title="Đóng">
+            ✕
           </button>
-          <button className="chat-ctrl-btn" onClick={closeChat} title="Đóng">✕</button>
         </div>
       </div>
 
-      {/* Body & Input (chỉ hiện khi không thu nhỏ) */}
-      {!isMinimized && (
-        <>
-          <div className="chat-box-messages">
-            <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
-              <img
-                src={activeChat.avatar}
-                alt={activeChat.name}
-                style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 6px' }}
-              />
-              <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-dark)' }}>{activeChat.name}</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-light-gray)' }}>Các bạn đã kết nối trên Socialita</div>
-            </div>
-
-            {(activeChat.messages || []).map((msg) => (
-              <div
-                key={msg.id}
-                className={'chat-bubble-row ' + (msg.isMe ? 'outgoing' : 'incoming')}
-              >
-                {!msg.isMe && (
-                  <img src={activeChat.avatar} alt="" className="bubble-avatar" />
-                )}
-                <div className={'chat-bubble ' + (msg.isMe ? 'outgoing' : 'incoming')}>
-                  <div className="bubble-text">{msg.text}</div>
-                  {msg.time && <div className="bubble-time">{msg.time}</div>}
-                </div>
+      {/* Body tin nhắn */}
+      <div className="chat-box-messages">
+        {(activeChat.messages || []).map((msg) => (
+          <div
+            key={msg.id}
+            className={'chat-msg-row ' + (msg.isMe ? 'outgoing' : 'incoming')}
+          >
+            {msg.isMe ? (
+              /* Tin nhắn gửi đi: bubble đỏ, chữ trắng, thời gian góc dưới bên phải trong bubble */
+              <div className="chat-bubble outgoing">
+                <div className="bubble-text">{msg.text}</div>
+                {msg.time && <div className="bubble-time outgoing">{msg.time}</div>}
               </div>
-            ))}
-            <div ref={messagesEndRef} />
+            ) : (
+              /* Tin nhắn nhận: bubble trắng viền nhẹ, thời gian nằm bên dưới bubble */
+              <>
+                <div className="chat-bubble incoming">
+                  <div className="bubble-text">{msg.text}</div>
+                </div>
+                {msg.time && <div className="bubble-time incoming">{msg.time}</div>}
+              </>
+            )}
           </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
 
-          <form onSubmit={handleSend} className="chat-box-input-row">
-            <input
-              type="text"
-              placeholder="Aa..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              className="chat-input-field"
-              autoFocus
-            />
-            <button type="submit" className="chat-send-btn" disabled={!inputText.trim()}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-              </svg>
-            </button>
-          </form>
-        </>
-      )}
+      {/* Input row với nút "Gửi" bo tròn đỏ */}
+      <form onSubmit={handleSend} className="chat-box-input-row">
+        <input
+          type="text"
+          placeholder="Nhập tin nhắn..."
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          className="chat-input-field"
+          autoFocus
+        />
+        <button
+          type="submit"
+          className="chat-send-btn"
+          disabled={!inputText.trim()}
+        >
+          Gửi
+        </button>
+      </form>
     </div>
   );
 };
