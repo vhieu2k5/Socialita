@@ -3055,3 +3055,12 @@ button:active:not(:disabled), .btn:active:not(:disabled) {
   background: rgba(0,0,0,0.4);
   backdrop-filter: blur(4px);
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

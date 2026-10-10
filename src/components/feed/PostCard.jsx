@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSocial } from '../../context/SocialContext';
 import { formatDate, getInitials } from '../../utils/formatters';
+import { PostMediaGrid } from './PostMediaGrid';
 
 export const PostCard = ({ post }) => {
   const { toggleLikePost, addCommentPost, sharePost, deletePost, currentUser, user } = useSocial();
@@ -17,6 +18,26 @@ export const PostCard = ({ post }) => {
   const mediaSource = post.image_url || post.mediaUrl || '';
   const isVideo = mediaSource.match(/\.(mp4|webm|mov|ogg)$/i) || post.mediaType === 'video';
   const isAuthorOrAdmin = currentUser?.role === 'admin' || (user?.name && user.name === post.authorName);
+
+  let postImages = [];
+  if (Array.isArray(post.images) && post.images.length > 0) {
+    postImages = post.images.filter(Boolean);
+  } else if (post.image_url) {
+    const raw = String(post.image_url).trim();
+    if (raw.startsWith('[') && raw.endsWith(']')) {
+      try {
+        postImages = JSON.parse(raw);
+      } catch (e) {
+        postImages = [raw];
+      }
+    } else if (raw.includes(',')) {
+      postImages = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    } else {
+      postImages = [raw];
+    }
+  } else if (post.mediaUrl && !isVideo) {
+    postImages = [post.mediaUrl];
+  }
 
   return (
     <article className="post-card">
@@ -61,26 +82,9 @@ export const PostCard = ({ post }) => {
       {/* 2. Nội dung văn bản bài viết */}
       {post.content && <p className="post-content">{post.content}</p>}
 
-      {/* 3. Media: Video hoặc Hình ảnh */}
-      {mediaSource ? (
-        <div style={{ marginTop: '12px', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#000' }}>
-          {isVideo ? (
-            <video
-              src={mediaSource}
-              controls
-              style={{ width: '100%', maxHeight: '480px', display: 'block' }}
-            />
-          ) : (
-            <img
-              src={mediaSource}
-              alt="Bài viết"
-              style={{ width: '100%', maxHeight: '480px', objectFit: 'cover', display: 'block' }}
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
-          )}
-        </div>
+      {/* 3. Media: Video hoặc Hình ảnh (Lưới thông minh nhiều ảnh + Lightbox) */}
+      {postImages.length > 0 || isVideo ? (
+        <PostMediaGrid images={postImages} mediaSource={mediaSource} isVideo={isVideo} />
       ) : post.mediaGradient ? (
         /* 4. Phông nền Gradient nếu không có ảnh/video */
         <div className="post-media-box" style={{ background: post.mediaGradient }}>

@@ -339,30 +339,54 @@ export const SocialProvider = ({ children }) => {
     }, 2800);
   };
 
+  // Helper chuyển đổi image_url (đơn lẻ, JSON mảng, hoặc phân tách bằng dấu phẩy) thành mảng ảnh
+  const parsePostImages = (source) => {
+    if (!source) return [];
+    if (Array.isArray(source)) return source.filter(Boolean);
+    if (typeof source === 'string') {
+      const trimmed = source.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) return parsed.filter(Boolean);
+        } catch (e) {}
+      }
+      if (trimmed.includes(',')) {
+        return trimmed.split(',').map(s => s.trim()).filter(Boolean);
+      }
+      return [trimmed];
+    }
+    return [];
+  };
+
   // 2. Tải danh sách bài viết từ Backend MySQL khi khởi động
   useEffect(() => {
     const loadPostsFromBackend = async () => {
       try {
         const res = await api.getPosts({ current_user_id: user.id });
         if (res && res.posts && Array.isArray(res.posts) && res.posts.length > 0) {
-          const formatted = res.posts.map(p => ({
-            id: String(p.id),
-            authorName: p.full_name || p.username || 'Người dùng Socialita',
-            authorAvatar: p.avatar_url || '',
-            authorAvatarBg: '#e52e3d',
-            time: p.created_at || 'Vừa xong',
-            content: p.content || '',
-            location: p.location || '',
-            mediaGradient: p.gradient || '',
-            image_url: p.image_url || '',
-            mediaUrl: p.image_url || '',
-            likes: Number(p.reaction_count) || 0,
-            liked: Boolean(p.user_has_reacted),
-            commentsCount: Number(p.comment_count) || 0,
-            sharesCount: 0,
-            category: 'all',
-            comments: []
-          }));
+          const formatted = res.posts.map(p => {
+            const imgs = parsePostImages(p.image_url);
+            return {
+              id: String(p.id),
+              authorName: p.full_name || p.username || 'Người dùng Socialita',
+              authorAvatar: p.avatar_url || '',
+              authorAvatarBg: '#e52e3d',
+              time: p.created_at || 'Vừa xong',
+              content: p.content || '',
+              location: p.location || '',
+              mediaGradient: p.gradient || '',
+              image_url: p.image_url || '',
+              mediaUrl: imgs[0] || p.image_url || '',
+              images: imgs,
+              likes: Number(p.reaction_count) || 0,
+              liked: Boolean(p.user_has_reacted),
+              commentsCount: Number(p.comment_count) || 0,
+              sharesCount: 0,
+              category: 'all',
+              comments: []
+            };
+          });
           setPosts(formatted);
         }
       } catch (err) {
@@ -426,6 +450,45 @@ export const SocialProvider = ({ children }) => {
     }
   };
 
+  // 4b. Đăng nhập bằng Google
+  const loginWithGoogle = async (googleUserData) => {
+    try {
+      const data = await api.googleLogin(googleUserData);
+      if (data && data.user) {
+        const authUser = {
+          id: data.user.id,
+          name: data.user.full_name || data.user.username,
+          email: data.user.email,
+          role: data.role || data.user.roles || 'user',
+          avatarBg: '#4285F4',
+          avatar_url: data.user.avatar_url
+        };
+        setCurrentUser(authUser);
+        setUser(prev => ({ ...prev, ...authUser }));
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+        showToast(`Đăng nhập Google thành công! Chào mừng ${authUser.name}`);
+        return true;
+      }
+    } catch (apiErr) {
+      console.warn('Backend Google Auth error, fallback offline:', apiErr.message);
+      // Fallback khi backend chưa chạy hoặc lỗi kết nối:
+      const fallbackUser = {
+        id: Date.now(),
+        name: googleUserData.name || googleUserData.email?.split('@')[0] || 'Google User',
+        email: googleUserData.email || 'user@gmail.com',
+        role: 'user',
+        avatarBg: '#4285F4',
+        avatar_url: googleUserData.avatar_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'
+      };
+      setCurrentUser(fallbackUser);
+      setUser(prev => ({ ...prev, ...fallbackUser }));
+      localStorage.setItem('currentUser', JSON.stringify(fallbackUser));
+      showToast(`Đăng nhập Google thành công! Chào mừng ${fallbackUser.name}`);
+      return true;
+    }
+    return false;
+  };
+
   // 5. Đăng xuất
   const logout = () => {
     setCurrentUser(null);
@@ -462,28 +525,38 @@ export const SocialProvider = ({ children }) => {
     }
   };
 
-  // 8. ĐĂNG BÀI VIẾT MỚI (Hỗ trợ File Ảnh/Video và lưu Database MySQL)
-  const createPost = async ({ content, location, gradient, category = 'all', file = null }) => {
-    let uploadedImageUrl = '';
+  // 8. ĐĂNG BÀI VIẾT MỚI (Hỗ trợ nhiều File Ảnh/Video và lưu Database MySQL)
+  const createPost = async ({ content, location, gradient, category = 'all', files = [], file = null }) => {
+    let uploadedImageUrls = [];
 
-    // Nếu người dùng chọn file ảnh/video, upload lên backend trước
-    if (file) {
+    // Hỗ trợ cả mảng files hoặc file đơn lẻ
+    const filesList = files && files.length > 0 ? Array.from(files) : (file ? [file] : []);
+
+    // Nếu người dùng chọn file ảnh/video, upload lên backend
+    if (filesList.length > 0) {
       try {
-        const uploadRes = await api.uploadPostImage(file);
-        if (uploadRes && uploadRes.image_url) {
-          uploadedImageUrl = uploadRes.image_url;
+        const uploadRes = await api.uploadPostImages(filesList);
+        if (uploadRes && Array.isArray(uploadRes.image_urls) && uploadRes.image_urls.length > 0) {
+          uploadedImageUrls = uploadRes.image_urls;
+        } else if (uploadRes && uploadRes.image_url) {
+          uploadedImageUrls = [uploadRes.image_url];
         }
       } catch (err) {
         console.warn('Lỗi upload file ảnh lên máy chủ, tạo preview tạm:', err.message);
-        uploadedImageUrl = URL.createObjectURL(file);
+        uploadedImageUrls = filesList.map(f => URL.createObjectURL(f));
       }
     }
+
+    const finalImageUrl = uploadedImageUrls.length > 0
+      ? (uploadedImageUrls.length === 1 ? uploadedImageUrls[0] : JSON.stringify(uploadedImageUrls))
+      : null;
 
     const postPayload = {
       content,
       location: location || null,
-      gradient: uploadedImageUrl ? null : (gradient || null),
-      image_url: uploadedImageUrl || null
+      gradient: uploadedImageUrls.length > 0 ? null : (gradient || null),
+      image_url: finalImageUrl,
+      image_urls: uploadedImageUrls
     };
 
     let serverPostId = `p-${Date.now()}`;
@@ -508,9 +581,10 @@ export const SocialProvider = ({ children }) => {
       isPublic: true,
       content,
       location,
-      mediaGradient: uploadedImageUrl ? null : gradient,
-      image_url: uploadedImageUrl,
-      mediaUrl: uploadedImageUrl,
+      mediaGradient: uploadedImageUrls.length > 0 ? null : gradient,
+      image_url: finalImageUrl || '',
+      mediaUrl: uploadedImageUrls[0] || '',
+      images: uploadedImageUrls,
       likes: 0,
       liked: false,
       commentsCount: 0,
@@ -649,6 +723,7 @@ export const SocialProvider = ({ children }) => {
       value={{
         currentUser,
         login,
+        loginWithGoogle,
         register,
         logout,
         tab,

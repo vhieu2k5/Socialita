@@ -37,6 +37,37 @@ export const INITIAL_STORIES = [
 
 export const INITIAL_POSTS = [
   {
+    id: 'p-multi-photos',
+    authorName: 'Lê Minh Anh',
+    authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+    time: '30 phút trước · Công khai',
+    isPublic: true,
+    content: 'Album ảnh chuyến phượt Đà Lạt cùng hội bạn! Thời tiết se lạnh, cảnh sắc mộng mơ, đồ ăn ngon xỉu luôn mọi người ơi 🌲🍓☁️ #DaLatTravel #SocialitaTrip',
+    location: 'Đà Lạt, Lâm Đồng',
+    images: [
+      'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&fit=crop',
+      'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&fit=crop',
+      'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&fit=crop',
+      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&fit=crop',
+      'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=800&fit=crop'
+    ],
+    image_url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&fit=crop',
+    likes: 352,
+    liked: true,
+    commentsCount: 45,
+    sharesCount: 18,
+    category: 'all',
+    comments: [
+      {
+        id: 'c-demo-1',
+        authorName: 'Quang Huy',
+        content: 'Ảnh chụp bằng máy gì mà nét đỉnh thế bạn ơi! 😍',
+        time: '20 phút trước',
+        likes: 6
+      }
+    ]
+  },
+  {
     id: 'p-1',
     authorName: 'Quang Huy',
     authorAvatar: '',

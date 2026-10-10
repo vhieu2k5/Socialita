@@ -53,6 +53,12 @@ export const api = {
       body: JSON.stringify(userData)
     }),
 
+  googleLogin: (userData) =>
+    request('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    }),
+
   // === POSTS & FEED ===
   getPosts: (params = {}) => {
     const query = new URLSearchParams();
@@ -72,6 +78,17 @@ export const api = {
     const formData = new FormData();
     formData.append('image', file);
     return request('/api/posts/upload-image', {
+      method: 'POST',
+      body: formData
+    });
+  },
+
+  uploadPostImages: async (files) => {
+    const formData = new FormData();
+    Array.from(files).forEach((file) => {
+      formData.append('images', file);
+    });
+    return request('/api/posts/upload-images', {
       method: 'POST',
       body: formData
     });

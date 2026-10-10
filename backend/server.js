@@ -21,6 +21,9 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
+// Tự động mở rộng cột image_url thành TEXT để lưu được nhiều ảnh (JSON array)
+db.query("ALTER TABLE posts MODIFY COLUMN image_url TEXT").catch(() => {});
+
 // 2. Cấu hình Static folder & Tự động tạo thư mục uploads nếu chưa có
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -94,6 +97,18 @@ app.post('/api/auth/register', async (req, res) => {
             return res.status(400).json({ message: "Vui lòng điền đầy đủ các thông tin bắt buộc" });
         }
 
+        // Kiểm tra độ mạnh mật khẩu: Tối thiểu 8 ký tự, gồm chữ hoa, số và ký tự đặc biệt
+        const hasMinLength = password.length >= 8;
+        const hasUpperCase = /[A-Z]/.test(password);
+        const hasNumber = /[0-9]/.test(password);
+        const hasSpecialChar = /[^A-Za-z0-9]/.test(password);
+
+        if (!hasMinLength || !hasUpperCase || !hasNumber || !hasSpecialChar) {
+            return res.status(400).json({
+                message: "Mật khẩu phải có tối thiểu 8 ký tự, bao gồm ít nhất 1 chữ hoa, 1 chữ số và 1 ký tự đặc biệt"
+            });
+        }
+
         // Kiểm tra xem username hoặc email đã tồn tại chưa
         const [existing] = await db.query("SELECT id FROM users WHERE username = ? OR email = ?", [username, email]);
         if (existing.length > 0) {
@@ -110,6 +125,79 @@ app.post('/api/auth/register', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Lỗi server khi đăng ký" });
+    }
+});
+
+// Đăng nhập / Đăng ký nhanh bằng Google
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        let { email, name, avatar_url, credential } = req.body;
+
+        // Nếu client gửi credential JWT từ Google Identity Services
+        if (credential) {
+            try {
+                const parts = credential.split('.');
+                if (parts.length >= 2) {
+                    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+                    email = payload.email || email;
+                    name = payload.name || name;
+                    avatar_url = payload.picture || avatar_url;
+                }
+            } catch (err) {
+                console.warn("Không thể giải mã Google credential:", err.message);
+            }
+        }
+
+        if (!email) {
+            return res.status(400).json({ message: "Không tìm thấy thông tin email từ Google" });
+        }
+
+        // Tìm kiếm user theo email trong CSDL
+        const [existing] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
+        let user;
+
+        if (existing.length > 0) {
+            user = existing[0];
+            if (user.status === 'locked') {
+                return res.status(403).json({ message: "Tài khoản của bạn đã bị khóa do vi phạm tiêu chuẩn cộng đồng" });
+            }
+
+            // Nếu user chưa có avatar thì lưu avatar từ Google vào
+            if (!user.avatar_url && avatar_url) {
+                await db.query("UPDATE users SET avatar_url = ?, last_login_at = NOW() WHERE id = ?", [avatar_url, user.id]);
+                user.avatar_url = avatar_url;
+            } else {
+                await db.query("UPDATE users SET last_login_at = NOW() WHERE id = ?", [user.id]);
+            }
+        } else {
+            // Người dùng Google lần đầu đăng nhập -> Tạo tài khoản tự động
+            const baseUsername = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') || 'google_user';
+            let finalUsername = baseUsername;
+            const [uCheck] = await db.query("SELECT id FROM users WHERE username = ?", [finalUsername]);
+            if (uCheck.length > 0) {
+                finalUsername = `${baseUsername}_${Math.floor(1000 + Math.random() * 9000)}`;
+            }
+
+            const fullName = name || email.split('@')[0];
+            const dummyPassword = 'GoogleAuth_' + Math.random().toString(36).substring(2, 12);
+            const insertSql = "INSERT INTO users (username, email, password_hash, full_name, avatar_url, roles, status, created_at, last_login_at) VALUES (?, ?, ?, ?, ?, 'user', 'active', NOW(), NOW())";
+            const [result] = await db.query(insertSql, [finalUsername, email, dummyPassword, fullName, avatar_url || null]);
+
+            const [newUserRows] = await db.query("SELECT * FROM users WHERE id = ?", [result.insertId]);
+            user = newUserRows[0];
+        }
+
+        delete user.password_hash;
+
+        res.status(200).json({
+            message: "Đăng nhập Google thành công!",
+            token: generateToken(user),
+            role: user.roles,
+            user: user
+        });
+    } catch (error) {
+        console.error("Lỗi Google Auth:", error);
+        res.status(500).json({ message: "Lỗi server khi xử lý đăng nhập Google" });
     }
 });
 
@@ -237,17 +325,35 @@ const postImageStorage = multer.diskStorage({
 });
 const uploadPostImg = multer({ storage: postImageStorage });
 
-// Upload ảnh bài viết
+// Upload ảnh bài viết đơn lẻ
 app.post('/api/posts/upload-image', uploadPostImg.single('image'), (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: "Vui lòng chọn một file ảnh" });
         }
         const imageUrl = `http://localhost:8080/uploads/${req.file.filename}`;
-        res.status(200).json({ message: "Tải ảnh lên thành công", image_url: imageUrl });
+        res.status(200).json({ message: "Tải ảnh lên thành công", image_url: imageUrl, image_urls: [imageUrl] });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Lỗi server khi upload ảnh bài viết" });
+    }
+});
+
+// Upload nhiều ảnh bài viết (Hỗ trợ tối đa 10 ảnh cùng lúc)
+app.post('/api/posts/upload-images', uploadPostImg.array('images', 10), (req, res) => {
+    try {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ message: "Vui lòng chọn ít nhất một file ảnh" });
+        }
+        const imageUrls = req.files.map(file => `http://localhost:8080/uploads/${file.filename}`);
+        res.status(200).json({
+            message: "Tải các ảnh lên thành công",
+            image_urls: imageUrls,
+            image_url: imageUrls.length === 1 ? imageUrls[0] : JSON.stringify(imageUrls)
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi server khi upload danh sách ảnh bài viết" });
     }
 });
 
@@ -320,22 +426,33 @@ app.get('/api/users/:id/posts', async (req, res) => {
     }
 });
 
-// Đăng bài viết mới (Hỗ trợ văn bản và hình ảnh)
+// Đăng bài viết mới (Hỗ trợ văn bản và một hoặc nhiều hình ảnh)
 app.post('/api/users/:id/posts', async (req, res) => {
     try {
         const userId = req.params.id;
-        const { content, location, gradient, image_url } = req.body;
+        const { content, location, gradient, image_url, image_urls } = req.body;
 
-        if (!content && !image_url) {
+        // Chuẩn hóa image_url (nếu có mảng nhiều ảnh thì lưu JSON string)
+        let finalImageUrl = null;
+        if (Array.isArray(image_urls) && image_urls.length > 0) {
+            finalImageUrl = image_urls.length === 1 ? image_urls[0] : JSON.stringify(image_urls);
+        } else if (Array.isArray(image_url) && image_url.length > 0) {
+            finalImageUrl = image_url.length === 1 ? image_url[0] : JSON.stringify(image_url);
+        } else if (image_url) {
+            finalImageUrl = image_url;
+        }
+
+        if (!content && !finalImageUrl) {
             return res.status(400).json({ message: "Nội dung hoặc hình ảnh không được để trống" });
         }
 
         const sql = "INSERT INTO posts (user_id, content, location, gradient, image_url, status, created_at) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
-        const [result] = await db.query(sql, [userId, content || '', location || null, gradient || null, image_url || null]);
+        const [result] = await db.query(sql, [userId, content || '', location || null, gradient || null, finalImageUrl]);
 
         res.status(201).json({
             message: "Đăng bài thành công!",
-            postId: result.insertId
+            postId: result.insertId,
+            image_url: finalImageUrl
         });
     } catch (error) {
         console.error(error);
