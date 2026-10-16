@@ -184,5 +184,21 @@ export const api = {
     request('/api/friends/respond', {
       method: 'POST',
       body: JSON.stringify({ user_id1: userId1, user_id2: userId2, status })
-    })
+    }),
+
+  // === ONLINE / OFFLINE STATUS ===
+  heartbeat: (userId) =>
+    request('/api/users/heartbeat', {
+      method: 'POST',
+      body: JSON.stringify({ userId })
+    }),
+
+  setOffline: (userId) =>
+    request('/api/users/offline', {
+      method: 'POST',
+      body: JSON.stringify({ userId })
+    }),
+
+  getOnlineStatus: (currentUserId) =>
+    request(`/api/users/${currentUserId}/online-status`)
 };

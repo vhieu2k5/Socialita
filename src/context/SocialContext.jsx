@@ -718,6 +718,17 @@ export const SocialProvider = ({ children }) => {
     if (sug) showToast(`Đã gửi lời mời kết bạn đến ${sug.name}`);
   };
 
+  const unfriendUser = (friendId) => {
+    const friend = friends.find(f => f.id === friendId);
+    setFriends(prev => prev.filter(f => f.id !== friendId));
+    if (friend) showToast(`Đã huỷ kết bạn với @${friend.name}`, 'info');
+  };
+
+  const setUserOnlineStatus = (userId, isOnline) => {
+    setActiveUsers(prev => prev.map(u => u.id === userId ? { ...u, isOnline } : u));
+    setConversations(prev => prev.map(c => c.id === userId ? { ...c, isOnline } : c));
+  };
+
   return (
     <SocialContext.Provider
       value={{
