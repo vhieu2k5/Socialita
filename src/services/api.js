@@ -39,6 +39,26 @@ async function request(endpoint, options = {}) {
   }
 }
 
+
+// Online/Offline status helpers
+export const heartbeat = async (userId) => {
+  const res = await fetch(`${BASE}/api/users/heartbeat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId })
+  });
+  return res.json();
+};
+
+export const setOffline = async (userId) => {
+  const res = await fetch(`${BASE}/api/users/offline`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId })
+  });
+  return res.json();
+};
+
 export const api = {
   // === AUTH ===
   login: (identifier, password) =>

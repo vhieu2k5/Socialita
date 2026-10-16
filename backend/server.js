@@ -14,7 +14,7 @@ app.use(express.json());
 const db = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: 'redtalk789',
+    password: 'quanganh01263360411',
     database: 'mini_social',
     waitForConnections: true,
     connectionLimit: 10,
@@ -23,6 +23,8 @@ const db = mysql.createPool({
 
 // Tự động mở rộng cột image_url thành TEXT để lưu được nhiều ảnh (JSON array)
 db.query("ALTER TABLE posts MODIFY COLUMN image_url TEXT").catch(() => {});
+db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_online TINYINT(1) DEFAULT 0").catch(() => {});
+db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_active_at DATETIME DEFAULT CURRENT_TIMESTAMP").catch(() => {});
 
 // 2. Cấu hình Static folder & Tự động tạo thư mục uploads nếu chưa có
 const uploadDir = path.join(__dirname, 'uploads');
@@ -1026,6 +1028,59 @@ app.get('/api/admin/activities', async (req, res) => {
     }
 });
 
+
+/* ========================================================
+   ONLINE/OFFLINE STATUS APIs
+   ======================================================== */
+// Heartbeat — called periodically while user is active
+app.post('/api/users/heartbeat', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ message: 'Thiếu userId' });
+        await db.query(
+            "UPDATE users SET is_online = 1, last_active_at = NOW() WHERE id = ?",
+            [userId]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// Offline — called on logout or tab close
+app.post('/api/users/offline', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ message: 'Thiếu userId' });
+        await db.query(
+            "UPDATE users SET is_online = 0, last_active_at = NOW() WHERE id = ?",
+            [userId]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// Get online friends list
+app.get('/api/users/:id/online-status', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            "SELECT id, is_online, last_active_at FROM users WHERE id != ?",
+            [req.params.id]
+        );
+        res.json({ users: rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
 app.listen(8080, () => {
     console.log("Server đang chạy tại http://localhost:8080");
+});
+app.get('/', (req, res) => {
+    res.send('Socialita Backend is running!');
 });

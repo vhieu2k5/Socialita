@@ -749,6 +749,8 @@ export const SocialProvider = ({ children }) => {
         acceptRequest,
         rejectRequest,
         sendRequest,
+        unfriendUser,
+        setUserOnlineStatus,
         trends,
         groups,
         isCreatePostModalOpen,
