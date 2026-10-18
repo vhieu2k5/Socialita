@@ -12,6 +12,7 @@ erDiagram
         varchar email UK "Email"
         varchar avatar_url "Ảnh đại diện"
         varchar school "Trường học/Nơi làm việc"
+        varchar liveIn "Nơi sinh sống"
         enum roles "Phân quyền (admin/user)"
         enum status "Trạng thái (active/locked)"
         timestamp last_login_at "Đăng nhập cuối"
@@ -26,6 +27,7 @@ erDiagram
         varchar image_url "Hình ảnh"
         varchar location "Vị trí"
         varchar gradient "Màu nền"
+        enum privacy "Quyền riêng tư (public/friends/private)"
         enum status "Trạng thái (active/hidden)"
         timestamp created_at
         timestamp updated_at

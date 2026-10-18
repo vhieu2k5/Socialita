@@ -13,6 +13,7 @@ export const CreatePostModal = () => {
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('all');
+  const [privacy, setPrivacy] = useState('public');
   const [selectedGradient, setSelectedGradient] = useState('linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -79,7 +80,8 @@ export const CreatePostModal = () => {
         location,
         gradient: selectedGradient,
         category,
-        files: selectedFiles
+        files: selectedFiles,
+        privacy
       });
       setContent('');
       setLocation('');
@@ -100,11 +102,26 @@ export const CreatePostModal = () => {
         <form onSubmit={handleSubmit} className="modal-body">
           <div className="modal-user-row">
             <div className="avatar-circle" style={{ backgroundColor: user.avatarBg || '#35c9b0' }}>
-              {getInitials(user.name)}
+              {user.avatar_url ? (
+                <img src={user.avatar_url} alt={user.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ) : (
+                getInitials(user.name)
+              )}
             </div>
             <div>
               <div className="author-name">{user.name}</div>
-              <div className="privacy-badge">🌐 Công khai</div>
+              <div className="privacy-select-wrapper">
+                <select
+                  className="privacy-select"
+                  value={privacy}
+                  onChange={(e) => setPrivacy(e.target.value)}
+                  title="Chọn quyền riêng tư bài viết"
+                >
+                  <option value="public">🌐 Công khai</option>
+                  <option value="friends">👥 Bạn bè</option>
+                  <option value="private">🔒 Chỉ mình tôi</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -296,19 +313,6 @@ export const CreatePostModal = () => {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
-          </div>
-
-          <div className="form-group">
-            <label>Chọn thể loại bảng tin</label>
-            <select
-              className="form-control"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="all">Tất cả mọi người</option>
-              <option value="following">Chỉ người đang theo dõi</option>
-              <option value="groups">Hội nhóm của tôi</option>
-            </select>
           </div>
 
           {selectedFiles.length === 0 && (

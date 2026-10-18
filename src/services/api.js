@@ -164,5 +164,10 @@ export const api = {
     request('/api/friends/respond', {
       method: 'POST',
       body: JSON.stringify({ user_id1: userId1, user_id2: userId2, status })
+    }),
+
+  unfriend: (userId1, userId2) =>
+    request(`/api/friends/${userId1}/${userId2}`, {
+      method: 'DELETE'
     })
 };

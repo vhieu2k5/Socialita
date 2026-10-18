@@ -3,11 +3,14 @@ import { useSocial } from '../context/SocialContext';
 import { PostCard } from '../components/feed/PostCard';
 
 export const ProfileView = () => {
-  const { user, posts, openEditProfileModal, openCreatePostModal, uploadAvatar, showToast } = useSocial();
+  const { user, posts, friends, joinedGroups, openEditProfileModal, openCreatePostModal, uploadAvatar, showToast } = useSocial();
   const [activeSubTab, setActiveSubTab] = useState('posts');
   const avatarInputRef = useRef(null);
 
-  const myPosts = posts.filter(p => p.authorName === user.name);
+  const myPosts = posts.filter(p =>
+    (p.user_id && user.id && Number(p.user_id) === Number(user.id)) ||
+    (p.authorName && user.name && p.authorName.trim() === user.name.trim())
+  );
 
   const handleAvatarFile = async (e) => {
     const file = e.target.files?.[0];
@@ -74,24 +77,24 @@ export const ProfileView = () => {
           </div>
 
           <h2 className="profile-user-name">{user.name}</h2>
-          <p className="profile-user-bio">{user.bio || 'Bio - Yêu thích du lịch - Hải Phòng, VN'}</p>
+          <p className="profile-user-bio">{user.bio || 'Chưa cập nhật tiểu sử'}</p>
 
           {/* 4 Thống kê căn giữa */}
           <div className="profile-stats-grid">
             <div className="profile-stat-box">
-              <div className="count">{myPosts.length || user.stats?.posts || 86}</div>
+              <div className="count">{myPosts.length}</div>
               <div className="desc">Bài viết</div>
             </div>
             <div className="profile-stat-box">
-              <div className="count">{user.stats?.friends || 128}</div>
+              <div className="count">{friends ? friends.length : (user.stats?.friends ?? 0)}</div>
               <div className="desc">Bạn bè</div>
             </div>
             <div className="profile-stat-box">
-              <div className="count">{user.stats?.followers || '1.4K'}</div>
+              <div className="count">{user.stats?.followers ?? 0}</div>
               <div className="desc">Người theo dõi</div>
             </div>
             <div className="profile-stat-box">
-              <div className="count">{user.stats?.groups || 9}</div>
+              <div className="count">{joinedGroups ? joinedGroups.length : 0}</div>
               <div className="desc">Hội nhóm</div>
             </div>
           </div>
@@ -179,15 +182,15 @@ export const ProfileView = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12.5px', color: 'var(--text-gray)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>💼</span>
-                <span>{user.intro?.school || 'Sinh viên tại ĐH Kinh tế TP.HCM'}</span>
+                <span>{user.intro?.school || user.school || 'Chưa cập nhật trường học'}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>📍</span>
-                <span>{user.intro?.liveIn || 'Sống tại Sài Gòn, Việt Nam'}</span>
+                <span>{user.intro?.liveIn || user.liveIn || 'Chưa cập nhật nơi sống'}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>📅</span>
-                <span>{user.intro?.joinedDate || 'Tham gia từ tháng 3, 2024'}</span>
+                <span>{user.intro?.joinedDate || 'Tham gia gần đây'}</span>
               </div>
             </div>
           </div>

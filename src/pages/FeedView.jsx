@@ -2,11 +2,15 @@ import React from 'react';
 import { useSocial } from '../context/SocialContext';
 import { FeedFilters } from '../components/feed/FeedFilters';
 import { PostCard } from '../components/feed/PostCard';
+import { canViewPost } from '../utils/privacy';
 
 export const FeedView = () => {
-  const { posts, feedFilter, searchQuery, trends } = useSocial();
+  const { posts, feedFilter, searchQuery, trends, user, friends } = useSocial();
 
   const filteredPosts = posts.filter(p => {
+    // 1. Kiểm tra quyền xem bài viết (Công khai, Bạn bè, Chỉ mình tôi)
+    if (!canViewPost(p, user, friends)) return false;
+
     const matchesSearch =
       (p.content || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.authorName || '').toLowerCase().includes(searchQuery.toLowerCase());

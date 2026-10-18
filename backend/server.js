@@ -23,6 +23,8 @@ const db = mysql.createPool({
 
 // Tự động mở rộng cột image_url thành TEXT để lưu được nhiều ảnh (JSON array)
 db.query("ALTER TABLE posts MODIFY COLUMN image_url TEXT").catch(() => {});
+// Tự động bổ sung cột privacy cho bảng posts nếu chưa có
+db.query("ALTER TABLE posts ADD COLUMN privacy ENUM('public', 'friends', 'private') DEFAULT 'public'").catch(() => {});
 
 // 2. Cấu hình Static folder & Tự động tạo thư mục uploads nếu chưa có
 const uploadDir = path.join(__dirname, 'uploads');
@@ -227,7 +229,7 @@ app.get('/api/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
         const sql = `
-            SELECT u.id, u.username, u.full_name, u.email, u.avatar_url, u.roles, u.status, u.bio, u.school, u.created_at, u.last_login_at,
+            SELECT u.id, u.username, u.full_name, u.email, u.avatar_url, u.roles, u.status, u.bio, u.school, u.liveIn, u.created_at, u.last_login_at,
                    (SELECT COUNT(*) FROM posts WHERE user_id = u.id) AS post_count,
                    (SELECT COUNT(*) FROM reports WHERE reported_user_id = u.id) AS violation_count,
                    (SELECT COUNT(*) FROM friendships WHERE (user_id1 = u.id OR user_id2 = u.id) AND status = 'accepted') AS friend_count
@@ -251,11 +253,13 @@ app.get('/api/users/:id', async (req, res) => {
 app.put('/api/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
-        const { full_name, name, bio, school } = req.body;
+        const { full_name, name, bio, school, liveIn, intro } = req.body;
         const updateName = full_name || name;
+        const updateSchool = school || intro?.school || null;
+        const updateLiveIn = liveIn || intro?.liveIn || null;
 
-        const sql = "UPDATE users SET full_name = ?, bio = ?, school = ? WHERE id = ?";
-        const [result] = await db.query(sql, [updateName, bio, school, userId]);
+        const sql = "UPDATE users SET full_name = ?, bio = ?, school = ?, liveIn = ? WHERE id = ?";
+        const [result] = await db.query(sql, [updateName, bio, updateSchool, updateLiveIn, userId]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Người dùng không tồn tại" });
@@ -382,6 +386,31 @@ app.get('/api/posts', async (req, res) => {
             params.push(userId, userId, userId);
         } else if (req.query.status !== 'all') {
             whereClause += " AND p.status = 'active'";
+            
+            // Phân quyền hiển thị theo Privacy:
+            // 1. Công khai (public) hoặc bài cũ (NULL): Ai cũng xem được
+            // 2. Tác giả: Luôn xem được bài của chính mình (kể cả private hay friends)
+            // 3. Bạn bè (friends): Chỉ bạn bè đã kết bạn (status = 'accepted') mới xem được
+            // 4. Chỉ mình tôi (private): Chỉ tác giả xem được (thỏa mãn ở điều kiện 2)
+            if (currentUserId > 0) {
+                whereClause += ` AND (
+                    p.privacy = 'public' 
+                    OR p.privacy IS NULL 
+                    OR p.user_id = ?
+                    OR (
+                        p.privacy = 'friends' AND (
+                            p.user_id IN (
+                                SELECT user_id2 FROM friendships WHERE user_id1 = ? AND status = 'accepted'
+                                UNION
+                                SELECT user_id1 FROM friendships WHERE user_id2 = ? AND status = 'accepted'
+                            )
+                        )
+                    )
+                )`;
+                params.push(currentUserId, currentUserId, currentUserId);
+            } else {
+                whereClause += " AND (p.privacy = 'public' OR p.privacy IS NULL)";
+            }
         }
 
         const sql = `
@@ -406,8 +435,35 @@ app.get('/api/posts', async (req, res) => {
 // Lấy bài viết của 1 người dùng cụ thể (Trang cá nhân - STT 12)
 app.get('/api/users/:id/posts', async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = parseInt(req.params.id);
         const currentUserId = req.query.current_user_id ? parseInt(req.query.current_user_id) : 0;
+
+        let privacyCondition = "";
+        const params = [userId];
+
+        // Nếu người xem chính là chủ trang cá nhân -> Thấy toàn bộ bài của mình
+        if (currentUserId === userId) {
+            privacyCondition = "";
+        } else if (currentUserId > 0) {
+            // Xem trang người khác: chỉ thấy public, hoặc friends nếu đã kết bạn
+            privacyCondition = ` AND (
+                p.privacy = 'public' 
+                OR p.privacy IS NULL
+                OR (
+                    p.privacy = 'friends' AND (
+                        EXISTS (
+                            SELECT 1 FROM friendships 
+                            WHERE ((user_id1 = ? AND user_id2 = ?) OR (user_id1 = ? AND user_id2 = ?))
+                              AND status = 'accepted'
+                        )
+                    )
+                )
+            )`;
+            params.push(userId, currentUserId, currentUserId, userId);
+        } else {
+            privacyCondition = " AND (p.privacy = 'public' OR p.privacy IS NULL)";
+        }
+
         const sql = `
             SELECT p.*, u.full_name, u.username, u.avatar_url,
                    (SELECT COUNT(*) FROM reactions WHERE post_id = p.id) AS reaction_count,
@@ -415,10 +471,10 @@ app.get('/api/users/:id/posts', async (req, res) => {
                    ${currentUserId ? `EXISTS(SELECT 1 FROM reactions WHERE post_id = p.id AND user_id = ${currentUserId})` : '0'} AS user_has_reacted
             FROM posts p 
             LEFT JOIN users u ON p.user_id = u.id 
-            WHERE p.user_id = ? AND p.status = 'active'
+            WHERE p.user_id = ? AND p.status = 'active' ${privacyCondition}
             ORDER BY p.created_at DESC
         `;
-        const [rows] = await db.query(sql, [userId]);
+        const [rows] = await db.query(sql, params);
         res.json({ posts: rows });
     } catch (error) {
         console.error(error);
@@ -430,7 +486,7 @@ app.get('/api/users/:id/posts', async (req, res) => {
 app.post('/api/users/:id/posts', async (req, res) => {
     try {
         const userId = req.params.id;
-        const { content, location, gradient, image_url, image_urls } = req.body;
+        const { content, location, gradient, image_url, image_urls, privacy = 'public' } = req.body;
 
         // Chuẩn hóa image_url (nếu có mảng nhiều ảnh thì lưu JSON string)
         let finalImageUrl = null;
@@ -446,13 +502,16 @@ app.post('/api/users/:id/posts', async (req, res) => {
             return res.status(400).json({ message: "Nội dung hoặc hình ảnh không được để trống" });
         }
 
-        const sql = "INSERT INTO posts (user_id, content, location, gradient, image_url, status, created_at) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
-        const [result] = await db.query(sql, [userId, content || '', location || null, gradient || null, finalImageUrl]);
+        const validPrivacy = ['public', 'friends', 'private'].includes(privacy) ? privacy : 'public';
+
+        const sql = "INSERT INTO posts (user_id, content, location, gradient, image_url, privacy, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'active', NOW())";
+        const [result] = await db.query(sql, [userId, content || '', location || null, gradient || null, finalImageUrl, validPrivacy]);
 
         res.status(201).json({
             message: "Đăng bài thành công!",
             postId: result.insertId,
-            image_url: finalImageUrl
+            image_url: finalImageUrl,
+            privacy: validPrivacy
         });
     } catch (error) {
         console.error(error);
@@ -679,7 +738,8 @@ app.get('/api/users/:id/suggestions', async (req, res) => {
 // Gửi lời mời kết bạn
 app.post('/api/friends/request', async (req, res) => {
     try {
-        const { requester_id, receiver_id } = req.body;
+        const requester_id = req.body.requester_id || req.body.user_id1;
+        const receiver_id = req.body.receiver_id || req.body.user_id2;
         if (!requester_id || !receiver_id || requester_id == receiver_id) {
             return res.status(400).json({ message: "Yêu cầu kết bạn không hợp lệ" });
         }
@@ -706,10 +766,15 @@ app.post('/api/friends/request', async (req, res) => {
     }
 });
 
-// Phản hồi lời mời kết bạn (Chấp nhận hoặc Từ chối)
-app.put('/api/friends/respond', async (req, res) => {
+// Phản hồi lời mời kết bạn (Chấp nhận hoặc Từ chối) - Hỗ trợ cả PUT và POST
+const handleFriendResponse = async (req, res) => {
     try {
-        const { requester_id, user_id, action } = req.body; // action: 'accept' | 'reject'
+        const requester_id = req.body.requester_id || req.body.user_id1;
+        const user_id = req.body.user_id || req.body.receiver_id || req.body.user_id2;
+        let action = req.body.action || req.body.status;
+        if (action === 'accepted') action = 'accept';
+        if (action === 'rejected') action = 'reject';
+
         if (!requester_id || !user_id || !['accept', 'reject'].includes(action)) {
             return res.status(400).json({ message: "Tham số phản hồi không hợp lệ" });
         }
@@ -731,7 +796,10 @@ app.put('/api/friends/respond', async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Lỗi server khi phản hồi kết bạn" });
     }
-});
+};
+
+app.put('/api/friends/respond', handleFriendResponse);
+app.post('/api/friends/respond', handleFriendResponse);
 
 // Hủy kết bạn
 app.delete('/api/friends/:u1/:u2', async (req, res) => {
