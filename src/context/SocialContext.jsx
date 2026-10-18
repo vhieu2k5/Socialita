@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { formatDate } from '../utils/formatters';
 import {
   INITIAL_USER,
   INITIAL_POSTS,
@@ -9,6 +10,7 @@ import {
   INITIAL_FRIEND_SUGGESTIONS,
   INITIAL_TRENDS,
   INITIAL_GROUPS,
+  MY_JOINED_GROUPS,
   MOCK_ACCOUNT
 } from '../data/initialData';
 
@@ -196,12 +198,33 @@ export const SocialProvider = ({ children }) => {
       const saved = localStorage.getItem('currentUser');
       if (saved) {
         const parsed = JSON.parse(saved);
+        const isDefaultDemoUser = Number(parsed.id) === 1;
+        const joinedDateStr = parsed.created_at
+          ? `Tham gia từ tháng ${new Date(parsed.created_at).getMonth() + 1}, ${new Date(parsed.created_at).getFullYear()}`
+          : (isDefaultDemoUser ? INITIAL_USER.intro.joinedDate : 'Tham gia gần đây');
+
         return {
-          ...INITIAL_USER,
           id: parsed.id || INITIAL_USER.id,
-          name: parsed.full_name || parsed.name || INITIAL_USER.name,
+          name: parsed.full_name || parsed.name || parsed.username || INITIAL_USER.name,
           username: parsed.username || INITIAL_USER.username,
-          avatar_url: parsed.avatar_url || ''
+          email: parsed.email || '',
+          role: parsed.roles || parsed.role || 'user',
+          avatar_url: parsed.avatar_url || '',
+          avatarBg: '#35c9b0',
+          bio: parsed.bio !== null && parsed.bio !== undefined ? parsed.bio : (isDefaultDemoUser ? INITIAL_USER.bio : ''),
+          school: parsed.school !== null && parsed.school !== undefined ? parsed.school : (isDefaultDemoUser ? INITIAL_USER.intro.school : ''),
+          liveIn: parsed.liveIn !== null && parsed.liveIn !== undefined ? parsed.liveIn : (isDefaultDemoUser ? INITIAL_USER.intro.liveIn : ''),
+          intro: {
+            school: parsed.school !== null && parsed.school !== undefined ? parsed.school : (isDefaultDemoUser ? INITIAL_USER.intro.school : ''),
+            liveIn: parsed.liveIn !== null && parsed.liveIn !== undefined ? parsed.liveIn : (isDefaultDemoUser ? INITIAL_USER.intro.liveIn : ''),
+            joinedDate: joinedDateStr
+          },
+          stats: {
+            posts: 0,
+            friends: 0,
+            followers: isDefaultDemoUser ? '1.4K' : 0,
+            groups: 0
+          }
         };
       }
     } catch {}
@@ -215,6 +238,41 @@ export const SocialProvider = ({ children }) => {
   const [friendSuggestions, setFriendSuggestions] = useState(INITIAL_FRIEND_SUGGESTIONS);
   const [trends] = useState(INITIAL_TRENDS);
   const [groups, setGroups] = useState(INITIAL_GROUPS);
+
+  // Quản lý hội nhóm đã tham gia (Riêng biệt cho từng tài khoản)
+  const [joinedGroups, setJoinedGroups] = useState(() => {
+    try {
+      const saved = localStorage.getItem('currentUser');
+      if (saved) {
+        const u = JSON.parse(saved);
+        const stored = localStorage.getItem(`socialita_groups_${u.id}`);
+        if (stored) return JSON.parse(stored);
+        if (Number(u.id) === 1) return MY_JOINED_GROUPS;
+        return [];
+      }
+    } catch {}
+    return MY_JOINED_GROUPS;
+  });
+
+  const toggleJoinGroup = (group) => {
+    setJoinedGroups(prev => {
+      const isJoined = prev.some(g => g.id === group.id || g.name === group.name);
+      let next;
+      if (isJoined) {
+        next = prev.filter(g => g.id !== group.id && g.name !== group.name);
+        showToast(`Đã rời khỏi nhóm "${group.name}"`, 'info');
+      } else {
+        next = [...prev, group];
+        showToast(`Đã tham gia nhóm "${group.name}" thành công!`);
+      }
+      try {
+        if (user?.id) {
+          localStorage.setItem(`socialita_groups_${user.id}`, JSON.stringify(next));
+        }
+      } catch {}
+      return next;
+    });
+  };
 
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
@@ -360,41 +418,184 @@ export const SocialProvider = ({ children }) => {
   };
 
   // 2. Tải danh sách bài viết từ Backend MySQL khi khởi động
-  useEffect(() => {
-    const loadPostsFromBackend = async () => {
+  const loadPostsFromBackend = async (overrideUserId) => {
+    try {
+      const targetUserId = overrideUserId !== undefined ? overrideUserId : user.id;
+      const res = await api.getPosts({ current_user_id: targetUserId });
+      if (res && res.posts && Array.isArray(res.posts) && res.posts.length > 0) {
+        const formatted = res.posts.map(p => {
+          const imgs = parsePostImages(p.image_url);
+          const privacyLabel = p.privacy === 'private' ? 'Chỉ mình tôi' : (p.privacy === 'friends' ? 'Bạn bè' : 'Công khai');
+          return {
+            id: String(p.id),
+            user_id: p.user_id,
+            authorName: p.full_name || p.username || 'Người dùng Socialita',
+            authorAvatar: p.avatar_url || '',
+            authorAvatarBg: '#e52e3d',
+            time: p.created_at ? `${formatDate(p.created_at)} · ${privacyLabel}` : `Vừa xong · ${privacyLabel}`,
+            privacy: p.privacy || 'public',
+            isPublic: p.privacy === 'public' || !p.privacy,
+            content: p.content || '',
+            location: p.location || '',
+            mediaGradient: p.gradient || '',
+            image_url: p.image_url || '',
+            mediaUrl: imgs[0] || p.image_url || '',
+            images: imgs,
+            likes: Number(p.reaction_count) || 0,
+            liked: Boolean(p.user_has_reacted),
+            commentsCount: Number(p.comment_count) || 0,
+            sharesCount: 0,
+            category: 'all',
+            comments: []
+          };
+        });
+        setPosts(formatted);
+      }
+    } catch (err) {
+      console.warn('Backend chưa sẵn sàng hoặc rỗng, dùng dữ liệu mẫu tĩnh:', err.message);
+    }
+  };
+
+  // 2b. Tải danh sách bạn bè, lời mời kết bạn và gợi ý kết bạn từ Backend MySQL
+  const loadFriendsFromBackend = async (overrideUserId) => {
+    try {
+      const targetUserId = overrideUserId !== undefined ? overrideUserId : user.id;
+      if (!targetUserId) return;
+
+      // 1. Tải danh sách bạn bè đã kết bạn (status = 'accepted')
       try {
-        const res = await api.getPosts({ current_user_id: user.id });
-        if (res && res.posts && Array.isArray(res.posts) && res.posts.length > 0) {
-          const formatted = res.posts.map(p => {
-            const imgs = parsePostImages(p.image_url);
+        const resFriends = await api.getFriends(targetUserId);
+        if (resFriends && Array.isArray(resFriends.friends)) {
+          const formattedFriends = resFriends.friends.map(f => {
+            let friendSinceStr = 'Bạn bè';
+            if (f.friendship_date) {
+              const d = new Date(f.friendship_date);
+              if (!isNaN(d.getTime())) {
+                friendSinceStr = `Bạn từ ${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+              }
+            }
             return {
-              id: String(p.id),
-              authorName: p.full_name || p.username || 'Người dùng Socialita',
-              authorAvatar: p.avatar_url || '',
-              authorAvatarBg: '#e52e3d',
-              time: p.created_at || 'Vừa xong',
-              content: p.content || '',
-              location: p.location || '',
-              mediaGradient: p.gradient || '',
-              image_url: p.image_url || '',
-              mediaUrl: imgs[0] || p.image_url || '',
-              images: imgs,
-              likes: Number(p.reaction_count) || 0,
-              liked: Boolean(p.user_has_reacted),
-              commentsCount: Number(p.comment_count) || 0,
-              sharesCount: 0,
-              category: 'all',
-              comments: []
+              id: f.id,
+              name: f.full_name || f.username || 'Người dùng Socialita',
+              username: f.username,
+              avatar_url: f.avatar_url || '',
+              avatarBg: '#e52e3d',
+              friendSince: friendSinceStr,
+              mutualFriends: 0,
+              bio: f.bio || '',
+              school: f.school || '',
+              liveIn: f.liveIn || ''
             };
           });
-          setPosts(formatted);
+          setFriends(formattedFriends);
         }
       } catch (err) {
-        console.warn('Backend chưa sẵn sàng hoặc rỗng, dùng dữ liệu mẫu tĩnh:', err.message);
+        console.warn('Không thể tải danh sách bạn bè từ server:', err.message);
       }
-    };
 
+      // 2. Tải danh sách lời mời kết bạn (pending requests)
+      try {
+        const resRequests = await api.getFriendRequests(targetUserId);
+        if (resRequests && Array.isArray(resRequests.requests)) {
+          const formattedRequests = resRequests.requests.map(r => ({
+            id: r.requester_id,
+            requester_id: r.requester_id,
+            name: r.full_name || r.username || 'Người dùng',
+            username: r.username,
+            avatar_url: r.avatar_url || '',
+            avatarBg: '#ff7675',
+            time: r.created_at ? formatDate(r.created_at) : 'Mới đây',
+            mutualFriends: 0
+          }));
+          setFriendRequests(formattedRequests);
+        }
+      } catch (err) {
+        console.warn('Không thể tải lời mời kết bạn từ server:', err.message);
+      }
+
+      // 3. Tải danh sách gợi ý kết bạn
+      try {
+        const resSuggestions = await api.getSuggestions(targetUserId);
+        if (resSuggestions && Array.isArray(resSuggestions.suggestions) && resSuggestions.suggestions.length > 0) {
+          const formattedSuggestions = resSuggestions.suggestions.map(s => ({
+            id: s.id,
+            name: s.full_name || s.username || 'Người dùng',
+            username: s.username,
+            avatar_url: s.avatar_url || '',
+            avatarBg: '#4c8dff',
+            mutualFriends: 0,
+            requested: false
+          }));
+          setFriendSuggestions(formattedSuggestions);
+        }
+      } catch (err) {
+        console.warn('Không thể tải gợi ý kết bạn từ server:', err.message);
+      }
+    } catch (err) {
+      console.warn('Lỗi khi tải dữ liệu bạn bè từ backend:', err.message);
+    }
+  };
+
+  // 2c. Tải thông tin chi tiết của người dùng từ Backend MySQL
+  const loadUserProfile = async (overrideUserId) => {
+    try {
+      const targetUserId = overrideUserId !== undefined ? overrideUserId : user.id;
+      if (!targetUserId) return;
+      const res = await api.getUser(targetUserId);
+      if (res && res.user) {
+        const u = res.user;
+        const isDefaultDemoUser = Number(u.id) === 1;
+        const joinedDateStr = u.created_at
+          ? `Tham gia từ tháng ${new Date(u.created_at).getMonth() + 1}, ${new Date(u.created_at).getFullYear()}`
+          : (isDefaultDemoUser ? INITIAL_USER.intro.joinedDate : 'Tham gia gần đây');
+
+        setUser(prev => ({
+          ...prev,
+          id: u.id,
+          name: u.full_name || u.username || prev.name,
+          username: u.username || prev.username,
+          email: u.email || prev.email,
+          role: u.roles || prev.role || 'user',
+          avatar_url: u.avatar_url || '',
+          bio: u.bio !== null && u.bio !== undefined ? u.bio : (isDefaultDemoUser ? INITIAL_USER.bio : ''),
+          school: u.school !== null && u.school !== undefined ? u.school : (isDefaultDemoUser ? INITIAL_USER.intro.school : ''),
+          liveIn: u.liveIn !== null && u.liveIn !== undefined ? u.liveIn : (isDefaultDemoUser ? INITIAL_USER.intro.liveIn : ''),
+          intro: {
+            school: u.school !== null && u.school !== undefined ? u.school : (isDefaultDemoUser ? INITIAL_USER.intro.school : ''),
+            liveIn: u.liveIn !== null && u.liveIn !== undefined ? u.liveIn : (isDefaultDemoUser ? INITIAL_USER.intro.liveIn : ''),
+            joinedDate: joinedDateStr
+          },
+          stats: {
+            posts: u.post_count !== undefined ? Number(u.post_count) : 0,
+            friends: u.friend_count !== undefined ? Number(u.friend_count) : 0,
+            followers: isDefaultDemoUser ? '1.4K' : 0,
+            groups: prev.stats?.groups || 0
+          }
+        }));
+      }
+    } catch (err) {
+      console.warn('Không thể tải profile chi tiết:', err.message);
+    }
+  };
+
+  useEffect(() => {
+    loadUserProfile();
     loadPostsFromBackend();
+    loadFriendsFromBackend();
+  }, [user.id, user.name]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    try {
+      const stored = localStorage.getItem(`socialita_groups_${user.id}`);
+      if (stored) {
+        setJoinedGroups(JSON.parse(stored));
+      } else {
+        setJoinedGroups(Number(user.id) === 1 ? MY_JOINED_GROUPS : []);
+      }
+    } catch {
+      setJoinedGroups([]);
+    }
   }, [user.id]);
 
   // 3. Đăng nhập
@@ -405,14 +606,21 @@ export const SocialProvider = ({ children }) => {
         const authUser = {
           id: data.user.id,
           name: data.user.full_name || data.user.username,
+          username: data.user.username,
           email: data.user.email,
           role: data.role || data.user.roles || 'user',
           avatarBg: '#35c9b0',
-          avatar_url: data.user.avatar_url
+          avatar_url: data.user.avatar_url || '',
+          bio: data.user.bio || '',
+          school: data.user.school || '',
+          liveIn: data.user.liveIn || ''
         };
         setCurrentUser(authUser);
         setUser(prev => ({ ...prev, ...authUser }));
         localStorage.setItem('currentUser', JSON.stringify(data.user));
+        loadUserProfile(authUser.id);
+        loadPostsFromBackend(authUser.id);
+        loadFriendsFromBackend(authUser.id);
         showToast(`Đăng nhập thành công với vai trò: ${authUser.role}`);
         return true;
       }
@@ -458,14 +666,21 @@ export const SocialProvider = ({ children }) => {
         const authUser = {
           id: data.user.id,
           name: data.user.full_name || data.user.username,
+          username: data.user.username,
           email: data.user.email,
           role: data.role || data.user.roles || 'user',
           avatarBg: '#4285F4',
-          avatar_url: data.user.avatar_url
+          avatar_url: data.user.avatar_url || '',
+          bio: data.user.bio || '',
+          school: data.user.school || '',
+          liveIn: data.user.liveIn || ''
         };
         setCurrentUser(authUser);
         setUser(prev => ({ ...prev, ...authUser }));
         localStorage.setItem('currentUser', JSON.stringify(data.user));
+        loadUserProfile(authUser.id);
+        loadPostsFromBackend(authUser.id);
+        loadFriendsFromBackend(authUser.id);
         showToast(`Đăng nhập Google thành công! Chào mừng ${authUser.name}`);
         return true;
       }
@@ -493,19 +708,41 @@ export const SocialProvider = ({ children }) => {
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
+    setUser(INITIAL_USER);
+    loadUserProfile(INITIAL_USER.id);
+    loadPostsFromBackend(INITIAL_USER.id);
+    loadFriendsFromBackend(INITIAL_USER.id);
     setTab('home');
     showToast('Đã đăng xuất khỏi hệ thống', 'info');
   };
 
   // 6. Cập nhật hồ sơ cá nhân
   const updateUser = async (updated) => {
+    const nextBio = updated.bio !== undefined ? updated.bio : (user.bio || '');
+    const nextSchool = updated.school || updated.intro?.school || user.intro?.school || user.school || '';
+    const nextLiveIn = updated.liveIn || updated.intro?.liveIn || user.intro?.liveIn || user.liveIn || '';
+    const nextName = updated.name || user.name;
+
     setUser(prev => ({
       ...prev,
       ...updated,
-      intro: { ...prev.intro, ...(updated.intro || {}) }
+      name: nextName,
+      bio: nextBio,
+      school: nextSchool,
+      liveIn: nextLiveIn,
+      intro: {
+        ...prev.intro,
+        school: nextSchool,
+        liveIn: nextLiveIn
+      }
     }));
     try {
-      await api.updateUser(user.id, updated);
+      await api.updateUser(user.id, {
+        full_name: nextName,
+        bio: nextBio,
+        school: nextSchool,
+        liveIn: nextLiveIn
+      });
       showToast('Cập nhật thông tin thành công!');
     } catch {
       showToast('Đã lưu thông tin trên trình duyệt');
@@ -526,7 +763,7 @@ export const SocialProvider = ({ children }) => {
   };
 
   // 8. ĐĂNG BÀI VIẾT MỚI (Hỗ trợ nhiều File Ảnh/Video và lưu Database MySQL)
-  const createPost = async ({ content, location, gradient, category = 'all', files = [], file = null }) => {
+  const createPost = async ({ content, location, gradient, category = 'all', files = [], file = null, privacy = 'public' }) => {
     let uploadedImageUrls = [];
 
     // Hỗ trợ cả mảng files hoặc file đơn lẻ
@@ -556,7 +793,8 @@ export const SocialProvider = ({ children }) => {
       location: location || null,
       gradient: uploadedImageUrls.length > 0 ? null : (gradient || null),
       image_url: finalImageUrl,
-      image_urls: uploadedImageUrls
+      image_urls: uploadedImageUrls,
+      privacy
     };
 
     let serverPostId = `p-${Date.now()}`;
@@ -572,13 +810,16 @@ export const SocialProvider = ({ children }) => {
       showToast('Đã đăng bài viết mới!');
     }
 
+    const privacyLabel = privacy === 'private' ? 'Chỉ mình tôi' : (privacy === 'friends' ? 'Bạn bè' : 'Công khai');
     const newPost = {
       id: serverPostId,
+      user_id: user.id || 1,
       authorName: user.name,
       authorAvatar: user.avatar_url || '',
       authorAvatarBg: user.avatarBg || '#35c9b0',
-      time: 'Vừa xong · Công khai',
-      isPublic: true,
+      time: `Vừa xong · ${privacyLabel}`,
+      isPublic: privacy === 'public',
+      privacy,
       content,
       location,
       mediaGradient: uploadedImageUrls.length > 0 ? null : gradient,
@@ -624,37 +865,111 @@ export const SocialProvider = ({ children }) => {
     }
   };
 
-  // 10. Bình luận bài viết
-  const addCommentPost = async (postId, text) => {
-    if (!text.trim()) return;
+  // 10a. Lấy danh sách bình luận của 1 bài viết từ Backend MySQL
+  const getPostComments = async (postId) => {
+    try {
+      const res = await api.getComments(postId);
+      if (res && Array.isArray(res.comments)) {
+        const formatted = res.comments.map(c => ({
+          id: c.id,
+          post_id: c.post_id,
+          parent_id: c.parent_id || null,
+          user_id: c.user_id,
+          authorName: c.full_name || c.username || 'Người dùng',
+          authorAvatar: c.avatar_url || '',
+          content: c.content || '',
+          created_at: c.created_at,
+          time: c.created_at ? formatDate(c.created_at) : 'Vừa xong'
+        }));
 
-    const newComment = {
+        setPosts(prev =>
+          prev.map(p => (String(p.id) === String(postId) ? { ...p, comments: formatted, commentsCount: formatted.length } : p))
+        );
+
+        return formatted;
+      }
+    } catch (err) {
+      console.warn('Lỗi lấy bình luận từ backend:', err.message);
+    }
+    return [];
+  };
+
+  // 10b. Gửi bình luận mới vào bài viết (hỗ trợ parentId để trả lời kiểu Facebook)
+  const addCommentPost = async (postId, text, parentId = null) => {
+    if (!text || !text.trim()) return null;
+
+    let createdComment = {
       id: `c-${Date.now()}`,
-      authorName: user.name,
+      post_id: postId,
+      parent_id: parentId,
+      user_id: user.id,
+      authorName: user.name || 'Người dùng',
+      authorAvatar: user.avatar_url || '',
       content: text,
+      created_at: new Date().toISOString(),
       time: 'Vừa xong'
     };
 
+    try {
+      const res = await api.addComment(postId, user.id, text, parentId);
+      if (res && res.comment) {
+        createdComment = {
+          id: res.comment.id,
+          post_id: res.comment.post_id,
+          parent_id: res.comment.parent_id || parentId,
+          user_id: res.comment.user_id,
+          authorName: res.comment.full_name || res.comment.username || user.name,
+          authorAvatar: res.comment.avatar_url || user.avatar_url || '',
+          content: res.comment.content,
+          created_at: res.comment.created_at,
+          time: 'Vừa xong'
+        };
+      }
+      showToast('Đã gửi bình luận');
+    } catch (err) {
+      console.warn('Lỗi lưu bình luận lên máy chủ, lưu cục bộ:', err.message);
+      showToast('Đã gửi bình luận');
+    }
+
     setPosts(prev =>
       prev.map(p => {
-        if (p.id === postId) {
+        if (String(p.id) === String(postId)) {
+          const currentList = Array.isArray(p.comments) ? p.comments : [];
           return {
             ...p,
             commentsCount: (p.commentsCount || 0) + 1,
-            comments: [...(p.comments || []), newComment]
+            comments: [...currentList, createdComment]
           };
         }
         return p;
       })
     );
 
-    showToast('Đã gửi bình luận');
+    return createdComment;
+  };
 
+  // 10c. Xóa bình luận
+  const deleteCommentPost = async (commentId, postId) => {
     try {
-      await api.addComment(postId, user.id, text);
+      await api.deleteComment(commentId);
+      showToast('Đã xóa bình luận', 'info');
     } catch (err) {
-      console.warn('Lỗi lưu bình luận lên máy chủ:', err.message);
+      console.warn('Lỗi xóa bình luận trên server:', err.message);
     }
+
+    setPosts(prev =>
+      prev.map(p => {
+        if (String(p.id) === String(postId)) {
+          const nextComments = (p.comments || []).filter(c => String(c.id) !== String(commentId));
+          return {
+            ...p,
+            commentsCount: Math.max(0, (p.commentsCount || 1) - 1),
+            comments: nextComments
+          };
+        }
+        return p;
+      })
+    );
   };
 
   // 11. Xóa bài viết
@@ -687,35 +1002,72 @@ export const SocialProvider = ({ children }) => {
     showToast('Đã thêm Story mới của bạn!');
   };
 
-  const acceptRequest = (reqId) => {
-    const req = friendRequests.find(r => r.id === reqId);
-    if (!req) return;
+  const acceptRequest = async (reqId) => {
+    const req = friendRequests.find(r => r.id === reqId || r.requester_id === reqId);
+    const requesterId = req?.requester_id || reqId;
 
-    const newFriend = {
-      id: `fr-${Date.now()}`,
-      name: req.name,
-      friendSince: 'Vừa kết bạn',
-      mutualFriends: req.mutualFriends,
-      avatarBg: req.avatarBg
-    };
-
-    setFriends(prev => [newFriend, ...prev]);
-    setFriendRequests(prev => prev.filter(r => r.id !== reqId));
-    showToast(`Đã đồng ý kết bạn với ${req.name}`);
+    try {
+      await api.respondFriendRequest(requesterId, user.id, 'accept');
+      showToast(`Đã đồng ý kết bạn với ${req?.name || 'người dùng'}`);
+      loadFriendsFromBackend(user.id);
+    } catch (err) {
+      console.warn('Lỗi đồng ý kết bạn trên server:', err.message);
+      if (req) {
+        const newFriend = {
+          id: req.requester_id || req.id,
+          name: req.name,
+          friendSince: 'Vừa kết bạn',
+          mutualFriends: req.mutualFriends,
+          avatarBg: req.avatarBg || '#e52e3d',
+          avatar_url: req.avatar_url || ''
+        };
+        setFriends(prev => [newFriend, ...prev]);
+        setFriendRequests(prev => prev.filter(r => r.id !== reqId && r.requester_id !== reqId));
+        showToast(`Đã đồng ý kết bạn với ${req.name}`);
+      }
+    }
   };
 
-  const rejectRequest = (reqId) => {
-    const req = friendRequests.find(r => r.id === reqId);
-    setFriendRequests(prev => prev.filter(r => r.id !== reqId));
-    if (req) showToast(`Đã từ chối lời mời của ${req.name}`, 'info');
+  const rejectRequest = async (reqId) => {
+    const req = friendRequests.find(r => r.id === reqId || r.requester_id === reqId);
+    const requesterId = req?.requester_id || reqId;
+
+    try {
+      await api.respondFriendRequest(requesterId, user.id, 'reject');
+      if (req) showToast(`Đã từ chối lời mời của ${req.name}`, 'info');
+      setFriendRequests(prev => prev.filter(r => r.id !== reqId && r.requester_id !== reqId));
+    } catch (err) {
+      console.warn('Lỗi từ chối kết bạn trên server:', err.message);
+      setFriendRequests(prev => prev.filter(r => r.id !== reqId && r.requester_id !== reqId));
+      if (req) showToast(`Đã từ chối lời mời của ${req.name}`, 'info');
+    }
   };
 
-  const sendRequest = (sugId) => {
+  const sendRequest = async (sugId) => {
     setFriendSuggestions(prev =>
       prev.map(s => (s.id === sugId ? { ...s, requested: true } : s))
     );
     const sug = friendSuggestions.find(s => s.id === sugId);
     if (sug) showToast(`Đã gửi lời mời kết bạn đến ${sug.name}`);
+
+    try {
+      await api.sendFriendRequest(user.id, sugId);
+    } catch (err) {
+      console.warn('Lỗi gửi lời mời kết bạn trên server:', err.message);
+    }
+  };
+
+  const unfriend = async (friendId) => {
+    const target = friends.find(f => f.id === friendId);
+    setFriends(prev => prev.filter(f => f.id !== friendId));
+    if (target) showToast(`Đã hủy kết bạn với ${target.name}`, 'info');
+
+    try {
+      await api.unfriend(user.id, friendId);
+      loadFriendsFromBackend(user.id);
+    } catch (err) {
+      console.warn('Lỗi hủy kết bạn trên server:', err.message);
+    }
   };
 
   const unfriendUser = (friendId) => {
@@ -750,6 +1102,8 @@ export const SocialProvider = ({ children }) => {
         createPost,
         toggleLikePost,
         addCommentPost,
+        getPostComments,
+        deleteCommentPost,
         deletePost,
         sharePost,
         stories,
@@ -757,13 +1111,18 @@ export const SocialProvider = ({ children }) => {
         friends,
         friendRequests,
         friendSuggestions,
+        loadFriendsFromBackend,
         acceptRequest,
         rejectRequest,
         sendRequest,
+        unfriend,
         unfriendUser,
         setUserOnlineStatus,
         trends,
         groups,
+        joinedGroups,
+        toggleJoinGroup,
+        loadUserProfile,
         isCreatePostModalOpen,
         openCreatePostModal: () => setIsCreatePostModalOpen(true),
         closeCreatePostModal: () => setIsCreatePostModalOpen(false),

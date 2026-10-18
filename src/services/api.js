@@ -134,10 +134,10 @@ export const api = {
   getComments: (postId) =>
     request(`/api/posts/${postId}/comments`),
 
-  addComment: (postId, userId, content) =>
+  addComment: (postId, userId, content, parentId = null) =>
     request(`/api/posts/${postId}/comments`, {
       method: 'POST',
-      body: JSON.stringify({ user_id: userId, content })
+      body: JSON.stringify({ user_id: userId, content, parent_id: parentId })
     }),
 
   deleteComment: (commentId) =>
@@ -200,5 +200,10 @@ export const api = {
     }),
 
   getOnlineStatus: (currentUserId) =>
-    request(`/api/users/${currentUserId}/online-status`)
+    request(`/api/users/${currentUserId}/online-status`),
+
+  unfriend: (userId1, userId2) =>
+    request(`/api/friends/${userId1}/${userId2}`, {
+      method: 'DELETE'
+    })
 };

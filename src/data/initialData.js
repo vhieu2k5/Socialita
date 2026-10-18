@@ -1,9 +1,9 @@
 // src/data/initialData.js
 export const INITIAL_USER = {
   id: 1,
-  name: 'Minh Anh Lê',
+  name: 'Lê Minh Anh',
   username: 'minhanh_123',
-  email: 'user@gmail.com',
+  email: 'minhanh@gmail.com',
   bio: 'Yêu thích du lịch, công nghệ và chụp ảnh - Sài Gòn, VN',
   avatarBg: '#35c9b0',
   stats: {

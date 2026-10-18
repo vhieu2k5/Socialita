@@ -23,8 +23,11 @@ const db = mysql.createPool({
 
 // Tự động mở rộng cột image_url thành TEXT để lưu được nhiều ảnh (JSON array)
 db.query("ALTER TABLE posts MODIFY COLUMN image_url TEXT").catch(() => {});
-db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_online TINYINT(1) DEFAULT 0").catch(() => {});
-db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_active_at DATETIME DEFAULT CURRENT_TIMESTAMP").catch(() => {});
+// Tự động bổ sung cột privacy cho bảng posts nếu chưa có
+db.query("ALTER TABLE posts ADD COLUMN privacy ENUM('public', 'friends', 'private') DEFAULT 'public'").catch(() => {});
+// Tự động bổ sung cột parent_id cho bảng comments để hỗ trợ trả lời bình luận (Reply lồng nhau kiểu Facebook)
+db.query("ALTER TABLE comments ADD COLUMN parent_id INT DEFAULT NULL").catch(() => {});
+
 
 // 2. Cấu hình Static folder & Tự động tạo thư mục uploads nếu chưa có
 const uploadDir = path.join(__dirname, 'uploads');
@@ -49,8 +52,7 @@ function generateToken(user) {
     return Buffer.from(`${user.id}:${user.email}:${Date.now()}`).toString('base64');
 }
 
-/* ========================================================
-   AUTH APIS (Đăng nhập / Đăng ký) - STT 13
+/* =================================================   AUTH APIS (Đăng nhập / Đăng ký) - STT 13
 ======================================================== */
 // Đăng nhập
 app.post('/api/auth/login', async (req, res) => {
@@ -203,8 +205,7 @@ app.post('/api/auth/google', async (req, res) => {
     }
 });
 
-/* ========================================================
-   USER APIS (Quản lý thông tin & Avatar) - STT 11 & STT 12
+/* =================================================   USER APIS (Quản lý thông tin & Avatar) - STT 11 & STT 12
 ======================================================== */
 // Lấy danh sách users (Admin - STT 11) - Đã ẩn password_hash
 app.get('/api/users', async (req, res) => {
@@ -229,7 +230,7 @@ app.get('/api/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
         const sql = `
-            SELECT u.id, u.username, u.full_name, u.email, u.avatar_url, u.roles, u.status, u.bio, u.school, u.created_at, u.last_login_at,
+            SELECT u.id, u.username, u.full_name, u.email, u.avatar_url, u.roles, u.status, u.bio, u.school, u.liveIn, u.created_at, u.last_login_at,
                    (SELECT COUNT(*) FROM posts WHERE user_id = u.id) AS post_count,
                    (SELECT COUNT(*) FROM reports WHERE reported_user_id = u.id) AS violation_count,
                    (SELECT COUNT(*) FROM friendships WHERE (user_id1 = u.id OR user_id2 = u.id) AND status = 'accepted') AS friend_count
@@ -253,11 +254,13 @@ app.get('/api/users/:id', async (req, res) => {
 app.put('/api/users/:id', async (req, res) => {
     try {
         const userId = req.params.id;
-        const { full_name, name, bio, school } = req.body;
+        const { full_name, name, bio, school, liveIn, intro } = req.body;
         const updateName = full_name || name;
+        const updateSchool = school || intro?.school || null;
+        const updateLiveIn = liveIn || intro?.liveIn || null;
 
-        const sql = "UPDATE users SET full_name = ?, bio = ?, school = ? WHERE id = ?";
-        const [result] = await db.query(sql, [updateName, bio, school, userId]);
+        const sql = "UPDATE users SET full_name = ?, bio = ?, school = ?, liveIn = ? WHERE id = ?";
+        const [result] = await db.query(sql, [updateName, bio, updateSchool, updateLiveIn, userId]);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Người dùng không tồn tại" });
@@ -311,8 +314,7 @@ app.delete('/api/users/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
+/* =================================================   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
 ======================================================== */
 // Lấy danh sách tất cả bài viết kèm thông tin tác giả (JOIN users)
 // Multer lưu ảnh bài viết
@@ -359,8 +361,7 @@ app.post('/api/posts/upload-images', uploadPostImg.array('images', 10), (req, re
     }
 });
 
-/* ========================================================
-   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
+/* =================================================   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
 ======================================================== */
 // Lấy danh sách tất cả bài viết kèm thông tin tác giả, reactions, comments (Hỗ trợ lọc bạn bè - Newsfeed)
 app.get('/api/posts', async (req, res) => {
@@ -384,6 +385,31 @@ app.get('/api/posts', async (req, res) => {
             params.push(userId, userId, userId);
         } else if (req.query.status !== 'all') {
             whereClause += " AND p.status = 'active'";
+            
+            // Phân quyền hiển thị theo Privacy:
+            // 1. Công khai (public) hoặc bài cũ (NULL): Ai cũng xem được
+            // 2. Tác giả: Luôn xem được bài của chính mình (kể cả private hay friends)
+            // 3. Bạn bè (friends): Chỉ bạn bè đã kết bạn (status = 'accepted') mới xem được
+            // 4. Chỉ mình tôi (private): Chỉ tác giả xem được (thỏa mãn ở điều kiện 2)
+            if (currentUserId > 0) {
+                whereClause += ` AND (
+                    p.privacy = 'public' 
+                    OR p.privacy IS NULL 
+                    OR p.user_id = ?
+                    OR (
+                        p.privacy = 'friends' AND (
+                            p.user_id IN (
+                                SELECT user_id2 FROM friendships WHERE user_id1 = ? AND status = 'accepted'
+                                UNION
+                                SELECT user_id1 FROM friendships WHERE user_id2 = ? AND status = 'accepted'
+                            )
+                        )
+                    )
+                )`;
+                params.push(currentUserId, currentUserId, currentUserId);
+            } else {
+                whereClause += " AND (p.privacy = 'public' OR p.privacy IS NULL)";
+            }
         }
 
         const sql = `
@@ -408,8 +434,35 @@ app.get('/api/posts', async (req, res) => {
 // Lấy bài viết của 1 người dùng cụ thể (Trang cá nhân - STT 12)
 app.get('/api/users/:id/posts', async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = parseInt(req.params.id);
         const currentUserId = req.query.current_user_id ? parseInt(req.query.current_user_id) : 0;
+
+        let privacyCondition = "";
+        const params = [userId];
+
+        // Nếu người xem chính là chủ trang cá nhân -> Thấy toàn bộ bài của mình
+        if (currentUserId === userId) {
+            privacyCondition = "";
+        } else if (currentUserId > 0) {
+            // Xem trang người khác: chỉ thấy public, hoặc friends nếu đã kết bạn
+            privacyCondition = ` AND (
+                p.privacy = 'public' 
+                OR p.privacy IS NULL
+                OR (
+                    p.privacy = 'friends' AND (
+                        EXISTS (
+                            SELECT 1 FROM friendships 
+                            WHERE ((user_id1 = ? AND user_id2 = ?) OR (user_id1 = ? AND user_id2 = ?))
+                              AND status = 'accepted'
+                        )
+                    )
+                )
+            )`;
+            params.push(userId, currentUserId, currentUserId, userId);
+        } else {
+            privacyCondition = " AND (p.privacy = 'public' OR p.privacy IS NULL)";
+        }
+
         const sql = `
             SELECT p.*, u.full_name, u.username, u.avatar_url,
                    (SELECT COUNT(*) FROM reactions WHERE post_id = p.id) AS reaction_count,
@@ -417,10 +470,10 @@ app.get('/api/users/:id/posts', async (req, res) => {
                    ${currentUserId ? `EXISTS(SELECT 1 FROM reactions WHERE post_id = p.id AND user_id = ${currentUserId})` : '0'} AS user_has_reacted
             FROM posts p 
             LEFT JOIN users u ON p.user_id = u.id 
-            WHERE p.user_id = ? AND p.status = 'active'
+            WHERE p.user_id = ? AND p.status = 'active' ${privacyCondition}
             ORDER BY p.created_at DESC
         `;
-        const [rows] = await db.query(sql, [userId]);
+        const [rows] = await db.query(sql, params);
         res.json({ posts: rows });
     } catch (error) {
         console.error(error);
@@ -432,7 +485,7 @@ app.get('/api/users/:id/posts', async (req, res) => {
 app.post('/api/users/:id/posts', async (req, res) => {
     try {
         const userId = req.params.id;
-        const { content, location, gradient, image_url, image_urls } = req.body;
+        const { content, location, gradient, image_url, image_urls, privacy = 'public' } = req.body;
 
         // Chuẩn hóa image_url (nếu có mảng nhiều ảnh thì lưu JSON string)
         let finalImageUrl = null;
@@ -448,13 +501,16 @@ app.post('/api/users/:id/posts', async (req, res) => {
             return res.status(400).json({ message: "Nội dung hoặc hình ảnh không được để trống" });
         }
 
-        const sql = "INSERT INTO posts (user_id, content, location, gradient, image_url, status, created_at) VALUES (?, ?, ?, ?, ?, 'active', NOW())";
-        const [result] = await db.query(sql, [userId, content || '', location || null, gradient || null, finalImageUrl]);
+        const validPrivacy = ['public', 'friends', 'private'].includes(privacy) ? privacy : 'public';
+
+        const sql = "INSERT INTO posts (user_id, content, location, gradient, image_url, privacy, status, created_at) VALUES (?, ?, ?, ?, ?, ?, 'active', NOW())";
+        const [result] = await db.query(sql, [userId, content || '', location || null, gradient || null, finalImageUrl, validPrivacy]);
 
         res.status(201).json({
             message: "Đăng bài thành công!",
             postId: result.insertId,
-            image_url: finalImageUrl
+            image_url: finalImageUrl,
+            privacy: validPrivacy
         });
     } catch (error) {
         console.error(error);
@@ -484,8 +540,7 @@ app.delete('/api/posts/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   REACTIONS APIS (Thả tim / Like bài viết)
+/* =================================================   REACTIONS APIS (Thả tim / Like bài viết)
 ======================================================== */
 // Thả tim / Bỏ thả tim (Toggle reaction)
 app.post('/api/posts/:id/react', async (req, res) => {
@@ -543,8 +598,7 @@ app.get('/api/posts/:id/reactions', async (req, res) => {
     }
 });
 
-/* ========================================================
-   COMMENTS APIS (Bình luận bài viết)
+/* =================================================   COMMENTS APIS (Bình luận bài viết)
 ======================================================== */
 // Lấy danh sách bình luận của 1 bài viết
 app.get('/api/posts/:id/comments', async (req, res) => {
@@ -565,18 +619,19 @@ app.get('/api/posts/:id/comments', async (req, res) => {
     }
 });
 
-// Gửi bình luận mới
+// Gửi bình luận mới (hỗ trợ parent_id cho trả lời bình luận kiểu Facebook)
 app.post('/api/posts/:id/comments', async (req, res) => {
     try {
         const postId = req.params.id;
-        const { user_id, content } = req.body;
+        const { user_id, content, parent_id } = req.body;
 
         if (!user_id || !content || !content.trim()) {
             return res.status(400).json({ message: "Nội dung bình luận không được để trống" });
         }
 
-        const sql = "INSERT INTO comments (post_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())";
-        const [result] = await db.query(sql, [postId, user_id, content.trim()]);
+        const parentId = parent_id ? parseInt(parent_id) : null;
+        const sql = "INSERT INTO comments (post_id, user_id, parent_id, content, created_at) VALUES (?, ?, ?, ?, NOW())";
+        const [result] = await db.query(sql, [postId, user_id, parentId, content.trim()]);
 
         const [[newComment]] = await db.query(`
             SELECT c.*, u.full_name, u.username, u.avatar_url 
@@ -598,10 +653,11 @@ app.post('/api/posts/:id/comments', async (req, res) => {
     }
 });
 
-// Xóa bình luận
+// Xóa bình luận (xóa luôn các phản hồi con nếu có)
 app.delete('/api/comments/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        await db.query("DELETE FROM comments WHERE parent_id = ?", [id]).catch(() => {});
         const [result] = await db.query("DELETE FROM comments WHERE id = ?", [id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Bình luận không tồn tại" });
@@ -613,8 +669,7 @@ app.delete('/api/comments/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   FRIENDSHIPS APIS (Kết bạn)
+/* =================================================   FRIENDSHIPS APIS (Kết bạn)
 ======================================================== */
 // Lấy danh sách bạn bè đã kết bạn của user
 app.get('/api/users/:id/friends', async (req, res) => {
@@ -681,7 +736,8 @@ app.get('/api/users/:id/suggestions', async (req, res) => {
 // Gửi lời mời kết bạn
 app.post('/api/friends/request', async (req, res) => {
     try {
-        const { requester_id, receiver_id } = req.body;
+        const requester_id = req.body.requester_id || req.body.user_id1;
+        const receiver_id = req.body.receiver_id || req.body.user_id2;
         if (!requester_id || !receiver_id || requester_id == receiver_id) {
             return res.status(400).json({ message: "Yêu cầu kết bạn không hợp lệ" });
         }
@@ -708,10 +764,15 @@ app.post('/api/friends/request', async (req, res) => {
     }
 });
 
-// Phản hồi lời mời kết bạn (Chấp nhận hoặc Từ chối)
-app.put('/api/friends/respond', async (req, res) => {
+// Phản hồi lời mời kết bạn (Chấp nhận hoặc Từ chối) - Hỗ trợ cả PUT và POST
+const handleFriendResponse = async (req, res) => {
     try {
-        const { requester_id, user_id, action } = req.body; // action: 'accept' | 'reject'
+        const requester_id = req.body.requester_id || req.body.user_id1;
+        const user_id = req.body.user_id || req.body.receiver_id || req.body.user_id2;
+        let action = req.body.action || req.body.status;
+        if (action === 'accepted') action = 'accept';
+        if (action === 'rejected') action = 'reject';
+
         if (!requester_id || !user_id || !['accept', 'reject'].includes(action)) {
             return res.status(400).json({ message: "Tham số phản hồi không hợp lệ" });
         }
@@ -733,7 +794,10 @@ app.put('/api/friends/respond', async (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Lỗi server khi phản hồi kết bạn" });
     }
-});
+};
+
+app.put('/api/friends/respond', handleFriendResponse);
+app.post('/api/friends/respond', handleFriendResponse);
 
 // Hủy kết bạn
 app.delete('/api/friends/:u1/:u2', async (req, res) => {
@@ -750,8 +814,7 @@ app.delete('/api/friends/:u1/:u2', async (req, res) => {
     }
 });
 
-/* ========================================================
-   MESSAGES APIS (Nhắn tin trò chuyện)
+/* =================================================   MESSAGES APIS (Nhắn tin trò chuyện)
 ======================================================== */
 // Lấy danh sách hội thoại gần đây của user (Phải đặt trước /:u1/:u2 để không bị match nhầm)
 app.get('/api/messages/conversations/:userId', async (req, res) => {
@@ -835,8 +898,7 @@ app.post('/api/messages', async (req, res) => {
     }
 });
 
-/* ========================================================
-   ADMIN STATS APIS (Thống kê - STT 11)
+/* =================================================   ADMIN STATS APIS (Thống kê - STT 11)
 ======================================================== */
 app.get('/api/admin/stats', async (req, res) => {
     try {
@@ -859,8 +921,7 @@ app.get('/api/admin/stats', async (req, res) => {
     }
 });
 
-/* ========================================================
-   REPORT APIS (Báo cáo vi phạm)
+/* =================================================   REPORT APIS (Báo cáo vi phạm)
 ======================================================== */
 // Tạo báo cáo (User)
 app.post('/api/reports', async (req, res) => {
@@ -924,8 +985,7 @@ app.put('/api/admin/reports/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   ADMIN MANAGEMENT APIS (Quản lý User & Admin)
+/* =================================================   ADMIN MANAGEMENT APIS (Quản lý User & Admin)
 ======================================================== */
 // Khóa/Mở khóa tài khoản (Có lý do & ghi chú)
 app.put('/api/admin/users/:id/status', async (req, res) => {
@@ -1029,8 +1089,7 @@ app.get('/api/admin/activities', async (req, res) => {
 });
 
 
-/* ========================================================
-   ONLINE/OFFLINE STATUS APIs
+/* =================================================   ONLINE/OFFLINE STATUS APIs
    ======================================================== */
 // Heartbeat — called periodically while user is active
 app.post('/api/users/heartbeat', async (req, res) => {

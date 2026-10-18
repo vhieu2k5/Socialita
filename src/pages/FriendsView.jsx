@@ -4,10 +4,10 @@ import { Logo } from '../components/ui/Logo';
 import { ConfirmModal } from '../components/ui/ConfirmModal';
 
 export const FriendsView = () => {
-  const { friends, setFriends, friendRequests, acceptRequest, rejectRequest, showToast } = useSocial();
+  const { friends, setFriends, friendRequests, acceptRequest, rejectRequest, unfriend, showToast } = useSocial();
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Unfriend flow state
+  // Unfriend flow state (2-step modal from Figma)
   const [unfriendTarget, setUnfriendTarget] = useState(null);   // step 1: info popup
   const [confirmTarget, setConfirmTarget] = useState(null);     // step 2: confirm popup
 
@@ -26,8 +26,12 @@ export const FriendsView = () => {
 
   const handleConfirmUnfriend = () => {
     if (!confirmTarget) return;
-    setFriends(prev => prev.filter(f => f.id !== confirmTarget.id));
-    showToast(`Đã huỷ kết bạn với @${confirmTarget.name}`, 'info');
+    if (typeof unfriend === 'function') {
+      unfriend(confirmTarget.id);
+    } else {
+      setFriends(prev => prev.filter(f => f.id !== confirmTarget.id));
+      showToast(`Đã huỷ kết bạn với @${confirmTarget.name}`, 'info');
+    }
     setConfirmTarget(null);
   };
 
@@ -66,12 +70,23 @@ export const FriendsView = () => {
             {friendRequests.map(req => (
               <div key={req.id} className="widget-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div className="avatar-circle-sm" style={{ backgroundColor: req.avatarBg || '#e52e3d', color: '#fff' }}>
-                    {req.name?.[0]}
-                  </div>
+                  {req.avatar_url ? (
+                    <img
+                      src={req.avatar_url}
+                      alt={req.name}
+                      style={{ width: '38px', height: '38px', borderRadius: '50%', objectFit: 'cover' }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div className="avatar-circle-sm" style={{ backgroundColor: req.avatarBg || '#e52e3d', color: '#fff' }}>
+                      {req.name?.[0]}
+                    </div>
+                  )}
                   <div>
                     <div style={{ fontWeight: 700, fontSize: '13px' }}>{req.name}</div>
-                    <div style={{ fontSize: '11px', color: '#8e8e93' }}>{req.mutualFriends || 0} bạn chung</div>
+                    <div style={{ fontSize: '11px', color: '#8e8e93' }}>
+                      {req.mutualFriends ? `${req.mutualFriends} bạn chung` : (req.time || 'Lời mời kết bạn')}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
@@ -97,24 +112,84 @@ export const FriendsView = () => {
             <div
               key={friend.id}
               className="widget-card friend-card"
-              style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', cursor: 'pointer', position: 'relative' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', cursor: 'pointer', position: 'relative' }}
               onClick={() => handleUnfriendClick(friend)}
             >
-              <div
-                className="avatar-circle"
-                style={{ backgroundColor: friend.avatarBg || 'var(--brand-red)', color: '#fff', width: '46px', height: '46px', fontSize: '16px', flexShrink: 0, position: 'relative' }}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ position: 'relative' }}>
+                  {friend.avatar_url ? (
+                    <img
+                      src={friend.avatar_url}
+                      alt={friend.name}
+                      style={{
+                        width: '46px',
+                        height: '46px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        flexShrink: 0
+                      }}
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div
+                      className="avatar-circle"
+                      style={{
+                        backgroundColor: friend.avatarBg || 'var(--brand-red)',
+                        color: '#fff',
+                        width: '46px',
+                        height: '46px',
+                        fontSize: '16px',
+                        flexShrink: 0
+                      }}
+                    >
+                      {friend.name?.[0]}
+                    </div>
+                  )}
+                  {/* Online status indicator */}
+                  {friend.isOnline && <span className="online-badge" style={{ border: '2px solid #fff' }} />}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '14px' }}>{friend.name}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-light-gray)' }}>
+                    {friend.mutualFriends ? `${friend.mutualFriends} bạn chung` : (friend.friendSince || 'Bạn bè')}
+                  </div>
+                  {friend.school && (
+                    <div style={{ fontSize: '11px', color: 'var(--text-light-gray)', marginTop: '2px' }}>
+                      🎓 {friend.school}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUnfriendClick(friend);
+                }}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #fee2e2',
+                  background: '#fff5f5',
+                  color: '#ef4444',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap'
+                }}
+                title="Hủy kết bạn"
               >
-                {friend.name?.[0]}
-                {/* Online indicator */}
-                {friend.isOnline && <span className="online-badge" style={{ border: '2px solid #fff' }} />}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 800, fontSize: '14px' }}>{friend.name}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-light-gray)' }}>{friend.mutualFriends || 0} bạn chung</div>
-              </div>
-              <span style={{ fontSize: '11px', color: 'var(--text-light-gray)', background: '#f3f4f6', borderRadius: '12px', padding: '2px 10px' }}>Bạn bè</span>
+                Hủy kết bạn
+              </button>
             </div>
           ))}
+
+          {filteredFriends.length === 0 && (
+            <div style={{ gridColumn: '1 / -1', padding: '36px', textAlign: 'center', color: 'var(--text-light-gray)', background: '#fff', borderRadius: '12px', border: '1px dashed #e5e7eb' }}>
+              <p style={{ fontSize: '15px', fontWeight: 600, marginBottom: '6px', color: 'var(--text-dark)' }}>Chưa có bạn bè nào</p>
+              <p style={{ fontSize: '13px' }}>Hãy kết nối với bạn bè qua mục Gợi ý kết bạn trên Socialita!</p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -161,7 +236,7 @@ export const FriendsView = () => {
             </div>
             <div>
               <div style={{ fontWeight: 700, fontSize: '13px' }}>{confirmTarget.name}</div>
-              <div style={{ fontSize: '11px', color: '#8e8e93' }}>{confirmTarget.mutualFriends || 0} bạn chung</div>
+              <div style={{ fontSize: '11px', color: '#8e8e93' }}>{confirmTarget.mutualFriends ? `${confirmTarget.mutualFriends} bạn chung` : ''}</div>
             </div>
           </div>
         )}

@@ -52,9 +52,18 @@ export const RightWidgets = ({ showLogo = true }) => {
           {friendSuggestions.map(s => (
             <div key={s.id} className="suggestion-item">
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div className="avatar-circle" style={{ background: s.avatarBg || '#ff7675', width: '36px', height: '36px', fontSize: '12px' }}>
-                  {s.name[0]}
-                </div>
+                {s.avatar_url ? (
+                  <img
+                    src={s.avatar_url}
+                    alt={s.name}
+                    style={{ width: '36px', height: '36px', borderRadius: '50%', objectFit: 'cover' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                ) : (
+                  <div className="avatar-circle" style={{ background: s.avatarBg || '#ff7675', width: '36px', height: '36px', fontSize: '12px' }}>
+                    {s.name?.[0]}
+                  </div>
+                )}
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 700 }}>{s.name}</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-light-gray)' }}>{s.mutualFriends || 0} bạn chung</div>
