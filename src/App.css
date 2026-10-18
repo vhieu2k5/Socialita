@@ -219,13 +219,13 @@ input, textarea {
 
 /* ==================== TOPBAR ==================== */
 .topbar {
-  height: 64px;
+  height: 72px;
   background-color: var(--bg-dark-panel);
   border-bottom: 1px solid var(--border-dark);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 12px 24px;
   position: sticky;
   top: 0;
   z-index: 40;
