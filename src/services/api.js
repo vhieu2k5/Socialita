@@ -114,10 +114,10 @@ export const api = {
   getComments: (postId) =>
     request(`/api/posts/${postId}/comments`),
 
-  addComment: (postId, userId, content) =>
+  addComment: (postId, userId, content, parentId = null) =>
     request(`/api/posts/${postId}/comments`, {
       method: 'POST',
-      body: JSON.stringify({ user_id: userId, content })
+      body: JSON.stringify({ user_id: userId, content, parent_id: parentId })
     }),
 
   deleteComment: (commentId) =>

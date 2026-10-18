@@ -73,7 +73,7 @@ CREATE TABLE `comments` (
   KEY `fk_comments_user_id` (`user_id`),
   CONSTRAINT `fk_comments_post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_comments_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,7 +82,7 @@ CREATE TABLE `comments` (
 
 LOCK TABLES `comments` WRITE;
 /*!40000 ALTER TABLE `comments` DISABLE KEYS */;
-INSERT INTO `comments` VALUES (1,1,2,'Giao diện đỉnh chóp quá bạn ơi! Chúc nền tảng phát triển rực rỡ 🔥','2026-09-28 01:45:00'),(2,1,6,'Chào mừng Socialita! Tông màu đỏ đen này nhìn sang xịn mịn ghê ❤️','2026-09-28 01:50:00'),(3,1,7,'Tuyệt vời, chúc mừng Minh Anh ra mắt dự án!','2026-09-28 02:00:00'),(6,3,1,'Ảnh chụp đẹp xuất sắc Lan Anh ơi! Mùa lúa chín vàng ươm luôn nhỉ 🌾','2026-09-27 10:00:00'),(7,3,2,'Góc chụp này đỉnh quá, thiên nhiên Việt Nam tuyệt vời thật!','2026-09-27 10:10:00'),(9,9,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:27:56'),(10,10,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:29:15'),(11,11,1,'Hello','2026-10-04 04:35:08');
+INSERT INTO `comments` VALUES (1,1,2,'Giao diện đỉnh chóp quá bạn ơi! Chúc nền tảng phát triển rực rỡ 🔥','2026-09-28 01:45:00'),(2,1,6,'Chào mừng Socialita! Tông màu đỏ đen này nhìn sang xịn mịn ghê ❤️','2026-09-28 01:50:00'),(3,1,7,'Tuyệt vời, chúc mừng Minh Anh ra mắt dự án!','2026-09-28 02:00:00'),(6,3,1,'Ảnh chụp đẹp xuất sắc Lan Anh ơi! Mùa lúa chín vàng ươm luôn nhỉ 🌾','2026-09-27 10:00:00'),(7,3,2,'Góc chụp này đỉnh quá, thiên nhiên Việt Nam tuyệt vời thật!','2026-09-27 10:10:00'),(9,9,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:27:56'),(10,10,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:29:15'),(11,11,1,'Hello','2026-10-04 04:35:08'),(12,13,2,'Hay quá!','2026-10-18 05:36:57'),(13,13,12,'@Quang Huy Cảm ơn bạn nhiều nhé!','2026-10-18 05:42:39');
 /*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -298,4 +298,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-18 12:30:35
+-- Dump completed on 2026-10-18 12:42:54

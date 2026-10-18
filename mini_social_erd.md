@@ -72,6 +72,7 @@ erDiagram
         int id PK
         int post_id FK "Bài viết"
         int user_id FK "Người bình luận"
+        int parent_id FK "Bình luận cha (trả lời/reply)"
         text content "Nội dung bình luận"
         timestamp created_at
     }
@@ -92,6 +93,7 @@ erDiagram
     USERS ||--o{ FRIENDSHIPS : "kết bạn (befriends)"
     POSTS ||--o{ COMMENTS : "chứa (has)"
     POSTS ||--o{ REACTIONS : "nhận (receives)"
+    COMMENTS ||--o{ COMMENTS : "trả lời (replies)"
 ```
 
 ### Chú thích ký hiệu:

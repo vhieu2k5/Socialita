@@ -865,37 +865,111 @@ export const SocialProvider = ({ children }) => {
     }
   };
 
-  // 10. Bình luận bài viết
-  const addCommentPost = async (postId, text) => {
-    if (!text.trim()) return;
+  // 10a. Lấy danh sách bình luận của 1 bài viết từ Backend MySQL
+  const getPostComments = async (postId) => {
+    try {
+      const res = await api.getComments(postId);
+      if (res && Array.isArray(res.comments)) {
+        const formatted = res.comments.map(c => ({
+          id: c.id,
+          post_id: c.post_id,
+          parent_id: c.parent_id || null,
+          user_id: c.user_id,
+          authorName: c.full_name || c.username || 'Người dùng',
+          authorAvatar: c.avatar_url || '',
+          content: c.content || '',
+          created_at: c.created_at,
+          time: c.created_at ? formatDate(c.created_at) : 'Vừa xong'
+        }));
 
-    const newComment = {
+        setPosts(prev =>
+          prev.map(p => (String(p.id) === String(postId) ? { ...p, comments: formatted, commentsCount: formatted.length } : p))
+        );
+
+        return formatted;
+      }
+    } catch (err) {
+      console.warn('Lỗi lấy bình luận từ backend:', err.message);
+    }
+    return [];
+  };
+
+  // 10b. Gửi bình luận mới vào bài viết (hỗ trợ parentId để trả lời kiểu Facebook)
+  const addCommentPost = async (postId, text, parentId = null) => {
+    if (!text || !text.trim()) return null;
+
+    let createdComment = {
       id: `c-${Date.now()}`,
-      authorName: user.name,
+      post_id: postId,
+      parent_id: parentId,
+      user_id: user.id,
+      authorName: user.name || 'Người dùng',
+      authorAvatar: user.avatar_url || '',
       content: text,
+      created_at: new Date().toISOString(),
       time: 'Vừa xong'
     };
 
+    try {
+      const res = await api.addComment(postId, user.id, text, parentId);
+      if (res && res.comment) {
+        createdComment = {
+          id: res.comment.id,
+          post_id: res.comment.post_id,
+          parent_id: res.comment.parent_id || parentId,
+          user_id: res.comment.user_id,
+          authorName: res.comment.full_name || res.comment.username || user.name,
+          authorAvatar: res.comment.avatar_url || user.avatar_url || '',
+          content: res.comment.content,
+          created_at: res.comment.created_at,
+          time: 'Vừa xong'
+        };
+      }
+      showToast('Đã gửi bình luận');
+    } catch (err) {
+      console.warn('Lỗi lưu bình luận lên máy chủ, lưu cục bộ:', err.message);
+      showToast('Đã gửi bình luận');
+    }
+
     setPosts(prev =>
       prev.map(p => {
-        if (p.id === postId) {
+        if (String(p.id) === String(postId)) {
+          const currentList = Array.isArray(p.comments) ? p.comments : [];
           return {
             ...p,
             commentsCount: (p.commentsCount || 0) + 1,
-            comments: [...(p.comments || []), newComment]
+            comments: [...currentList, createdComment]
           };
         }
         return p;
       })
     );
 
-    showToast('Đã gửi bình luận');
+    return createdComment;
+  };
 
+  // 10c. Xóa bình luận
+  const deleteCommentPost = async (commentId, postId) => {
     try {
-      await api.addComment(postId, user.id, text);
+      await api.deleteComment(commentId);
+      showToast('Đã xóa bình luận', 'info');
     } catch (err) {
-      console.warn('Lỗi lưu bình luận lên máy chủ:', err.message);
+      console.warn('Lỗi xóa bình luận trên server:', err.message);
     }
+
+    setPosts(prev =>
+      prev.map(p => {
+        if (String(p.id) === String(postId)) {
+          const nextComments = (p.comments || []).filter(c => String(c.id) !== String(commentId));
+          return {
+            ...p,
+            commentsCount: Math.max(0, (p.commentsCount || 1) - 1),
+            comments: nextComments
+          };
+        }
+        return p;
+      })
+    );
   };
 
   // 11. Xóa bài viết
@@ -1017,6 +1091,8 @@ export const SocialProvider = ({ children }) => {
         createPost,
         toggleLikePost,
         addCommentPost,
+        getPostComments,
+        deleteCommentPost,
         deletePost,
         sharePost,
         stories,

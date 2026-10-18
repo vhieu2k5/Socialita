@@ -25,6 +25,8 @@ const db = mysql.createPool({
 db.query("ALTER TABLE posts MODIFY COLUMN image_url TEXT").catch(() => {});
 // Tự động bổ sung cột privacy cho bảng posts nếu chưa có
 db.query("ALTER TABLE posts ADD COLUMN privacy ENUM('public', 'friends', 'private') DEFAULT 'public'").catch(() => {});
+// Tự động bổ sung cột parent_id cho bảng comments để hỗ trợ trả lời bình luận (Reply lồng nhau kiểu Facebook)
+db.query("ALTER TABLE comments ADD COLUMN parent_id INT DEFAULT NULL").catch(() => {});
 
 // 2. Cấu hình Static folder & Tự động tạo thư mục uploads nếu chưa có
 const uploadDir = path.join(__dirname, 'uploads');
@@ -622,18 +624,19 @@ app.get('/api/posts/:id/comments', async (req, res) => {
     }
 });
 
-// Gửi bình luận mới
+// Gửi bình luận mới (hỗ trợ parent_id cho trả lời bình luận kiểu Facebook)
 app.post('/api/posts/:id/comments', async (req, res) => {
     try {
         const postId = req.params.id;
-        const { user_id, content } = req.body;
+        const { user_id, content, parent_id } = req.body;
 
         if (!user_id || !content || !content.trim()) {
             return res.status(400).json({ message: "Nội dung bình luận không được để trống" });
         }
 
-        const sql = "INSERT INTO comments (post_id, user_id, content, created_at) VALUES (?, ?, ?, NOW())";
-        const [result] = await db.query(sql, [postId, user_id, content.trim()]);
+        const parentId = parent_id ? parseInt(parent_id) : null;
+        const sql = "INSERT INTO comments (post_id, user_id, parent_id, content, created_at) VALUES (?, ?, ?, ?, NOW())";
+        const [result] = await db.query(sql, [postId, user_id, parentId, content.trim()]);
 
         const [[newComment]] = await db.query(`
             SELECT c.*, u.full_name, u.username, u.avatar_url 
@@ -655,10 +658,11 @@ app.post('/api/posts/:id/comments', async (req, res) => {
     }
 });
 
-// Xóa bình luận
+// Xóa bình luận (xóa luôn các phản hồi con nếu có)
 app.delete('/api/comments/:id', async (req, res) => {
     try {
         const { id } = req.params;
+        await db.query("DELETE FROM comments WHERE parent_id = ?", [id]).catch(() => {});
         const [result] = await db.query("DELETE FROM comments WHERE id = ?", [id]);
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: "Bình luận không tồn tại" });
