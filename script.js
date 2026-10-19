@@ -193,14 +193,16 @@ function buildPostCardHtml(p) {
 
       <div class="post-actions-row">
         <button class="action-btn ${hasLiked ? 'liked' : ''}" style="${hasLiked ? 'color:var(--brand-red);' : ''}" onclick="toggleLike(this, ${p.id})">
-          <span class="like-icon">${hasLiked ? '❤️' : '🤍'}</span>
+          <i class="${hasLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'} like-icon"></i>
           <span>Thích</span>
         </button>
         <button class="action-btn" onclick="toggleCommentBox(this, ${p.id})">
-          <span>💬</span><span>Bình luận</span>
+          <i class="fa-regular fa-comment"></i>
+          <span>Bình luận</span>
         </button>
         <button class="action-btn" onclick="sharePost()">
-          <span>↗</span><span>Chia sẻ</span>
+          <i class="fa-solid fa-share"></i>
+          <span>Chia sẻ</span>
         </button>
       </div>
 
@@ -281,14 +283,19 @@ async function toggleLike(btn, postId) {
       return;
     }
 
+    const likeIcon = btn.querySelector('.like-icon');
     if (data.reacted) {
       btn.classList.add('liked');
-      btn.querySelector('.like-icon').textContent = '❤️';
+      if (likeIcon) {
+        likeIcon.className = 'fa-solid fa-heart like-icon';
+      }
       btn.style.color = 'var(--brand-red)';
       showToast('Đã thả tim bài viết ❤️');
     } else {
       btn.classList.remove('liked');
-      btn.querySelector('.like-icon').textContent = '🤍';
+      if (likeIcon) {
+        likeIcon.className = 'fa-regular fa-heart like-icon';
+      }
       btn.style.color = 'var(--text-gray)';
     }
 

@@ -174,9 +174,11 @@ input, textarea {
   box-shadow: 0 4px 14px rgba(229, 46, 61, 0.35);
 }
 
-.sidebar-item svg {
+.sidebar-item svg,
+.sidebar-item i {
   width: 20px;
-  height: 20px;
+  font-size: 18px;
+  text-align: center;
   flex-shrink: 0;
 }
 
@@ -282,9 +284,14 @@ input, textarea {
 .icon-btn-white:hover {
   background: #f3f4f6;
 }
-.icon-btn-white svg {
+.icon-btn-white svg,
+.icon-btn-white i {
   width: 20px;
   height: 20px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .red-dot {
   position: absolute;
@@ -573,6 +580,12 @@ input, textarea {
   background-color: #f9fafb;
 }
 .action-btn.liked {
+  color: var(--brand-red);
+}
+.action-btn i {
+  font-size: 16px;
+}
+.action-btn.liked i.fa-heart {
   color: var(--brand-red);
 }
 

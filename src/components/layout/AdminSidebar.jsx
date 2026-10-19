@@ -7,7 +7,7 @@ export const AdminSidebar = ({
   usersCountBadge = '1.2K',
   postsCountBadge = 18
 }) => {
-  const { logout, user } = useSocial();
+  const { openLogoutModal, user } = useSocial();
 
   return (
     <aside style={{
@@ -222,7 +222,7 @@ export const AdminSidebar = ({
           </div>
         </div>
         <button
-          onClick={logout}
+          onClick={openLogoutModal}
           title="Đăng xuất khỏi hệ thống"
           style={{
             color: '#8e8e93',
@@ -233,7 +233,7 @@ export const AdminSidebar = ({
             transition: 'color 0.15s ease'
           }}
         >
-          ➔
+          <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     </aside>

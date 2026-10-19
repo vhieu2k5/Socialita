@@ -8,10 +8,7 @@ export const WelcomeBanner = () => {
     <div className="welcome-banner">
       <div>
         <div className="banner-date">THỨ BẢY, 22/08</div>
-        <h2 className="banner-title">Chào buổi sáng, {user.name} 👋</h2>
-        <p className="banner-sub">
-          Cộng đồng của bạn vừa có <span style={{ color: 'var(--brand-red)', fontWeight: 700 }}>47 hoạt động</span> mới trong hôm nay.
-        </p>
+        <h2 className="banner-title">Chào buổi sáng, {user.name} <i class="fa-solid fa-hand-middle-finger"></i></h2>
       </div>
 
       <div className="banner-stats">

@@ -5,7 +5,7 @@
 -- Server version	8.0.46
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;groups
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
@@ -73,7 +73,7 @@ CREATE TABLE `comments` (
   KEY `fk_comments_user_id` (`user_id`),
   CONSTRAINT `fk_comments_post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_comments_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,7 +82,7 @@ CREATE TABLE `comments` (
 
 LOCK TABLES `comments` WRITE;
 /*!40000 ALTER TABLE `comments` DISABLE KEYS */;
-INSERT INTO `comments` VALUES (1,1,2,'Giao diện đỉnh chóp quá bạn ơi! Chúc nền tảng phát triển rực rỡ 🔥','2026-09-28 01:45:00'),(2,1,6,'Chào mừng Socialita! Tông màu đỏ đen này nhìn sang xịn mịn ghê ❤️','2026-09-28 01:50:00'),(3,1,7,'Tuyệt vời, chúc mừng Minh Anh ra mắt dự án!','2026-09-28 02:00:00'),(6,3,1,'Ảnh chụp đẹp xuất sắc Lan Anh ơi! Mùa lúa chín vàng ươm luôn nhỉ 🌾','2026-09-27 10:00:00'),(7,3,2,'Góc chụp này đỉnh quá, thiên nhiên Việt Nam tuyệt vời thật!','2026-09-27 10:10:00'),(9,9,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:27:56'),(10,10,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:29:15'),(11,11,1,'Hello','2026-10-04 04:35:08'),(12,13,2,'Hay quá!','2026-10-18 05:36:57'),(13,13,12,'@Quang Huy Cảm ơn bạn nhiều nhé!','2026-10-18 05:42:39');
+INSERT INTO `comments` VALUES (1,1,2,'Giao diện đỉnh chóp quá bạn ơi! Chúc nền tảng phát triển rực rỡ 🔥','2026-09-28 01:45:00'),(2,1,6,'Chào mừng Socialita! Tông màu đỏ đen này nhìn sang xịn mịn ghê ❤️','2026-09-28 01:50:00'),(3,1,7,'Tuyệt vời, chúc mừng Minh Anh ra mắt dự án!','2026-09-28 02:00:00'),(4,2,1,'Góc làm việc chill quá anh Huy ơi! Thích phong cách này ghê.','2026-09-28 02:20:00'),(5,2,6,'Cà phê ngon cùng view đẹp thì code bao mượt ạ ☕','2026-09-28 02:25:00'),(6,3,1,'Ảnh chụp đẹp xuất sắc Lan Anh ơi! Mùa lúa chín vàng ươm luôn nhỉ 🌾','2026-09-27 10:00:00'),(7,3,2,'Góc chụp này đỉnh quá, thiên nhiên Việt Nam tuyệt vời thật!','2026-09-27 10:10:00'),(9,9,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:27:56'),(10,10,1,'Bình luận kiểm thử hệ thống Socialita!','2026-10-04 04:29:15'),(11,11,1,'Hello','2026-10-04 04:35:08');
 /*!40000 ALTER TABLE `comments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -134,7 +134,7 @@ CREATE TABLE `messages` (
   KEY `fk_messages_receiver_id` (`receiver_id`),
   CONSTRAINT `fk_messages_receiver_id` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_messages_sender_id` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -143,7 +143,7 @@ CREATE TABLE `messages` (
 
 LOCK TABLES `messages` WRITE;
 /*!40000 ALTER TABLE `messages` DISABLE KEYS */;
-INSERT INTO `messages` VALUES (1,2,1,'Chào Minh Anh! Hôm nay hệ thống Socialita chạy mượt không bạn?',1,'2026-09-28 01:35:00'),(2,1,2,'Chào Huy! Mượt lắm luôn, các tính năng tương tác bài viết và chat đều ổn định.',1,'2026-09-28 01:37:00'),(3,2,1,'Tuyệt vời quá! Giao diện tông đỏ đen trông hiện đại và rất cuốn hút.',1,'2026-09-28 01:40:00'),(4,1,2,'Cảm ơn bạn nhé! Bạn cùng trải nghiệm thêm xem cần cải thiện gì cứ nhắn mình nha 😊',0,'2026-09-28 01:42:00'),(5,6,1,'Minh Anh ơi, cuối tuần này có rảnh đi cafe không?',1,'2026-09-27 11:00:00'),(6,1,6,'Okie bạn ơi, chiều thứ 7 hẹn ở Phố Cổ nhé!',0,'2026-09-27 11:15:00'),(7,1,2,'Xin chào, test tin nhắn!',0,'2026-09-28 03:50:59'),(8,1,6,'Hi',0,'2026-09-28 03:59:19'),(9,1,2,'Tin nhắn kiểm thử tự động giữa User 1 và User 2',0,'2026-10-04 04:27:56'),(10,1,2,'Tin nhắn kiểm thử tự động giữa User 1 và User 2',0,'2026-10-04 04:29:15'),(11,1,6,'Chào bạn nha',0,'2026-10-04 04:31:54'),(12,1,7,'Hi',0,'2026-10-04 04:34:24'),(13,1,6,'Test',0,'2026-10-05 01:04:46');
+INSERT INTO `messages` VALUES (1,2,1,'Chào Minh Anh! Hôm nay hệ thống Socialita chạy mượt không bạn?',1,'2026-09-28 01:35:00'),(2,1,2,'Chào Huy! Mượt lắm luôn, các tính năng tương tác bài viết và chat đều ổn định.',1,'2026-09-28 01:37:00'),(3,2,1,'Tuyệt vời quá! Giao diện tông đỏ đen trông hiện đại và rất cuốn hút.',1,'2026-09-28 01:40:00'),(4,1,2,'Cảm ơn bạn nhé! Bạn cùng trải nghiệm thêm xem cần cải thiện gì cứ nhắn mình nha 😊',0,'2026-09-28 01:42:00'),(5,6,1,'Minh Anh ơi, cuối tuần này có rảnh đi cafe không?',1,'2026-09-27 11:00:00'),(6,1,6,'Okie bạn ơi, chiều thứ 7 hẹn ở Phố Cổ nhé!',0,'2026-09-27 11:15:00'),(7,1,2,'Xin chào, test tin nhắn!',0,'2026-09-28 03:50:59'),(8,1,6,'Hi',0,'2026-09-28 03:59:19'),(9,1,2,'Tin nhắn kiểm thử tự động giữa User 1 và User 2',0,'2026-10-04 04:27:56'),(10,1,2,'Tin nhắn kiểm thử tự động giữa User 1 và User 2',0,'2026-10-04 04:29:15'),(11,1,6,'Chào bạn nha',0,'2026-10-04 04:31:54'),(12,1,7,'Hi',0,'2026-10-04 04:34:24');
 /*!40000 ALTER TABLE `messages` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -158,17 +158,16 @@ CREATE TABLE `posts` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int DEFAULT NULL,
   `content` text NOT NULL,
-  `image_url` text,
+  `image_url` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `location` varchar(50) DEFAULT NULL,
   `gradient` varchar(255) DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `status` enum('active','hidden') DEFAULT 'active',
-  `privacy` enum('public','friends','private') DEFAULT 'public',
   PRIMARY KEY (`id`),
   KEY `fk_posts_user_id` (`user_id`),
   CONSTRAINT `fk_posts_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -177,7 +176,7 @@ CREATE TABLE `posts` (
 
 LOCK TABLES `posts` WRITE;
 /*!40000 ALTER TABLE `posts` DISABLE KEYS */;
-INSERT INTO `posts` VALUES (1,1,'Chào mừng mọi người đến với mạng xã hội Socialita! Nơi kết nối thật và chia sẻ là chính bạn. Rất vui được đồng hành cùng cộng đồng công nghệ hôm nay! 🚀✨',NULL,'2026-09-28 01:30:00','Hà Nội','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-09-28 03:41:02','active','public'),(3,6,'Chuyến đi Mù Cang Chải ngắm mùa vàng bậc thang đẹp như một bức tranh thuỷ mặc! Đất nước mình còn bao nhiêu cảnh đẹp đang chờ khám phá 🌾⛰️',NULL,'2026-09-27 09:45:00','Yên Bái','linear-gradient(135deg, #4a1d4b 0%, #1f0d29 100%)','2026-09-28 03:41:02','active','public'),(4,7,'Vừa hoàn thiện xong concept giao diện tối giản cho Socialita. Tông đỏ đen sang trọng, rất mong nhận được góp ý của anh em! 🎨📱',NULL,'2026-09-26 11:20:00','Hà Nội','linear-gradient(135deg, #2b2d3d 0%, #1c1d2b 100%)','2026-09-28 03:41:02','active','public'),(5,3,'Bán tài khoản game giá rẻ, ib zalo 0987654xxx... liên hệ ngay kẻo hết ưu đãi sốc hôm nay!!',NULL,'2026-09-28 00:00:00','Toàn quốc','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-09-28 03:41:02','active','public'),(8,10,'Xin ch�o Socialita! D�y l� b�i vi?t ki?m th? k?t n?i Front-end & Back-end t? t�i kho?n m?i.',NULL,'2026-10-04 04:00:08','S�i G�n','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-10-04 04:00:08','active','public'),(9,1,'Bài viết kiểm thử tự động kèm ảnh và check-in Đà Lạt 🌸','https://images.unsplash.com/photo-1506744038136-46273834b3fb','2026-10-04 04:27:56','Đà Lạt, Lâm Đồng','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-10-04 04:27:56','active','public'),(10,1,'Bài viết kiểm thử tự động kèm ảnh và check-in Đà Lạt 🌸','https://images.unsplash.com/photo-1506744038136-46273834b3fb','2026-10-04 04:29:15','Đà Lạt, Lâm Đồng','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-10-04 04:29:15','active','public'),(11,1,'Hello, test01','http://localhost:8080/uploads/post-1791088398894-438529577.jpg','2026-10-04 04:33:18','Hà Nội',NULL,'2026-10-04 04:33:18','active','public'),(12,11,'Hello','[\"http://localhost:8080/uploads/post-1791640011040-741635974.jpg\",\"http://localhost:8080/uploads/post-1791640011042-894456313.jpg\",\"http://localhost:8080/uploads/post-1791640011043-283627644.jpg\"]','2026-10-10 13:46:51',NULL,NULL,'2026-10-10 13:46:51','active','public'),(13,2,'Test','http://localhost:8080/uploads/post-1791640319550-105837788.png','2026-10-10 13:51:59',NULL,NULL,'2026-10-10 13:51:59','active','public'),(14,1,'Bi mat chi minh toi',NULL,'2026-10-18 04:48:56',NULL,NULL,'2026-10-18 04:48:56','active','public'),(15,1,'Bi mat chi minh toi moi',NULL,'2026-10-18 04:49:49',NULL,NULL,'2026-10-18 04:49:49','active','private'),(16,1,'Bai viet danh rieng cho ban be',NULL,'2026-10-18 04:50:15',NULL,NULL,'2026-10-18 04:50:15','active','friends');
+INSERT INTO `posts` VALUES (1,1,'Chào mừng mọi người đến với mạng xã hội Socialita! Nơi kết nối thật và chia sẻ là chính bạn. Rất vui được đồng hành cùng cộng đồng công nghệ hôm nay! 🚀✨',NULL,'2026-09-28 01:30:00','Hà Nội','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-09-28 03:41:02','active'),(2,2,'Góc làm việc cuối tuần nhẹ nhàng với ly cà phê đậm đà. Chúc cả nhà một ngày tràn đầy năng lượng và làm việc hiệu quả nhé! ☕💻',NULL,'2026-09-28 02:15:00','Đà Lạt','linear-gradient(135deg, #1b4b43 0%, #0d2924 100%)','2026-09-28 03:41:02','active'),(3,6,'Chuyến đi Mù Cang Chải ngắm mùa vàng bậc thang đẹp như một bức tranh thuỷ mặc! Đất nước mình còn bao nhiêu cảnh đẹp đang chờ khám phá 🌾⛰️',NULL,'2026-09-27 09:45:00','Yên Bái','linear-gradient(135deg, #4a1d4b 0%, #1f0d29 100%)','2026-09-28 03:41:02','active'),(4,7,'Vừa hoàn thiện xong concept giao diện tối giản cho Socialita. Tông đỏ đen sang trọng, rất mong nhận được góp ý của anh em! 🎨📱',NULL,'2026-09-26 11:20:00','Hà Nội','linear-gradient(135deg, #2b2d3d 0%, #1c1d2b 100%)','2026-09-28 03:41:02','active'),(5,3,'Bán tài khoản game giá rẻ, ib zalo 0987654xxx... liên hệ ngay kẻo hết ưu đãi sốc hôm nay!!',NULL,'2026-09-28 00:00:00','Toàn quốc','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-09-28 03:41:02','active'),(8,10,'Xin ch�o Socialita! D�y l� b�i vi?t ki?m th? k?t n?i Front-end & Back-end t? t�i kho?n m?i.',NULL,'2026-10-04 04:00:08','S�i G�n','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-10-04 04:00:08','active'),(9,1,'Bài viết kiểm thử tự động kèm ảnh và check-in Đà Lạt 🌸','https://images.unsplash.com/photo-1506744038136-46273834b3fb','2026-10-04 04:27:56','Đà Lạt, Lâm Đồng','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-10-04 04:27:56','active'),(10,1,'Bài viết kiểm thử tự động kèm ảnh và check-in Đà Lạt 🌸','https://images.unsplash.com/photo-1506744038136-46273834b3fb','2026-10-04 04:29:15','Đà Lạt, Lâm Đồng','linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)','2026-10-04 04:29:15','active'),(11,1,'Hello, test01','http://localhost:8080/uploads/post-1791088398894-438529577.jpg','2026-10-04 04:33:18','Hà Nội',NULL,'2026-10-04 04:33:18','active');
 /*!40000 ALTER TABLE `posts` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -208,7 +207,7 @@ CREATE TABLE `reactions` (
 
 LOCK TABLES `reactions` WRITE;
 /*!40000 ALTER TABLE `reactions` DISABLE KEYS */;
-INSERT INTO `reactions` VALUES (2,1,2,'love','2026-09-28 03:41:02'),(3,1,6,'love','2026-09-28 03:41:02'),(4,1,7,'love','2026-09-28 03:41:02'),(8,3,1,'love','2026-09-28 03:41:02'),(9,3,2,'love','2026-09-28 03:41:02'),(10,3,7,'like','2026-09-28 03:41:02'),(11,4,1,'love','2026-09-28 03:41:02'),(12,4,2,'love','2026-09-28 03:41:02'),(14,1,1,'love','2026-10-04 04:22:05'),(15,9,1,'love','2026-10-04 04:27:56'),(16,10,1,'love','2026-10-04 04:29:15'),(17,11,1,'love','2026-10-04 04:35:04');
+INSERT INTO `reactions` VALUES (2,1,2,'love','2026-09-28 03:41:02'),(3,1,6,'love','2026-09-28 03:41:02'),(4,1,7,'love','2026-09-28 03:41:02'),(5,2,1,'love','2026-09-28 03:41:02'),(6,2,6,'like','2026-09-28 03:41:02'),(7,2,7,'love','2026-09-28 03:41:02'),(8,3,1,'love','2026-09-28 03:41:02'),(9,3,2,'love','2026-09-28 03:41:02'),(10,3,7,'like','2026-09-28 03:41:02'),(11,4,1,'love','2026-09-28 03:41:02'),(12,4,2,'love','2026-09-28 03:41:02'),(14,1,1,'love','2026-10-04 04:22:05'),(15,9,1,'love','2026-10-04 04:27:56'),(16,10,1,'love','2026-10-04 04:29:15'),(17,11,1,'love','2026-10-04 04:35:04');
 /*!40000 ALTER TABLE `reactions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -272,7 +271,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `uq_users_email` (`email`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -281,13 +280,9 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'minhanh_123','123456','Lê Minh Anh','minhanh@gmail.com','default_avatar.jpg','user','Yêu thích du lịch, công nghệ & đam mê lập trình web 🚀✨','2024-01-10 01:00:00','ĐH Kinh tế TP.HCM (UEH)','Hà Nội','active','2026-10-18 04:56:00'),(2,'quanghuy','123456','Quang Huy','quanghuy@gmail.com','https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop','user','Reviewer công nghệ | Thích xê dịch và chụp ảnh 📸','2024-01-15 02:30:00','Đại học Bách Khoa Hà Nội','Hà Nội','active','2026-10-18 05:29:17'),(3,'fake_account_02','123456','Spam Bot 02','spam999@yahoo.com',NULL,'user','Chuyên cung cấp tài khoản game giá rẻ','2025-08-10 07:00:00','Tự do','Toàn quốc','active','2026-09-25 04:20:00'),(4,'admin_thien','123456','Thiện (Admin)','admin.thien@socialita.com',NULL,'admin','Quản trị viên hệ thống Socialita 🛡️','2022-12-31 10:00:00','Socialita HQ','TP. Hồ Chí Minh','active','2026-10-05 01:00:19'),(5,'admin','123456','Quản Trị Viên','admin@socialita.vn','https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop','admin','Admin Socialita VN','2022-12-31 17:00:00','Socialita HQ','Hà Nội','active','2026-10-10 13:32:35'),(6,'lananh','123456','Lan Anh','lananh@gmail.com',NULL,'user','Yêu du lịch, ẩm thực và những điều bình dị 🌿','2024-03-20 03:15:00','Đại học Kinh tế Quốc dân (NEU)','Hà Nội','active','2026-10-18 05:06:28'),(7,'hoangnam','123456','Hoàng Nam','hoangnam@gmail.com',NULL,'user','UI/UX Designer | Photographer 🎨','2024-05-12 07:20:00','Đại học Kiến trúc Hà Nội','Hà Nội','active','2026-09-28 00:45:00'),(9,'testuser','password123','Test User','testuser@gmail.com',NULL,'user',NULL,'2026-10-04 03:52:30',NULL,NULL,'active','2026-10-05 01:04:02'),(10,'hieuminh2026','password123','Minh Hi?u','hieuminh2026@gmail.com',NULL,'user',NULL,'2026-10-04 03:59:56',NULL,NULL,'active','2026-10-04 04:00:01'),(11,'minhanhle','GoogleAuth_pjud2y36tk','Lê Minh Anh','minhanh.le@gmail.com','https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop','user',NULL,'2026-10-10 13:27:44',NULL,NULL,'active','2026-10-10 13:46:28'),(12,'hoangThuong123','Abc12345@','Hoàng Thương','hoangThuong123@gmail.com',NULL,'user',NULL,'2026-10-18 05:19:14',NULL,NULL,'active','2026-10-18 05:19:38');
+INSERT INTO `users` VALUES (1,'minhanh_123','123456','Lê Minh Anh','minhanh@gmail.com','default_avatar.jpg','user','Yêu thích du lịch, công nghệ & đam mê lập trình web 🚀✨','2024-01-10 01:00:00','ĐH Kinh tế TP.HCM (UEH)','Hà Nội','active','2026-10-04 04:31:42'),(2,'quanghuy','123456','Quang Huy','quanghuy@gmail.com',NULL,'user','Reviewer công nghệ | Thích xê dịch và chụp ảnh 📸','2024-01-15 02:30:00','Đại học Bách Khoa Hà Nội','Hà Nội','active','2026-10-04 04:08:17'),(3,'fake_account_02','123456','Spam Bot 02','spam999@yahoo.com',NULL,'user','Chuyên cung cấp tài khoản game giá rẻ','2025-08-10 07:00:00','Tự do','Toàn quốc','active','2026-09-25 04:20:00'),(4,'admin_thien','123456','Thiện (Admin)','admin.thien@socialita.com',NULL,'admin','Quản trị viên hệ thống Socialita 🛡️','2022-12-31 10:00:00','Socialita HQ','TP. Hồ Chí Minh','active','2026-10-04 04:37:15'),(5,'admin','123456','Quản Trị Viên','admin@socialita.vn',NULL,'admin','Admin Socialita VN','2022-12-31 17:00:00','Socialita HQ','Hà Nội','active','2026-10-01 02:05:53'),(6,'lananh','123456','Lan Anh','lananh@gmail.com',NULL,'user','Yêu du lịch, ẩm thực và những điều bình dị 🌿','2024-03-20 03:15:00','Đại học Kinh tế Quốc dân (NEU)','Hà Nội','active','2026-09-28 01:00:00'),(7,'hoangnam','123456','Hoàng Nam','hoangnam@gmail.com',NULL,'user','UI/UX Designer | Photographer 🎨','2024-05-12 07:20:00','Đại học Kiến trúc Hà Nội','Hà Nội','active','2026-09-28 00:45:00'),(9,'testuser','password123','Test User','testuser@gmail.com',NULL,'user',NULL,'2026-10-04 03:52:30',NULL,NULL,'active','2026-10-04 04:31:20'),(10,'hieuminh2026','password123','Minh Hi?u','hieuminh2026@gmail.com',NULL,'user',NULL,'2026-10-04 03:59:56',NULL,NULL,'active','2026-10-04 04:00:01');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping routines for database 'mini_social'
---
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -298,4 +293,43 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-18 12:42:54
+-- Dump completed on 2026-10-04 11:42:22
+
+USE mini_social;
+
+DROP TABLE IF EXISTS `group_members`;
+DROP TABLE IF EXISTS `groups`;
+
+CREATE TABLE IF NOT EXISTS `groups` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(150) NOT NULL,
+    `category` VARCHAR(50) DEFAULT 'Khác',
+    `description` TEXT,
+    `banner_url` TEXT,
+    `member_count` INT DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `groups` (`id`, `name`, `category`, `description`, `banner_url`, `member_count`) VALUES
+(1, 'Nhiếp ảnh đường phố', 'Nghệ thuật', 'Giao lưu ảnh đời thường, kỹ thuật chụp máy cơ và điện thoại.', 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&fit=crop', 12400),
+(2, 'Review sách hay', 'Học tập', 'Chia sẻ cảm nhận sách phát triển bản thân, văn học và kinh tế.', 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&fit=crop', 8100),
+(3, 'Cộng đồng Fitness', 'Thể thao', 'Kiến thức gym, dinh dưỡng eat clean và lịch tập cho người mới.', 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600&fit=crop', 5600),
+(4, 'Dev Trẻ Việt Nam', 'Công nghệ', 'Nơi chia sẻ kiến thức lập trình, tuyển dụng và dự án cho sinh viên IT.', 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&fit=crop', 18900),
+(5, 'Phượt Thủ Việt', 'Du lịch', 'Chia sẻ kinh nghiệm, lịch trình và địa điểm du lịch khắp Việt Nam.', 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=600&fit=crop', 24300),
+(6, 'Học nhóm ôn thi', 'Học tập', 'Cùng nhau học tập, chia sẻ tài liệu và kinh nghiệm ôn thi các môn.', 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&fit=crop', 3200)
+ON DUPLICATE KEY UPDATE `name`=VALUES(`name`);
+
+CREATE TABLE IF NOT EXISTS `group_members` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `group_id` INT NOT NULL,
+    `user_id` INT NOT NULL,
+    `joined_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_user_group` (`user_id`, `group_id`),
+    CONSTRAINT `fk_group_members_group` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_group_members_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `group_members` (`group_id`, `user_id`) VALUES
+(1, 1), (2, 1), (3, 1), (6, 1),
+(4, 2), (5, 2);
+

@@ -16,6 +16,7 @@ import { FriendsView } from './pages/FriendsView';
 import { GroupsView } from './pages/GroupsView';
 import { CreatePostModal } from './components/modals/CreatePostModal';
 import { EditProfileModal } from './components/modals/EditProfileModal';
+import { ConfirmLogoutModal } from './components/modals/ConfirmLogoutModal';
 import { ChatBox } from './components/chat/ChatBox';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -93,6 +94,7 @@ export const App = () => {
       <>
         <CustomCursor />
         <AdminDashboard />
+        <ConfirmLogoutModal />
         <ToastContainer />
       </>
     );
@@ -119,6 +121,7 @@ export const App = () => {
 
         <CreatePostModal />
         <EditProfileModal />
+        <ConfirmLogoutModal />
 
         {/* Floating chat box */}
         <ChatBox />

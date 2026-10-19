@@ -276,6 +276,7 @@ export const SocialProvider = ({ children }) => {
 
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
 
   // State Tin nhắn & Thông báo (FE chuẩn Facebook Web)
@@ -716,6 +717,13 @@ export const SocialProvider = ({ children }) => {
     showToast('Đã đăng xuất khỏi hệ thống', 'info');
   };
 
+  const openLogoutModal = () => setIsLogoutModalOpen(true);
+  const closeLogoutModal = () => setIsLogoutModalOpen(false);
+  const confirmLogout = () => {
+    setIsLogoutModalOpen(false);
+    logout();
+  };
+
   // 6. Cập nhật hồ sơ cá nhân
   const updateUser = async (updated) => {
     const nextBio = updated.bio !== undefined ? updated.bio : (user.bio || '');
@@ -1116,6 +1124,10 @@ export const SocialProvider = ({ children }) => {
         isEditProfileModalOpen,
         openEditProfileModal: () => setIsEditProfileModalOpen(true),
         closeEditProfileModal: () => setIsEditProfileModalOpen(false),
+        isLogoutModalOpen,
+        openLogoutModal,
+        closeLogoutModal,
+        confirmLogout,
         toasts,
         showToast,
         isMessagesOpen,

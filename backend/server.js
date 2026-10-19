@@ -14,7 +14,7 @@ app.use(express.json());
 const db = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: 'redtalk789',
+    password: 'hai12345',
     database: 'mini_social',
     waitForConnections: true,
     connectionLimit: 10,
@@ -1098,6 +1098,25 @@ app.get('/api/admin/activities', async (req, res) => {
     }
 });
 
+// API lấy toàn bộ danh sách Hội nhóm từ Database (kèm trạng thái tham gia theo tài khoản)
+app.get('/api/groups', async (req, res) => {
+    try {
+        const userId = req.query.current_user_id || req.query.userId || 1;
+        const [groups] = await db.query(`
+            SELECT g.*, 
+                   EXISTS(SELECT 1 FROM group_members gm WHERE gm.group_id = g.id AND gm.user_id = ?) AS is_joined
+            FROM \`groups\` g 
+            ORDER BY g.id ASC
+        `, [userId]);
+        res.status(200).json({ success: true, groups });
+    } catch (error) {
+        console.error('Lỗi lấy danh sách nhóm:', error);
+        res.status(500).json({ message: 'Lỗi server khi lấy hội nhóm' });
+    }
+});
+
 app.listen(8080, () => {
     console.log("Server đang chạy tại http://localhost:8080");
 });
+
+

@@ -155,10 +155,10 @@ export const INITIAL_GROUPS = [
 ];
 
 export const MY_JOINED_GROUPS = [
-  { id: 'mg-1', name: 'Nhiếp ảnh đường phố', members: '12.4K thành viên', banner: 'linear-gradient(135deg, #18191a 0%, #7a1d26 100%)' },
-  { id: 'mg-2', name: 'Review sách hay', members: '8.1K thành viên', banner: 'linear-gradient(135deg, #18191a 0%, #7a1d26 100%)' },
-  { id: 'mg-3', name: 'Cộng đồng Fitness', members: '5.6K thành viên', banner: 'linear-gradient(135deg, #18191a 0%, #7a1d26 100%)' },
-  { id: 'mg-4', name: 'Học nhóm ôn thi', members: '3.2K thành viên', banner: 'linear-gradient(135deg, #18191a 0%, #7a1d26 100%)' }
+  { id: 'mg-1', name: 'Nhiếp ảnh đường phố', members: '12.4K thành viên', banner: 'url("https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&fit=crop") center/cover' },
+  { id: 'mg-2', name: 'Review sách hay', members: '8.1K thành viên', banner: 'url("https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&fit=crop") center/cover' },
+  { id: 'mg-3', name: 'Cộng đồng Fitness', members: '5.6K thành viên', banner: 'url("https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=500&fit=crop") center/cover' },
+  { id: 'mg-4', name: 'Học nhóm ôn thi', members: '3.2K thành viên', banner: 'url("https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&fit=crop") center/cover' }
 ];
 
 export const DISCOVER_GROUPS = [
@@ -168,7 +168,7 @@ export const DISCOVER_GROUPS = [
     name: 'Dev Trẻ Việt Nam',
     desc: 'Nơi chia sẻ kiến thức lập trình, tuyển dụng và dự án cho sinh viên IT.',
     members: '18.9K thành viên',
-    banner: 'linear-gradient(135deg, #18191a 0%, #7a1d26 100%)'
+    banner: 'url("https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&fit=crop") center/cover'
   },
   {
     id: 'dg-2',
@@ -176,7 +176,7 @@ export const DISCOVER_GROUPS = [
     name: 'Phượt Thủ Việt',
     desc: 'Chia sẻ kinh nghiệm, lịch trình và địa điểm du lịch khắp Việt Nam.',
     members: '24.3K thành viên',
-    banner: 'linear-gradient(135deg, #242526 0%, #18191a 100%)'
+    banner: 'url("https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&fit=crop") center/cover'
   }
 ];
 

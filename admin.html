@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Socialita — Quản Trị Hệ Thống (Admin Panel)</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     /* ========================================================
        ADMIN FIGMA PIXEL-PERFECT STYLES
@@ -848,7 +849,7 @@
         </div>
       </div>
       <button class="logout-btn" onclick="handleAdminLogout()" title="Đăng xuất khỏi hệ thống">
-        ➔
+        <i class="fa-solid fa-arrow-right"></i>
       </button>
     </div>
   </aside>
@@ -1388,6 +1389,31 @@
         </button>
         <button type="button" onclick="confirmDeleteUser()" style="padding: 10px 20px; border-radius: 10px; background-color: var(--admin-red-primary); color: #ffffff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(229,46,61,0.3);">
           Xóa vĩnh viễn
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL XÁC NHẬN ĐĂNG XUẤT ADMIN
+  ======================================================== -->
+  <div class="modal-backdrop" id="modal-logout-confirm" onclick="closeAdminLogoutModal()">
+    <div class="modal-card-box" style="width: 400px; max-width: 92vw; text-align: center; padding: 24px 24px 20px;" onclick="event.stopPropagation()">
+      <div style="width: 52px; height: 52px; border-radius: 50%; background-color: var(--admin-red-bg); color: var(--admin-red-primary); display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 16px;">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </div>
+      <h3 style="font-size: 18px; font-weight: 800; color: var(--admin-text-dark); margin: 0 0 8px;">
+        Đăng xuất khỏi Quản trị?
+      </h3>
+      <p style="font-size: 13.5px; color: #6b7280; margin: 0 0 24px; line-height: 1.5;">
+        Bạn có chắc chắn muốn kết thúc phiên quản trị viên và đăng xuất khỏi hệ thống?
+      </p>
+      <div style="display: flex; gap: 12px;">
+        <button type="button" onclick="closeAdminLogoutModal()" style="flex: 1; padding: 11px 16px; border-radius: 10px; border: 1px solid #e5e7eb; background: #ffffff; color: var(--admin-text-dark); font-size: 13.5px; font-weight: 700; cursor: pointer;">
+          Hủy
+        </button>
+        <button type="button" onclick="confirmAdminLogout()" style="flex: 1; padding: 11px 16px; border-radius: 10px; border: none; background-color: var(--admin-red-primary); color: #ffffff; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(229,46,61,0.3);">
+          Đăng xuất
         </button>
       </div>
     </div>
@@ -2027,9 +2053,17 @@
 
     // ==================== LOGOUT ====================
     function handleAdminLogout() {
-      if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi Admin Panel?')) {
-        window.location.href = 'index.html';
-      }
+      const modal = document.getElementById('modal-logout-confirm');
+      if (modal) modal.classList.add('open');
+    }
+
+    function closeAdminLogoutModal() {
+      const modal = document.getElementById('modal-logout-confirm');
+      if (modal) modal.classList.remove('open');
+    }
+
+    function confirmAdminLogout() {
+      window.location.href = 'index.html';
     }
 
     // ==================== KHỞI TẠO TỰ ĐỘNG ====================
