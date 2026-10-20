@@ -186,10 +186,10 @@ export const PostCard = ({ post }) => {
                 padding: '4px'
               }}
             >
-              🗑️
+              <i class="fa-solid fa-trash"></i>
             </button>
           )}
-          <button style={{ color: 'var(--text-light-gray)', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer' }}>•••</button>
+          <button style={{ color: 'var(--text-light-gray)', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer' }}><i class="fa-solid fa-ellipsis"></i></button>
         </div>
       </div>
 
@@ -199,11 +199,11 @@ export const PostCard = ({ post }) => {
       {/* 3. Media: Video hoặc Hình ảnh */}
       {postImages.length > 0 || isVideo ? (
         <PostMediaGrid images={postImages} mediaSource={mediaSource} isVideo={isVideo} />
-      ) : post.mediaGradient ? (
+      ) : post.mediaGradient ? (  
         <div className="post-media-box" style={{ background: post.mediaGradient }}>
           {post.location && (
             <div className="location-tag">
-              <span>📍</span>
+              <i class="fa-solid fa-location-dot"></i>
               <span>{post.location}</span>
             </div>
           )}
@@ -222,17 +222,17 @@ export const PostCard = ({ post }) => {
           className={`action-btn ${post.liked ? 'liked' : ''}`}
           onClick={() => toggleLikePost(post.id)}
         >
-          <span>{post.liked ? '❤️' : '🤍'}</span>
+          <i className={post.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
           <span>{post.liked ? 'Đã thích' : 'Thích'}</span>
         </button>
 
         <button className="action-btn" onClick={handleToggleComments}>
-          <span>💬</span>
+          <i class="fa-regular fa-comment-dots"></i>
           <span>Bình luận</span>
         </button>
 
         <button className="action-btn" onClick={() => sharePost(post.id)}>
-          <span>↗</span>
+          <i class="fa-regular fa-share-from-square"></i>
           <span>Chia sẻ</span>
         </button>
       </div>

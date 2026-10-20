@@ -10,7 +10,7 @@ export const ToastContainer = () => {
     <div className="toast-container">
       {toasts.map(toast => (
         <div key={toast.id} className="toast-box">
-          <span>{toast.type === 'error' ? '❌' : toast.type === 'info' ? 'ℹ️' : '✨'}</span>
+          <span>{toast.type === 'error' ? <i class="fa-solid fa-x"></i> : toast.type === 'info' ? <i class="fa-solid fa-triangle-exclamation"></i> : <i class="fa-solid fa-check"></i>}</span>
           <span>{toast.msg}</span>
         </div>
       ))}

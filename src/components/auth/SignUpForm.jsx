@@ -148,7 +148,7 @@ export const SignUpForm = ({ onSwitchToSignIn }) => {
         <div className="form-group">
           <label>Email</label>
           <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}>✉️</span>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}><i class="fa-solid fa-envelope"></i></span>
             <input
               type="email"
               className="form-control"
@@ -164,7 +164,7 @@ export const SignUpForm = ({ onSwitchToSignIn }) => {
         <div className="form-group">
           <label>Số điện thoại (không bắt buộc)</label>
           <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}>📞</span>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}><i class="fa-solid fa-phone"></i></span>
             <input
               type="text"
               className="form-control"
@@ -179,7 +179,7 @@ export const SignUpForm = ({ onSwitchToSignIn }) => {
         <div className="form-group">
           <label>Mật khẩu</label>
           <div style={{ position: 'relative' }}>
-            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}>🔒</span>
+            <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}><i class="fa-solid fa-lock"></i></span>
             <input
               type={showPassword ? 'text' : 'password'}
               className="form-control"
@@ -194,10 +194,27 @@ export const SignUpForm = ({ onSwitchToSignIn }) => {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}
+              onClick={() => setShowPassword((prev) => !prev)}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9ca3af',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '15px',
+                zIndex: 10
+              }}
+              title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >
-              {showPassword ? '🙈' : '👁️'}
+              <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} />
             </button>
           </div>
 
@@ -299,10 +316,27 @@ export const SignUpForm = ({ onSwitchToSignIn }) => {
             />
             <button
               type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9ca3af',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '15px',
+                zIndex: 10
+              }}
+              title={showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >
-              {showConfirmPassword ? '🙈' : '👁️'}
+              <i className={`fa-solid ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`} />
             </button>
           </div>
           {confirmPassword && confirmPassword !== password && (

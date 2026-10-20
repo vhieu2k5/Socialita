@@ -277,6 +277,9 @@ export const SocialProvider = ({ children }) => {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [selectedFriendProfile, setSelectedFriendProfile] = useState(null);
+  const [friendProfilePosts, setFriendProfilePosts] = useState([]);
+  const [isLoadingFriendProfile, setIsLoadingFriendProfile] = useState(false);
   const [toasts, setToasts] = useState([]);
 
   // State Tin nhắn & Thông báo (FE chuẩn Facebook Web)
@@ -1078,6 +1081,75 @@ export const SocialProvider = ({ children }) => {
     }
   };
 
+  const openFriendProfile = async (friend) => {
+    if (!friend) return;
+    setSelectedFriendProfile(friend);
+    setFriendProfilePosts([]);
+    setIsLoadingFriendProfile(true);
+
+    try {
+      if (friend.id && !String(friend.id).startsWith('fr-')) {
+        const userRes = await api.getUser(friend.id);
+        if (userRes && userRes.user) {
+          const u = userRes.user;
+          setSelectedFriendProfile(prev => ({
+            ...prev,
+            ...u,
+            name: u.full_name || u.username || prev.name,
+            username: u.username || prev.username,
+            avatar_url: u.avatar_url || prev.avatar_url,
+            bio: u.bio || prev.bio,
+            school: u.school || prev.school,
+            liveIn: u.liveIn || prev.liveIn,
+            post_count: u.post_count,
+            friend_count: u.friend_count,
+            created_at: u.created_at
+          }));
+        }
+
+        const currentUserId = user?.id || 0;
+        const postsRes = await api.getUserPosts(friend.id, currentUserId);
+        if (postsRes && Array.isArray(postsRes.posts)) {
+          setFriendProfilePosts(postsRes.posts);
+        }
+      } else {
+        const mockPosts = posts.filter(p => p.author?.name === friend.name);
+        setFriendProfilePosts(mockPosts);
+      }
+    } catch (err) {
+      console.warn('Lỗi khi tải thông tin hồ sơ bạn bè:', err.message);
+    } finally {
+      setIsLoadingFriendProfile(false);
+    }
+  };
+
+  const closeFriendProfile = () => {
+    setSelectedFriendProfile(null);
+    setFriendProfilePosts([]);
+  };
+
+  const openChatWithFriend = (friend) => {
+    if (!friend) return;
+    let conv = conversations.find(c => c.name === friend.name || c.id === `conv-${friend.id}`);
+    if (!conv) {
+      conv = {
+        id: `conv-${friend.id}`,
+        name: friend.name,
+        avatar: friend.avatar_url || friend.avatar || '',
+        avatarBg: friend.avatarBg || '#e52e3d',
+        isOnline: true,
+        isGroup: false,
+        time: 'Vừa xong',
+        unread: 0,
+        lastMessage: '',
+        messages: []
+      };
+      setConversations(prev => [conv, ...prev]);
+    }
+    openChat(conv);
+    closeFriendProfile();
+  };
+
   return (
     <SocialContext.Provider
       value={{
@@ -1113,6 +1185,12 @@ export const SocialProvider = ({ children }) => {
         rejectRequest,
         sendRequest,
         unfriend,
+        selectedFriendProfile,
+        friendProfilePosts,
+        isLoadingFriendProfile,
+        openFriendProfile,
+        closeFriendProfile,
+        openChatWithFriend,
         trends,
         groups,
         joinedGroups,

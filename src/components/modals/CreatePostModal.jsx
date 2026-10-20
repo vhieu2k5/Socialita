@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSocial } from '../../context/SocialContext';
 import { getInitials } from '../../utils/formatters';
 
@@ -14,12 +14,51 @@ export const CreatePostModal = () => {
   const [location, setLocation] = useState('');
   const [category, setCategory] = useState('all');
   const [privacy, setPrivacy] = useState('public');
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [selectedGradient, setSelectedGradient] = useState('linear-gradient(180deg, #18191a 0%, #242526 50%, #7a1d26 100%)');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fileInputRef = useRef(null);
+  const privacyDropdownRef = useRef(null);
+
+  const privacyOptions = [
+    {
+      value: 'public',
+      label: 'Công khai',
+      icon: 'fa-globe',
+      desc: 'Bất kỳ ai trên hoặc ngoài Socialita'
+    },
+    {
+      value: 'friends',
+      label: 'Bạn bè',
+      icon: 'fa-user-group',
+      desc: 'Chỉ bạn bè của bạn trên Socialita'
+    },
+    {
+      value: 'private',
+      label: 'Chỉ mình tôi',
+      icon: 'fa-lock',
+      desc: 'Chỉ mình bạn có thể nhìn thấy'
+    }
+  ];
+
+  const currentPrivacy = privacyOptions.find(p => p.value === privacy) || privacyOptions[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (privacyDropdownRef.current && !privacyDropdownRef.current.contains(e.target)) {
+        setIsPrivacyOpen(false);
+      }
+    };
+    if (isPrivacyOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isPrivacyOpen]);
 
   if (!isCreatePostModalOpen) return null;
 
@@ -110,17 +149,44 @@ export const CreatePostModal = () => {
             </div>
             <div>
               <div className="author-name">{user.name}</div>
-              <div className="privacy-select-wrapper">
-                <select
-                  className="privacy-select"
-                  value={privacy}
-                  onChange={(e) => setPrivacy(e.target.value)}
+              <div className="custom-privacy-dropdown" ref={privacyDropdownRef}>
+                <button
+                  type="button"
+                  className="privacy-dropdown-trigger"
+                  onClick={() => setIsPrivacyOpen((prev) => !prev)}
                   title="Chọn quyền riêng tư bài viết"
                 >
-                  <option value="public">🌐 Công khai</option>
-                  <option value="friends">👥 Bạn bè</option>
-                  <option value="private">🔒 Chỉ mình tôi</option>
-                </select>
+                  <i className={`fa-solid ${currentPrivacy.icon}`} />
+                  <span className="privacy-current-label">{currentPrivacy.label}</span>
+                  <i className={`fa-solid fa-chevron-down privacy-caret ${isPrivacyOpen ? 'open' : ''}`} />
+                </button>
+
+                {isPrivacyOpen && (
+                  <div className="privacy-dropdown-menu">
+                    <div className="privacy-dropdown-header">Ai có thể xem bài viết của bạn?</div>
+                    {privacyOptions.map((opt) => (
+                      <div
+                        key={opt.value}
+                        className={`privacy-dropdown-item ${privacy === opt.value ? 'active' : ''}`}
+                        onClick={() => {
+                          setPrivacy(opt.value);
+                          setIsPrivacyOpen(false);
+                        }}
+                      >
+                        <div className="privacy-item-icon">
+                          <i className={`fa-solid ${opt.icon}`} />
+                        </div>
+                        <div className="privacy-item-info">
+                          <div className="privacy-item-label">{opt.label}</div>
+                          <div className="privacy-item-desc">{opt.desc}</div>
+                        </div>
+                        <div className="privacy-item-check">
+                          {privacy === opt.value && <i className="fa-solid fa-check" />}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -286,7 +352,7 @@ export const CreatePostModal = () => {
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#3b82f6')}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#cbd5e1')}
               >
-                <div style={{ fontSize: '24px', marginBottom: '6px' }}>📸</div>
+                <div style={{ fontSize: '24px', marginBottom: '6px' }}><i class="fa-solid fa-photo-film"></i></div>
                 <span style={{ fontWeight: '600', color: '#1e293b' }}>Bấm để chọn nhiều ảnh hoặc video</span>
                 <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px' }}>
                   Có thể giữ phím Ctrl/Shift để chọn nhiều ảnh cùng lúc (tối đa 10 ảnh)

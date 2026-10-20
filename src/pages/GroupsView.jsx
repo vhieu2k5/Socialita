@@ -114,7 +114,7 @@ export const GroupsView = () => {
                   }}
                 />
                 <div style={{ fontWeight: 800, fontSize: '14px', marginBottom: '4px' }}>{g.name}</div>
-                <div style={{ fontSize: '12px', color: '#8e8e93' }}>👥 {formatMembers(g.member_count ?? g.members)}</div>
+                <div style={{ fontSize: '12px', color: '#8e8e93' }}><i class="fa-solid fa-users"></i> {formatMembers(g.member_count ?? g.members)}</div>
               </div>
             ))}
           </div>
@@ -146,7 +146,7 @@ export const GroupsView = () => {
                   {g.description || g.desc}
                 </p>
                 <div style={{ fontSize: '11.5px', color: '#8e8e93', fontWeight: 600 }}>
-                  👥 {formatMembers(g.member_count ?? g.members)}
+                  <i class="fa-solid fa-users"></i> {formatMembers(g.member_count ?? g.members)}
                 </div>
               </div>
             ))}

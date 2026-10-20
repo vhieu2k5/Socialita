@@ -5,8 +5,8 @@ import { GoogleAuthModal } from './GoogleAuthModal';
 
 export const SignInForm = ({ onSwitchToSignUp }) => {
   const { login, showToast } = useSocial();
-  const [email, setEmail] = useState('minhanh.le@gmail.com');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ export const SignInForm = ({ onSwitchToSignUp }) => {
         <div className="auth-tab" onClick={onSwitchToSignUp}>Đăng ký</div>
       </div>
 
-      <h1 className="auth-title">Chào mừng trở lại 👋</h1>
+      <h1 className="auth-title">Chào mừng trở lại <i class="fa-solid fa-hand-sparkles"></i></h1>
       <p className="auth-subtitle">Đăng nhập để tiếp tục với Socialita.</p>
 
       <form onSubmit={handleSubmit}>
@@ -38,7 +38,7 @@ export const SignInForm = ({ onSwitchToSignUp }) => {
           <label>Email</label>
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}>
-              ✉️
+              <i class="fa-solid fa-envelope"></i>
             </span>
             <input
               type="text"
@@ -56,7 +56,7 @@ export const SignInForm = ({ onSwitchToSignUp }) => {
           <label>Mật khẩu</label>
           <div style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}>
-              🔒
+              <i class="fa-solid fa-lock"></i>
             </span>
             <input
               type={showPassword ? 'text' : 'password'}
@@ -69,10 +69,27 @@ export const SignInForm = ({ onSwitchToSignUp }) => {
             />
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer' }}
+              onClick={() => setShowPassword((prev) => !prev)}
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: '#9ca3af',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '15px',
+                zIndex: 10
+              }}
+              title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             >
-              👁️
+              <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`} />
             </button>
           </div>
         </div>

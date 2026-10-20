@@ -26,11 +26,11 @@ export const ProfileView = () => {
         {/* Nút chỉnh sửa & chia sẻ ở góc trên bên phải */}
         <div className="profile-top-actions">
           <button className="btn-profile-action" onClick={openEditProfileModal}>
-            <span>✏️</span>
+            <i className="fa-solid fa-pen-to-square"></i>
             <span>Chỉnh sửa trang cá nhân</span>
           </button>
           <button className="btn-profile-action primary" onClick={openCreatePostModal}>
-            <span>↗</span>
+            <i className="fa-solid fa-share-from-square"></i>
             <span>Chia sẻ</span>
           </button>
         </div>
@@ -65,7 +65,7 @@ export const ProfileView = () => {
               }}
               title="Đổi ảnh đại diện"
             >
-              +
+              <i className="fa-solid fa-plus"></i>
             </button>
             <input
               type="file"
@@ -180,18 +180,31 @@ export const ProfileView = () => {
           <div className="widget-card">
             <h3 className="widget-card-title">Giới thiệu</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '12.5px', color: 'var(--text-gray)' }}>
+              
+              {/* 1. Trường học / Công việc */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>💼</span>
+                <span style={{ width: '20px', display: 'inline-flex', justifyContent: 'center', fontSize: '15px', color: 'var(--brand-gray)' }}>
+                  <i className="fa-solid fa-graduation-cap"></i>
+                </span>
                 <span>{user.intro?.school || user.school || 'Chưa cập nhật trường học'}</span>
               </div>
+
+              {/* 2. Nơi sống */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>📍</span>
+                <span style={{ width: '20px', display: 'inline-flex', justifyContent: 'center', fontSize: '15px', color: 'var(--brand-gray)' }}>
+                  <i className="fa-solid fa-location-dot"></i>
+                </span>
                 <span>{user.intro?.liveIn || user.liveIn || 'Chưa cập nhật nơi sống'}</span>
               </div>
+
+              {/* 3. Ngày tham gia */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '16px', color: 'var(--brand-red)' }}>📅</span>
+                <span style={{ width: '20px', display: 'inline-flex', justifyContent: 'center', fontSize: '15px', color: 'var(--brand-gray)' }}>
+                  <i className="fa-regular fa-calendar-days"></i>
+                </span>
                 <span>{user.intro?.joinedDate || 'Tham gia gần đây'}</span>
               </div>
+
             </div>
           </div>
 

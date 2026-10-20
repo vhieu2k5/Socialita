@@ -3,7 +3,7 @@ import { useSocial } from '../context/SocialContext';
 import { Logo } from '../components/ui/Logo';
 
 export const FriendsView = () => {
-  const { friends, friendRequests, acceptRequest, rejectRequest, unfriend } = useSocial();
+  const { friends, friendRequests, acceptRequest, rejectRequest, unfriend, openFriendProfile } = useSocial();
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredFriends = (friends || []).filter(f =>
@@ -22,9 +22,7 @@ export const FriendsView = () => {
 
         <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
           <div className="search-box" style={{ width: '260px' }}>
-            <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            <i className="search-icon fa-solid fa-magnifying-glass" style={{ display: 'flex', alignItems: 'center', fontSize: '13px' }}></i>
             <input
               type="text"
               className="search-input"
@@ -44,8 +42,19 @@ export const FriendsView = () => {
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
             {friendRequests.map(req => (
-              <div key={req.id} className="widget-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div key={req.id} className="widget-card friend-card-hover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px' }}>
+                <div
+                  className="friend-info-clickable" style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}
+                  onClick={() => openFriendProfile({
+                    id: req.requester_id || req.id,
+                    name: req.name,
+                    avatar_url: req.avatar_url,
+                    avatarBg: req.avatarBg,
+                    mutualFriends: req.mutualFriends,
+                    friendSince: 'Lời mời kết bạn'
+                  })}
+                  title="Bấm để xem trang cá nhân"
+                >
                   {req.avatar_url ? (
                     <img
                       src={req.avatar_url}
@@ -59,7 +68,7 @@ export const FriendsView = () => {
                     </div>
                   )}
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: '13px' }}>{req.name}</div>
+                    <div className="friend-name-text" style={{ fontWeight: 700, fontSize: '13px' }}>{req.name}</div>
                     <div style={{ fontSize: '11px', color: '#8e8e93' }}>
                       {req.mutualFriends ? `${req.mutualFriends} bạn chung` : (req.time || 'Lời mời kết bạn')}
                     </div>
@@ -85,8 +94,12 @@ export const FriendsView = () => {
         </h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
           {filteredFriends.map(friend => (
-            <div key={friend.id} className="widget-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div key={friend.id} className="widget-card friend-card-hover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px' }}>
+              <div
+                className="friend-info-clickable" style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}
+                onClick={() => openFriendProfile(friend)}
+                title="Bấm để xem trang cá nhân"
+              >
                 {friend.avatar_url ? (
                   <img
                     src={friend.avatar_url}
@@ -116,11 +129,11 @@ export const FriendsView = () => {
                   </div>
                 )}
                 <div>
-                  <div style={{ fontWeight: 800, fontSize: '14px' }}>{friend.name}</div>
+                  <div className="friend-name-text" style={{ fontWeight: 800, fontSize: '14px' }}>{friend.name}</div>
                   <div style={{ fontSize: '12px', color: 'var(--text-light-gray)' }}>{friend.friendSince}</div>
                   {friend.school && (
                     <div style={{ fontSize: '11px', color: 'var(--text-light-gray)', marginTop: '2px' }}>
-                      🎓 {friend.school}
+                      <i className="fa-solid fa-graduation-cap"></i> {friend.school}
                     </div>
                   )}
                 </div>

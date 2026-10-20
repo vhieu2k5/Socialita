@@ -8,7 +8,7 @@ export const WelcomeBanner = () => {
     <div className="welcome-banner">
       <div>
         <div className="banner-date">THỨ BẢY, 22/08</div>
-        <h2 className="banner-title">Chào buổi sáng, {user.name} <i class="fa-solid fa-hand-middle-finger"></i></h2>
+        <h2 className="banner-title">Chào buổi sáng, {user.name} <i class="fa-solid fa-hand"></i></h2>
       </div>
 
       <div className="banner-stats">

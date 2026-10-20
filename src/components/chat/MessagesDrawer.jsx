@@ -22,7 +22,7 @@ const ConvAvatar = ({ conv }) => {
         </div>
       )}
       {conv.isGroup ? (
-        <span className="group-badge-icon" title="Nhóm chat">👥</span>
+        <span className="group-badge-icon" title="Nhóm chat"><i class="fa-solid fa-user-group"></i></span>
       ) : conv.isIdle ? (
         <span className="idle-badge" title="Tạm vắng"></span>
       ) : (
