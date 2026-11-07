@@ -3,7 +3,7 @@ import { useSocial } from '../../context/SocialContext';
 import { Logo } from '../ui/Logo';
 
 export const Sidebar = () => {
-  const { tab, setTab, openCreatePostModal, friendRequests, showToast, logout } = useSocial();
+  const { tab, setTab, openCreatePostModal, friendRequests, showToast, logout, closeUserProfile } = useSocial();
 
   const navItems = [
     {
@@ -49,7 +49,12 @@ export const Sidebar = () => {
             return (
               <button
                 key={item.id}
-                onClick={() => setTab(item.id)}
+                onClick={() => {
+                  if (item.id === 'profile' && typeof closeUserProfile === 'function') {
+                    closeUserProfile();
+                  }
+                  setTab(item.id);
+                }}
                 className={`sidebar-item ${isActive ? 'active' : ''}`}
               >
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

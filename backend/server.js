@@ -709,23 +709,43 @@ app.get('/api/users/:id/friend-requests', async (req, res) => {
     }
 });
 
-// Lấy danh sách gợi ý kết bạn (chưa kết bạn và chưa gửi lời mời)
+// Lấy danh sách gợi ý kết bạn (bạn của bạn bè - friends of friends có bạn chung)
 app.get('/api/users/:id/suggestions', async (req, res) => {
     try {
         const userId = req.params.id;
         const sql = `
-            SELECT u.id, u.username, u.full_name, u.avatar_url, u.bio, u.school, u.liveIn
-            FROM users u
-            WHERE u.id != ? AND u.status = 'active'
+            SELECT 
+                u.id, 
+                u.username, 
+                u.full_name, 
+                u.avatar_url, 
+                u.bio, 
+                u.school, 
+                u.liveIn,
+                COUNT(DISTINCT my_friends.friend_id) AS mutualFriends
+            FROM (
+                SELECT CASE WHEN user_id1 = ? THEN user_id2 ELSE user_id1 END AS friend_id
+                FROM friendships
+                WHERE (user_id1 = ? OR user_id2 = ?) AND status = 'accepted'
+            ) AS my_friends
+            JOIN friendships fof 
+              ON (fof.user_id1 = my_friends.friend_id OR fof.user_id2 = my_friends.friend_id)
+             AND fof.status = 'accepted'
+            JOIN users u 
+              ON u.id = CASE WHEN fof.user_id1 = my_friends.friend_id THEN fof.user_id2 ELSE fof.user_id1 END
+            WHERE u.id != ? 
+              AND u.status = 'active'
               AND u.id NOT IN (
-                SELECT user_id2 FROM friendships WHERE user_id1 = ?
-                UNION
-                SELECT user_id1 FROM friendships WHERE user_id2 = ?
+                SELECT CASE WHEN user_id1 = ? THEN user_id2 ELSE user_id1 END
+                FROM friendships
+                WHERE user_id1 = ? OR user_id2 = ?
               )
-            ORDER BY u.created_at DESC
-            LIMIT 6
+            GROUP BY u.id, u.username, u.full_name, u.avatar_url, u.bio, u.school, u.liveIn
+            HAVING mutualFriends > 0
+            ORDER BY mutualFriends DESC, u.created_at DESC
+            LIMIT 12
         `;
-        const [rows] = await db.query(sql, [userId, userId, userId]);
+        const [rows] = await db.query(sql, [userId, userId, userId, userId, userId, userId, userId]);
         res.json({ suggestions: rows });
     } catch (error) {
         console.error(error);

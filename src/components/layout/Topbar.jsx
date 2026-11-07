@@ -15,7 +15,8 @@ export const Topbar = () => {
     toggleNotifications,
     closeDrawers,
     unreadMessagesCount,
-    unreadNotificationsCount
+    unreadNotificationsCount,
+    closeUserProfile
   } = useSocial();
 
   return (
@@ -72,6 +73,7 @@ export const Topbar = () => {
           style={{ backgroundColor: '#38bdf8' }}
           onClick={() => {
             closeDrawers();
+            if (typeof closeUserProfile === 'function') closeUserProfile();
             setTab('profile');
           }}
           title="Trang cá nhân"

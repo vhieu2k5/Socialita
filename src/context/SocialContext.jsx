@@ -178,6 +178,86 @@ const INITIAL_NOTIFICATIONS = [
 ];
 
 
+const getSeedConversations = (userName = 'Bạn') => [
+  {
+    id: 'conv-1',
+    name: 'Quang Huy',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+    isOnline: true,
+    isGroup: false,
+    time: '2 phút',
+    unread: 1,
+    lastMessage: 'Chào bạn! Rất vui được kết nối trên Socialita nhé 🎉',
+    messages: [
+      { id: 1, sender: 'Quang Huy', text: 'Chào bạn! Rất vui được kết nối trên Socialita nhé 🎉', time: '14:20', isMe: false }
+    ]
+  },
+  {
+    id: 'conv-2',
+    name: 'Nhóm: Đồ án Web Socialita',
+    avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&h=100&fit=crop',
+    isOnline: true,
+    isGroup: true,
+    time: '14 phút',
+    unread: 2,
+    lastMessage: 'Hải Đăng: Chào mừng thành viên mới gia nhập nhóm!',
+    messages: [
+      { id: 1, sender: 'Minh Tuấn', text: 'Chào mừng bạn đến với Socialita!', time: '10:15', isMe: false },
+      { id: 2, sender: 'Hải Đăng', text: 'Chào mừng thành viên mới gia nhập nhóm!', time: '10:30', isMe: false }
+    ]
+  },
+  {
+    id: 'conv-3',
+    name: 'Hải Yến',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+    isOnline: true,
+    isGroup: false,
+    time: '1 giờ',
+    unread: 0,
+    lastMessage: 'Hải Yến: Chào bạn, chúc bạn một ngày tốt lành!',
+    messages: [
+      { id: 1, sender: 'Hải Yến', text: 'Chào bạn, chúc bạn một ngày tốt lành!', time: '09:12', isMe: false }
+    ]
+  }
+];
+
+const getSeedNotifications = (userName = 'bạn') => [
+  {
+    id: 'notif-welcome',
+    user: 'Socialita',
+    avatar: '/logo.png',
+    type: 'system',
+    icon: '🔔',
+    iconBg: '#18181c',
+    content: `Chào mừng ${userName} đến với Socialita! Hãy hoàn thiện hồ sơ để kết nối cùng bạn bè.`,
+    time: 'Vừa xong',
+    unread: true
+  },
+  {
+    id: 'notif-1',
+    user: 'Quang Huy',
+    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+    type: 'friend',
+    icon: '👥',
+    iconBg: '#10b981',
+    content: 'đã gửi lời mời kết bạn cho bạn',
+    time: '5 phút trước',
+    unread: true,
+    isFriendReq: true
+  },
+  {
+    id: 'notif-2',
+    user: 'Lê Minh Anh',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
+    type: 'like',
+    icon: '❤️',
+    iconBg: '#e52e3d',
+    content: 'đã chào mừng bạn đến với cộng đồng Socialita',
+    time: '15 phút trước',
+    unread: true
+  }
+];
+
 export const SocialProvider = ({ children }) => {
   // 1. Quản lý phiên người dùng đăng nhập
   const [currentUser, setCurrentUser] = useState(() => {
@@ -274,17 +354,53 @@ export const SocialProvider = ({ children }) => {
     });
   };
 
+  const [viewingProfileUser, setViewingProfileUser] = useState(null);
+
+  const openUserProfile = (targetUser) => {
+    setViewingProfileUser(targetUser);
+    setTab('profile');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const closeUserProfile = () => {
+    setViewingProfileUser(null);
+  };
+
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
   const [toasts, setToasts] = useState([]);
 
-  // State Tin nhắn & Thông báo (FE chuẩn Facebook Web)
+  // State Tin nhắn & Thông báo (FE chuẩn Facebook Web, lưu động theo từng tài khoản)
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
-  const [conversations, setConversations] = useState(INITIAL_CONVERSATIONS);
+  const [conversations, setConversations] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('currentUser');
+      const uId = savedUser ? JSON.parse(savedUser).id : (INITIAL_USER.id || 1);
+      const savedConvs = localStorage.getItem(`socialita_conversations_${uId}`);
+      if (savedConvs) return JSON.parse(savedConvs);
+      const seeds = getSeedConversations(savedUser ? (JSON.parse(savedUser).full_name || JSON.parse(savedUser).username) : 'Bạn');
+      localStorage.setItem(`socialita_conversations_${uId}`, JSON.stringify(seeds));
+      return seeds;
+    } catch {
+      return INITIAL_CONVERSATIONS;
+    }
+  });
   const [activeUsers, setActiveUsers] = useState(INITIAL_ACTIVE_USERS);
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('currentUser');
+      const uId = savedUser ? JSON.parse(savedUser).id : (INITIAL_USER.id || 1);
+      const savedNotifs = localStorage.getItem(`socialita_notifications_${uId}`);
+      if (savedNotifs) return JSON.parse(savedNotifs);
+      const seeds = getSeedNotifications(savedUser ? (JSON.parse(savedUser).full_name || JSON.parse(savedUser).username) : 'bạn');
+      localStorage.setItem(`socialita_notifications_${uId}`, JSON.stringify(seeds));
+      return seeds;
+    } catch {
+      return INITIAL_NOTIFICATIONS;
+    }
+  });
 
   const unreadMessagesCount = conversations.reduce((acc, c) => acc + (c.unread || 0), 0);
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
@@ -305,7 +421,13 @@ export const SocialProvider = ({ children }) => {
   };
 
   const openChat = (conv) => {
-    setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, unread: 0 } : c));
+    setConversations(prev => {
+      const next = prev.map(c => c.id === conv.id ? { ...c, unread: 0 } : c);
+      try {
+        if (user?.id) localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     setActiveChat({ ...conv, unread: 0 });
     setIsMessagesOpen(false);
   };
@@ -325,17 +447,23 @@ export const SocialProvider = ({ children }) => {
       isMe: true
     };
 
-    setConversations(prev => prev.map(c => {
-      if (c.id === convId) {
-        return {
-          ...c,
-          lastMessage: 'Bạn: ' + text,
-          time: timeStr,
-          messages: [...(c.messages || []), newMsg]
-        };
-      }
-      return c;
-    }));
+    setConversations(prev => {
+      const next = prev.map(c => {
+        if (c.id === convId) {
+          return {
+            ...c,
+            lastMessage: 'Bạn: ' + text,
+            time: timeStr,
+            messages: [...(c.messages || []), newMsg]
+          };
+        }
+        return c;
+      });
+      try {
+        if (user?.id) localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
 
     if (activeChat && activeChat.id === convId) {
       setActiveChat(prev => ({
@@ -355,17 +483,23 @@ export const SocialProvider = ({ children }) => {
           time: replyTime,
           isMe: false
         };
-        setConversations(prev => prev.map(c => {
-          if (c.id === convId) {
-            return {
-              ...c,
-              lastMessage: replyMsg.text,
-              time: replyTime,
-              messages: [...(c.messages || []), replyMsg]
-            };
-          }
-          return c;
-        }));
+        setConversations(prev => {
+          const next = prev.map(c => {
+            if (c.id === convId) {
+              return {
+                ...c,
+                lastMessage: replyMsg.text,
+                time: replyTime,
+                messages: [...(c.messages || []), replyMsg]
+              };
+            }
+            return c;
+          });
+          try {
+            if (user?.id) localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(next));
+          } catch {}
+          return next;
+        });
         setActiveChat(prev => {
           if (prev && prev.id === convId) {
             return {
@@ -381,11 +515,23 @@ export const SocialProvider = ({ children }) => {
   };
 
   const markNotificationAsRead = (id) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+    setNotifications(prev => {
+      const next = prev.map(n => n.id === id ? { ...n, unread: false } : n);
+      try {
+        if (user?.id) localStorage.setItem(`socialita_notifications_${user.id}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
   const markAllNotificationsAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    setNotifications(prev => {
+      const next = prev.map(n => ({ ...n, unread: false }));
+      try {
+        if (user?.id) localStorage.setItem(`socialita_notifications_${user.id}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
 
@@ -596,7 +742,34 @@ export const SocialProvider = ({ children }) => {
     } catch {
       setJoinedGroups([]);
     }
-  }, [user.id]);
+
+    // Tải và khởi tạo tin nhắn và thông báo riêng theo từng tài khoản
+    try {
+      const savedConvs = localStorage.getItem(`socialita_conversations_${user.id}`);
+      if (savedConvs) {
+        setConversations(JSON.parse(savedConvs));
+      } else {
+        const seeds = getSeedConversations(user.name || 'Bạn');
+        localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(seeds));
+        setConversations(seeds);
+      }
+    } catch {
+      setConversations(INITIAL_CONVERSATIONS);
+    }
+
+    try {
+      const savedNotifs = localStorage.getItem(`socialita_notifications_${user.id}`);
+      if (savedNotifs) {
+        setNotifications(JSON.parse(savedNotifs));
+      } else {
+        const seeds = getSeedNotifications(user.name || 'bạn');
+        localStorage.setItem(`socialita_notifications_${user.id}`, JSON.stringify(seeds));
+        setNotifications(seeds);
+      }
+    } catch {
+      setNotifications(INITIAL_NOTIFICATIONS);
+    }
+  }, [user.id, user.name]);
 
   // 3. Đăng nhập
   const login = async (email, password) => {
@@ -707,6 +880,7 @@ export const SocialProvider = ({ children }) => {
   // 5. Đăng xuất
   const logout = () => {
     setCurrentUser(null);
+    setViewingProfileUser(null);
     localStorage.removeItem('currentUser');
     setUser(INITIAL_USER);
     loadUserProfile(INITIAL_USER.id);
@@ -1123,6 +1297,10 @@ export const SocialProvider = ({ children }) => {
         joinedGroups,
         toggleJoinGroup,
         loadUserProfile,
+        viewingProfileUser,
+        setViewingProfileUser,
+        openUserProfile,
+        closeUserProfile,
         isCreatePostModalOpen,
         openCreatePostModal: () => setIsCreatePostModalOpen(true),
         closeCreatePostModal: () => setIsCreatePostModalOpen(false),
