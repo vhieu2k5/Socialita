@@ -139,18 +139,17 @@ export const MessagesDrawer = ({ isOpen, onClose }) => {
               key={user.id}
               user={user}
               onClick={() => {
-                const existing = conversations.find(c => c.name === user.name);
+                const existing = conversations.find(c => Number(c.id) === Number(user.id) || Number(c.partnerId) === Number(user.id));
                 if (existing) {
                   openChat(existing);
                 } else {
                   openChat({
-                    id: 'temp-' + user.id,
+                    id: user.id,
+                    partnerId: user.id,
                     name: user.name,
                     avatar: user.avatar,
-                    isOnline: true,
-                    messages: [
-                      { id: 1, sender: user.name, text: 'Chào bạn! Mình có thể giúp gì cho bạn?', time: 'Vừa xong', isMe: false }
-                    ]
+                    isOnline: user.isOnline,
+                    messages: []
                   });
                 }
               }}

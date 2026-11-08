@@ -59,16 +59,13 @@ export const FriendsView = () => {
     setConfirmTarget(null);
   };
 
-  // Filter friend suggestions: strictly friends of friends (must have mutualFriends > 0)
-  // and not already in friends or requests
+  // Filter friend suggestions: not already in friends or requests
   const friendIds = new Set((friends || []).map(f => String(f.id)));
   const requestIds = new Set((friendRequests || []).map(r => String(r.id || r.requester_id)));
 
   const validSuggestions = (friendSuggestions || []).filter(s => {
     const sId = String(s.id);
-    if (friendIds.has(sId) || requestIds.has(sId)) return false;
-    // Suggest users who are friends with existing friends (friends of friends)
-    return (s.mutualFriends !== undefined && s.mutualFriends !== null) ? Number(s.mutualFriends) > 0 : false;
+    return !friendIds.has(sId) && !requestIds.has(sId);
   });
 
   return (

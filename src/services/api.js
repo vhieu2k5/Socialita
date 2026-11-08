@@ -31,7 +31,7 @@ async function request(endpoint, options = {}) {
     return data;
   } catch (err) {
     if (err.message === 'Failed to fetch') {
-      console.info(`[Socialita API] Không thể kết nối Backend (${API_BASE}). Đang dùng dữ liệu mẫu offline.`);
+      console.info(`[Socialita API] Không thể kết nối Backend (${API_BASE}).`);
     } else {
       console.warn(`[API Error] ${endpoint}:`, err.message);
     }
@@ -39,10 +39,9 @@ async function request(endpoint, options = {}) {
   }
 }
 
-
 // Online/Offline status helpers
 export const heartbeat = async (userId) => {
-  const res = await fetch(`${BASE}/api/users/heartbeat`, {
+  const res = await fetch(`${API_BASE}/api/users/heartbeat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId })
@@ -51,7 +50,7 @@ export const heartbeat = async (userId) => {
 };
 
 export const setOffline = async (userId) => {
-  const res = await fetch(`${BASE}/api/users/offline`, {
+  const res = await fetch(`${API_BASE}/api/users/offline`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId })
@@ -186,7 +185,57 @@ export const api = {
       body: JSON.stringify({ user_id1: userId1, user_id2: userId2, status })
     }),
 
-  // === ONLINE / OFFLINE STATUS ===
+  unfriend: (userId1, userId2) =>
+    request(`/api/friends/${userId1}/${userId2}`, {
+      method: 'DELETE'
+    }),
+
+  // === MESSAGES ===
+  getConversations: (userId) =>
+    request(`/api/messages/conversations/${userId}`),
+
+  getMessages: (u1, u2) =>
+    request(`/api/messages/${u1}/${u2}`),
+
+  sendMessage: (senderId, receiverId, content) =>
+    request('/api/messages', {
+      method: 'POST',
+      body: JSON.stringify({ sender_id: senderId, receiver_id: receiverId, content })
+    }),
+
+  markMessagesAsRead: (u1, u2) =>
+    request(`/api/messages/mark-read/${u1}/${u2}`, {
+      method: 'PUT'
+    }),
+
+  getUnreadMessagesCount: (userId) =>
+    request(`/api/messages/unread-count/${userId}`),
+
+  // === NOTIFICATIONS ===
+  getNotifications: (userId) =>
+    request(`/api/notifications/${userId}`),
+
+  getUnreadNotificationsCount: (userId) =>
+    request(`/api/notifications/unread-count/${userId}`),
+
+  markNotificationAsRead: (notifId) =>
+    request(`/api/notifications/${notifId}/read`, {
+      method: 'PUT'
+    }),
+
+  markAllNotificationsAsRead: (userId) =>
+    request(`/api/notifications/mark-all-read/${userId}`, {
+      method: 'PUT'
+    }),
+
+  // === USER PHOTOS ===
+  getUserPhotos: (userId) =>
+    request(`/api/users/${userId}/photos`),
+
+  // === USERS & ONLINE STATUS ===
+  getUsers: () =>
+    request('/api/users'),
+
   heartbeat: (userId) =>
     request('/api/users/heartbeat', {
       method: 'POST',
@@ -200,10 +249,5 @@ export const api = {
     }),
 
   getOnlineStatus: (currentUserId) =>
-    request(`/api/users/${currentUserId}/online-status`),
-
-  unfriend: (userId1, userId2) =>
-    request(`/api/friends/${userId1}/${userId2}`, {
-      method: 'DELETE'
-    })
+    request(`/api/users/${currentUserId}/online-status`)
 };

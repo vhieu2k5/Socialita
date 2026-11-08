@@ -16,248 +16,6 @@ import {
 
 const SocialContext = createContext(undefined);
 
-const INITIAL_ACTIVE_USERS = [
-  { id: 'u1', name: 'Hải Yến', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop', isOnline: true },
-  { id: 'u2', name: 'Đức Anh', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', isOnline: true },
-  { id: 'u3', name: 'Thuỳ Linh', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop', isOnline: true },
-  { id: 'u4', name: 'Bảo Trân', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop', isOnline: true },
-  { id: 'u5', name: 'Tấn Phát', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', isOnline: true }
-];
-
-const INITIAL_CONVERSATIONS = [
-  {
-    id: 'conv-1',
-    name: 'Quang Huy',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    isOnline: true,
-    isGroup: false,
-    time: '2 phút',
-    unread: 0,
-    lastMessage: 'Ê, mai đi Đà Lạt nhớ mang theo áo k',
-    messages: [
-      { id: 1, sender: 'Quang Huy', text: 'Hôm nay chuẩn bị đồ đi du lịch chưa ông?', time: '14:20', isMe: false },
-      { id: 2, sender: 'Bạn', text: 'Gần xong rồi ông ơi, đang soạn balo!', time: '14:22', isMe: true },
-      { id: 3, sender: 'Quang Huy', text: 'Ê, mai đi Đà Lạt nhớ mang theo áo khoác ấm nhé!', time: '14:25', isMe: false }
-    ]
-  },
-  {
-    id: 'conv-2',
-    name: 'Nhóm: Đồ án Web',
-    avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&h=100&fit=crop',
-    isOnline: true,
-    isGroup: true,
-    time: '14 phút',
-    unread: 5,
-    lastMessage: 'Hải Đăng: Mình vừa đẩy code lên nh',
-    messages: [
-      { id: 1, sender: 'Minh Tuấn', text: 'Mọi người test phần backend chưa?', time: '10:15', isMe: false },
-      { id: 2, sender: 'Hải Đăng', text: 'Mình vừa đẩy code lên nhánh mới rồi nhé!', time: '10:30', isMe: false }
-    ]
-  },
-  {
-    id: 'conv-3',
-    name: 'Hải Yến',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-    isOnline: true,
-    isGroup: false,
-    time: '1 giờ',
-    unread: 0,
-    lastMessage: '✓ Bạn: Ảnh đẹp lắm, gửi thêm mình xin và',
-    messages: [
-      { id: 1, sender: 'Hải Yến', text: 'Ảnh hôm nọ chụp ở trường nè bạn!', time: '09:12', isMe: false },
-      { id: 2, sender: 'Bạn', text: 'Ảnh đẹp lắm, gửi thêm mình xin vài tấm nữa nha', time: '09:15', isMe: true }
-    ]
-  },
-  {
-    id: 'conv-4',
-    name: 'Bảo Trân',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
-    isOnline: true,
-    isGroup: false,
-    time: '3 giờ',
-    unread: 1,
-    lastMessage: 'Video call tối nay lúc 8h nha 📹',
-    messages: [
-      { id: 1, sender: 'Bảo Trân', text: 'Tối nay rảnh họp nhóm online không?', time: '08:00', isMe: false },
-      { id: 2, sender: 'Bảo Trân', text: 'Video call tối nay lúc 8h nha 📹', time: '08:05', isMe: false }
-    ]
-  },
-  {
-    id: 'conv-5',
-    name: 'Đức Anh',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-    isOnline: false,
-    isIdle: true,
-    isGroup: false,
-    isMuted: true,
-    time: '5 giờ',
-    unread: 0,
-    lastMessage: '⟲ Bạn: Ok để mình xem lại lịch',
-    messages: [
-      { id: 1, sender: 'Đức Anh', text: 'Cuối tuần này rảnh cafe không ông?', time: 'Hôm qua', isMe: false },
-      { id: 2, sender: 'Bạn', text: 'Ok để mình xem lại lịch rồi báo lại nha', time: 'Hôm qua', isMe: true }
-    ]
-  },
-  {
-    id: 'conv-6',
-    name: 'Lan Anh',
-    avatar: '',
-    avatarBg: '#dc2626',
-    isOnline: true,
-    isGroup: false,
-    time: 'Hôm qua',
-    unread: 0,
-    lastMessage: 'Bạn: Test',
-    messages: [
-      { id: 1, sender: 'Lan Anh', text: 'Minh Anh ơi, cuối tuần này có rảnh đi cafe không?', time: '18:00', isMe: false },
-      { id: 2, sender: 'Bạn', text: 'Okie bạn ơi, chiều thứ 7 hẹn ở Phố Cổ nhé!', time: '18:15', isMe: true },
-      { id: 3, sender: 'Bạn', text: 'Hi', time: '10:59', isMe: true },
-      { id: 4, sender: 'Bạn', text: 'Chào bạn nha', time: '11:31', isMe: true },
-      { id: 5, sender: 'Bạn', text: 'Test', time: '08:04', isMe: true }
-    ]
-  }
-];
-
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 'notif-1',
-    user: 'Lê Minh Anh',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
-    type: 'like',
-    icon: '❤️',
-    iconBg: '#e52e3d',
-    content: 'đã thích bài viết của bạn: "Check-in Hải Phòng cuối tuần..."',
-    time: '5 phút trước',
-    unread: true
-  },
-  {
-    id: 'notif-2',
-    user: 'Quang Huy',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    type: 'comment',
-    icon: '💬',
-    iconBg: '#3b82f6',
-    content: 'đã bình luận về bài viết của bạn: "Quá đỉnh luôn bạn ơi!"',
-    time: '25 phút trước',
-    unread: true
-  },
-  {
-    id: 'notif-3',
-    user: 'Thuỳ Linh',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
-    type: 'friend',
-    icon: '👥',
-    iconBg: '#10b981',
-    content: 'đã gửi lời mời kết bạn cho bạn',
-    time: '1 giờ trước',
-    unread: true,
-    isFriendReq: true
-  },
-  {
-    id: 'notif-4',
-    user: 'Bảo Trân',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop',
-    type: 'mention',
-    icon: '🏷️',
-    iconBg: '#8b5cf6',
-    content: 'đã nhắc đến bạn trong một bình luận ở Hội nhóm sinh viên',
-    time: '3 giờ trước',
-    unread: false
-  },
-  {
-    id: 'notif-5',
-    user: 'Socialita',
-    avatar: '/logo.png',
-    type: 'system',
-    icon: '🔔',
-    iconBg: '#18181c',
-    content: 'Chào mừng bạn đến với Socialita! Hãy hoàn thiện hồ sơ để kết nối cùng bạn bè.',
-    time: 'Hôm qua',
-    unread: false
-  }
-];
-
-
-const getSeedConversations = (userName = 'Bạn') => [
-  {
-    id: 'conv-1',
-    name: 'Quang Huy',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    isOnline: true,
-    isGroup: false,
-    time: '2 phút',
-    unread: 1,
-    lastMessage: 'Chào bạn! Rất vui được kết nối trên Socialita nhé 🎉',
-    messages: [
-      { id: 1, sender: 'Quang Huy', text: 'Chào bạn! Rất vui được kết nối trên Socialita nhé 🎉', time: '14:20', isMe: false }
-    ]
-  },
-  {
-    id: 'conv-2',
-    name: 'Nhóm: Đồ án Web Socialita',
-    avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=100&h=100&fit=crop',
-    isOnline: true,
-    isGroup: true,
-    time: '14 phút',
-    unread: 2,
-    lastMessage: 'Hải Đăng: Chào mừng thành viên mới gia nhập nhóm!',
-    messages: [
-      { id: 1, sender: 'Minh Tuấn', text: 'Chào mừng bạn đến với Socialita!', time: '10:15', isMe: false },
-      { id: 2, sender: 'Hải Đăng', text: 'Chào mừng thành viên mới gia nhập nhóm!', time: '10:30', isMe: false }
-    ]
-  },
-  {
-    id: 'conv-3',
-    name: 'Hải Yến',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
-    isOnline: true,
-    isGroup: false,
-    time: '1 giờ',
-    unread: 0,
-    lastMessage: 'Hải Yến: Chào bạn, chúc bạn một ngày tốt lành!',
-    messages: [
-      { id: 1, sender: 'Hải Yến', text: 'Chào bạn, chúc bạn một ngày tốt lành!', time: '09:12', isMe: false }
-    ]
-  }
-];
-
-const getSeedNotifications = (userName = 'bạn') => [
-  {
-    id: 'notif-welcome',
-    user: 'Socialita',
-    avatar: '/logo.png',
-    type: 'system',
-    icon: '🔔',
-    iconBg: '#18181c',
-    content: `Chào mừng ${userName} đến với Socialita! Hãy hoàn thiện hồ sơ để kết nối cùng bạn bè.`,
-    time: 'Vừa xong',
-    unread: true
-  },
-  {
-    id: 'notif-1',
-    user: 'Quang Huy',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
-    type: 'friend',
-    icon: '👥',
-    iconBg: '#10b981',
-    content: 'đã gửi lời mời kết bạn cho bạn',
-    time: '5 phút trước',
-    unread: true,
-    isFriendReq: true
-  },
-  {
-    id: 'notif-2',
-    user: 'Lê Minh Anh',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
-    type: 'like',
-    icon: '❤️',
-    iconBg: '#e52e3d',
-    content: 'đã chào mừng bạn đến với cộng đồng Socialita',
-    time: '15 phút trước',
-    unread: true
-  }
-];
-
 export const SocialProvider = ({ children }) => {
   // 1. Quản lý phiên người dùng đăng nhập
   const [currentUser, setCurrentUser] = useState(() => {
@@ -374,33 +132,9 @@ export const SocialProvider = ({ children }) => {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [activeChat, setActiveChat] = useState(null);
-  const [conversations, setConversations] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('currentUser');
-      const uId = savedUser ? JSON.parse(savedUser).id : (INITIAL_USER.id || 1);
-      const savedConvs = localStorage.getItem(`socialita_conversations_${uId}`);
-      if (savedConvs) return JSON.parse(savedConvs);
-      const seeds = getSeedConversations(savedUser ? (JSON.parse(savedUser).full_name || JSON.parse(savedUser).username) : 'Bạn');
-      localStorage.setItem(`socialita_conversations_${uId}`, JSON.stringify(seeds));
-      return seeds;
-    } catch {
-      return INITIAL_CONVERSATIONS;
-    }
-  });
-  const [activeUsers, setActiveUsers] = useState(INITIAL_ACTIVE_USERS);
-  const [notifications, setNotifications] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('currentUser');
-      const uId = savedUser ? JSON.parse(savedUser).id : (INITIAL_USER.id || 1);
-      const savedNotifs = localStorage.getItem(`socialita_notifications_${uId}`);
-      if (savedNotifs) return JSON.parse(savedNotifs);
-      const seeds = getSeedNotifications(savedUser ? (JSON.parse(savedUser).full_name || JSON.parse(savedUser).username) : 'bạn');
-      localStorage.setItem(`socialita_notifications_${uId}`, JSON.stringify(seeds));
-      return seeds;
-    } catch {
-      return INITIAL_NOTIFICATIONS;
-    }
-  });
+  const [conversations, setConversations] = useState([]);
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
 
   const unreadMessagesCount = conversations.reduce((acc, c) => acc + (c.unread || 0), 0);
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
@@ -420,118 +154,128 @@ export const SocialProvider = ({ children }) => {
     setIsNotificationsOpen(false);
   };
 
-  const openChat = (conv) => {
-    setConversations(prev => {
-      const next = prev.map(c => c.id === conv.id ? { ...c, unread: 0 } : c);
-      try {
-        if (user?.id) localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-    setActiveChat({ ...conv, unread: 0 });
+  const openChat = async (target) => {
+    const partnerId = target.partnerId || target.id;
+    if (!partnerId) return;
+
+    const initialChat = {
+      id: partnerId,
+      partnerId: partnerId,
+      name: target.partner_name || target.name || target.username || 'Người dùng',
+      avatar: target.partner_avatar || target.avatar || target.avatar_url || '',
+      avatarBg: target.avatarBg || '#dc2626',
+      isOnline: true,
+      messages: []
+    };
+    setActiveChat(initialChat);
     setIsMessagesOpen(false);
+
+    // Xóa unread trong local state hội thoại
+    setConversations(prev => prev.map(c => (Number(c.id) === Number(partnerId) || Number(c.partnerId) === Number(partnerId)) ? { ...c, unread: 0 } : c));
+
+    // Lấy tin nhắn thực tế từ database
+    try {
+      if (user?.id) {
+        const res = await api.getMessages(user.id, partnerId);
+        if (res && Array.isArray(res.messages)) {
+          const formattedMessages = res.messages.map(m => {
+            let timeStr = 'Vừa xong';
+            if (m.created_at) {
+              const d = new Date(m.created_at);
+              if (!isNaN(d.getTime())) {
+                timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+              }
+            }
+            return {
+              id: m.id,
+              sender: m.sender_name || (Number(m.sender_id) === Number(user.id) ? 'Bạn' : initialChat.name),
+              text: m.content,
+              time: timeStr,
+              isMe: Number(m.sender_id) === Number(user.id)
+            };
+          });
+          setActiveChat(prev => (prev && (Number(prev.id) === Number(partnerId) || Number(prev.partnerId) === Number(partnerId))) ? { ...prev, messages: formattedMessages } : prev);
+        }
+        await api.markMessagesAsRead(user.id, partnerId);
+        loadConversations();
+      }
+    } catch (err) {
+      console.warn('Lỗi tải tin nhắn chi tiết:', err.message);
+    }
   };
 
   const closeChat = () => {
     setActiveChat(null);
   };
 
-  const sendMessage = (convId, text) => {
+  const sendMessage = async (convId, text) => {
+    if (!text || !text.trim() || !user?.id) return;
+    const partnerId = activeChat?.partnerId || activeChat?.id || convId;
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const newMsg = {
-      id: Date.now(),
+    const tempId = `temp-${Date.now()}`;
+    const tempMsg = {
+      id: tempId,
       sender: user.name || 'Bạn',
-      text,
+      text: text.trim(),
       time: timeStr,
       isMe: true
     };
 
-    setConversations(prev => {
-      const next = prev.map(c => {
-        if (c.id === convId) {
-          return {
-            ...c,
-            lastMessage: 'Bạn: ' + text,
-            time: timeStr,
-            messages: [...(c.messages || []), newMsg]
-          };
-        }
-        return c;
-      });
-      try {
-        if (user?.id) localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(next));
-      } catch {}
-      return next;
+    setActiveChat(prev => {
+      if (prev && (Number(prev.id) === Number(partnerId) || Number(prev.partnerId) === Number(partnerId))) {
+        return {
+          ...prev,
+          lastMessage: 'Bạn: ' + text.trim(),
+          messages: [...(prev.messages || []), tempMsg]
+        };
+      }
+      return prev;
     });
 
-    if (activeChat && activeChat.id === convId) {
-      setActiveChat(prev => ({
-        ...prev,
-        lastMessage: 'Bạn: ' + text,
-        messages: [...(prev.messages || []), newMsg]
-      }));
-
-      // Mô phỏng người kia trả lời sau 1.2s để giao diện sống động
-      setTimeout(() => {
-        const replyNow = new Date();
-        const replyTime = `${String(replyNow.getHours()).padStart(2, '0')}:${String(replyNow.getMinutes()).padStart(2, '0')}`;
-        const replyMsg = {
-          id: Date.now() + 1,
-          sender: activeChat.name,
-          text: 'Ok bạn nha, mình nhận được tin nhắn rồi!',
-          time: replyTime,
-          isMe: false
+    try {
+      const res = await api.sendMessage(user.id, partnerId, text.trim());
+      if (res && res.messageData) {
+        const realMsg = {
+          id: res.messageData.id,
+          sender: 'Bạn',
+          text: res.messageData.content,
+          time: timeStr,
+          isMe: true
         };
-        setConversations(prev => {
-          const next = prev.map(c => {
-            if (c.id === convId) {
-              return {
-                ...c,
-                lastMessage: replyMsg.text,
-                time: replyTime,
-                messages: [...(c.messages || []), replyMsg]
-              };
-            }
-            return c;
-          });
-          try {
-            if (user?.id) localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(next));
-          } catch {}
-          return next;
-        });
         setActiveChat(prev => {
-          if (prev && prev.id === convId) {
-            return {
-              ...prev,
-              lastMessage: replyMsg.text,
-              messages: [...(prev.messages || []), replyMsg]
-            };
+          if (prev && (Number(prev.id) === Number(partnerId) || Number(prev.partnerId) === Number(partnerId))) {
+            const nextMsgs = (prev.messages || []).map(m => m.id === tempId ? realMsg : m);
+            return { ...prev, messages: nextMsgs };
           }
           return prev;
         });
-      }, 1200);
+      }
+      loadConversations();
+    } catch (err) {
+      console.error('Lỗi lưu tin nhắn vào CSDL:', err);
+      showToast('Lỗi gửi tin nhắn đến máy chủ', 'error');
     }
   };
 
-  const markNotificationAsRead = (id) => {
-    setNotifications(prev => {
-      const next = prev.map(n => n.id === id ? { ...n, unread: false } : n);
-      try {
-        if (user?.id) localStorage.setItem(`socialita_notifications_${user.id}`, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+  const markNotificationAsRead = async (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+    try {
+      await api.markNotificationAsRead(id);
+    } catch (err) {
+      console.warn('Lỗi đánh dấu thông báo đã đọc:', err.message);
+    }
   };
 
-  const markAllNotificationsAsRead = () => {
-    setNotifications(prev => {
-      const next = prev.map(n => ({ ...n, unread: false }));
-      try {
-        if (user?.id) localStorage.setItem(`socialita_notifications_${user.id}`, JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+  const markAllNotificationsAsRead = async () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    try {
+      if (user?.id) {
+        await api.markAllNotificationsAsRead(user.id);
+      }
+    } catch (err) {
+      console.warn('Lỗi đánh dấu tất cả thông báo đã đọc:', err.message);
+    }
   };
 
 
@@ -561,6 +305,109 @@ export const SocialProvider = ({ children }) => {
       return [trimmed];
     }
     return [];
+  };
+
+
+  // Tải danh sách cuộc hội thoại từ Backend MySQL
+  const loadConversations = async (overrideUserId) => {
+    const targetUserId = overrideUserId !== undefined ? overrideUserId : user?.id;
+    if (!targetUserId) return;
+    try {
+      const res = await api.getConversations(targetUserId);
+      if (res && Array.isArray(res.conversations)) {
+        const formatted = res.conversations.map(c => {
+          let timeStr = 'Vừa xong';
+          if (c.last_time) {
+            const d = new Date(c.last_time);
+            if (!isNaN(d.getTime())) {
+              timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            }
+          }
+          return {
+            id: c.partner_id,
+            partnerId: c.partner_id,
+            name: c.partner_name || c.partner_username || 'Người dùng',
+            username: c.partner_username,
+            avatar: c.partner_avatar || '',
+            avatarBg: '#dc2626',
+            isOnline: true,
+            isGroup: false,
+            time: timeStr,
+            unread: Number(c.unread_count) || 0,
+            lastMessage: (Number(c.last_sender_id) === Number(targetUserId) ? 'Bạn: ' : '') + (c.last_message || ''),
+            messages: []
+          };
+        });
+        setConversations(formatted);
+      }
+    } catch (err) {
+      console.warn('Lỗi tải danh sách cuộc trò chuyện:', err.message);
+    }
+  };
+
+  // Tải danh sách thông báo từ Backend MySQL
+  const loadNotifications = async (overrideUserId) => {
+    const targetUserId = overrideUserId !== undefined ? overrideUserId : user?.id;
+    if (!targetUserId) return;
+    try {
+      const res = await api.getNotifications(targetUserId);
+      if (res && Array.isArray(res.notifications)) {
+        const formatted = res.notifications.map(n => {
+          let icon = '🔔';
+          let iconBg = '#18181c';
+          if (n.type === 'like') {
+            icon = '❤️';
+            iconBg = '#e52e3d';
+          } else if (n.type === 'comment') {
+            icon = '💬';
+            iconBg = '#3b82f6';
+          } else if (n.type === 'friend' || n.type === 'friend_accept') {
+            icon = '👥';
+            iconBg = '#10b981';
+          }
+
+          return {
+            id: n.id,
+            user: n.actor_name || n.actor_username || 'Người dùng',
+            avatar: n.actor_avatar || '',
+            type: n.type,
+            icon,
+            iconBg,
+            content: n.content || '',
+            time: n.created_at ? formatDate(n.created_at) : 'Vừa xong',
+            unread: !n.is_read,
+            isFriendReq: n.type === 'friend',
+            actor_id: n.actor_id,
+            post_id: n.post_id
+          };
+        });
+        setNotifications(formatted);
+      }
+    } catch (err) {
+      console.warn('Lỗi tải thông báo từ backend:', err.message);
+    }
+  };
+
+  // Tải danh sách người dùng thật từ Backend MySQL
+  const loadActiveUsers = async (overrideUserId) => {
+    const targetUserId = overrideUserId !== undefined ? overrideUserId : user?.id;
+    if (!targetUserId) return;
+    try {
+      const res = await api.getOnlineStatus(targetUserId);
+      if (res && Array.isArray(res.users)) {
+        const formatted = res.users.map(u => ({
+          id: u.id,
+          name: u.full_name || u.username || 'Người dùng',
+          username: u.username,
+          avatar: u.avatar_url || '',
+          avatarBg: '#dc2626',
+          isOnline: Boolean(u.is_online)
+        }));
+        setActiveUsers(formatted);
+      }
+    } catch (err) {
+      console.warn('Lỗi tải danh sách người dùng:', err.message);
+    }
   };
 
   // 2. Tải danh sách bài viết từ Backend MySQL khi khởi động
@@ -627,7 +474,7 @@ export const SocialProvider = ({ children }) => {
               avatar_url: f.avatar_url || '',
               avatarBg: '#e52e3d',
               friendSince: friendSinceStr,
-              mutualFriends: 0,
+              mutualFriends: Number(f.mutualFriends) || 0,
               bio: f.bio || '',
               school: f.school || '',
               liveIn: f.liveIn || ''
@@ -669,7 +516,7 @@ export const SocialProvider = ({ children }) => {
             username: s.username,
             avatar_url: s.avatar_url || '',
             avatarBg: '#4c8dff',
-            mutualFriends: 0,
+            mutualFriends: Number(s.mutualFriends) || 0,
             requested: false
           }));
           setFriendSuggestions(formattedSuggestions);
@@ -725,51 +572,63 @@ export const SocialProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    if (!user?.id) return;
     loadUserProfile();
     loadPostsFromBackend();
     loadFriendsFromBackend();
+    loadConversations();
+    loadNotifications();
+    loadActiveUsers();
+    api.heartbeat(user.id).catch(() => {});
   }, [user.id, user.name]);
 
   useEffect(() => {
     if (!user?.id) return;
-    try {
-      const stored = localStorage.getItem(`socialita_groups_${user.id}`);
-      if (stored) {
-        setJoinedGroups(JSON.parse(stored));
-      } else {
-        setJoinedGroups(Number(user.id) === 1 ? MY_JOINED_GROUPS : []);
-      }
-    } catch {
-      setJoinedGroups([]);
-    }
 
-    // Tải và khởi tạo tin nhắn và thông báo riêng theo từng tài khoản
-    try {
-      const savedConvs = localStorage.getItem(`socialita_conversations_${user.id}`);
-      if (savedConvs) {
-        setConversations(JSON.parse(savedConvs));
-      } else {
-        const seeds = getSeedConversations(user.name || 'Bạn');
-        localStorage.setItem(`socialita_conversations_${user.id}`, JSON.stringify(seeds));
-        setConversations(seeds);
-      }
-    } catch {
-      setConversations(INITIAL_CONVERSATIONS);
-    }
+    // Polling định kỳ cập nhật tin nhắn, thông báo và bạn bè theo thời gian thực
+    const interval = setInterval(async () => {
+      loadConversations();
+      loadNotifications();
+      loadFriendsFromBackend();
+      api.heartbeat(user.id).catch(() => {});
 
-    try {
-      const savedNotifs = localStorage.getItem(`socialita_notifications_${user.id}`);
-      if (savedNotifs) {
-        setNotifications(JSON.parse(savedNotifs));
-      } else {
-        const seeds = getSeedNotifications(user.name || 'bạn');
-        localStorage.setItem(`socialita_notifications_${user.id}`, JSON.stringify(seeds));
-        setNotifications(seeds);
+      if (activeChat && activeChat.id) {
+        try {
+          const res = await api.getMessages(user.id, activeChat.id);
+          if (res && Array.isArray(res.messages)) {
+            const formatted = res.messages.map(m => {
+              let timeStr = 'Vừa xong';
+              if (m.created_at) {
+                const d = new Date(m.created_at);
+                if (!isNaN(d.getTime())) {
+                  timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                }
+              }
+              return {
+                id: m.id,
+                sender: m.sender_name || (Number(m.sender_id) === Number(user.id) ? 'Bạn' : activeChat.name),
+                text: m.content,
+                time: timeStr,
+                isMe: Number(m.sender_id) === Number(user.id)
+              };
+            });
+
+            setActiveChat(prev => {
+              if (!prev || prev.id !== activeChat.id) return prev;
+              const prevMsgs = prev.messages || [];
+              if (prevMsgs.length !== formatted.length ||
+                  (formatted.length > 0 && prevMsgs[prevMsgs.length - 1]?.id !== formatted[formatted.length - 1]?.id)) {
+                return { ...prev, messages: formatted };
+              }
+              return prev;
+            });
+          }
+        } catch (e) {}
       }
-    } catch {
-      setNotifications(INITIAL_NOTIFICATIONS);
-    }
-  }, [user.id, user.name]);
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [user?.id, activeChat?.id]);
 
   // 3. Đăng nhập
   const login = async (email, password) => {

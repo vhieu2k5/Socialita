@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSocial } from '../context/SocialContext';
 import { PostCard } from '../components/feed/PostCard';
+import { api } from '../services/api';
 
 export const ProfileView = () => {
   const {
@@ -19,6 +20,7 @@ export const ProfileView = () => {
     showToast
   } = useSocial();
   const [activeSubTab, setActiveSubTab] = useState('posts');
+  const [userPhotos, setUserPhotos] = useState([]);
   const avatarInputRef = useRef(null);
 
   // If viewingProfileUser is set and different from logged in user, show that user's profile
@@ -31,6 +33,29 @@ export const ProfileView = () => {
     (p.user_id && displayUser.id && Number(p.user_id) === Number(displayUser.id)) ||
     (p.authorName && displayUser.name && p.authorName.trim() === displayUser.name.trim())
   );
+
+  useEffect(() => {
+    let isMounted = true;
+    if (displayUser?.id) {
+      api.getUserPhotos(displayUser.id)
+        .then(res => {
+          if (isMounted && res && Array.isArray(res.photos)) {
+            setUserPhotos(res.photos);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            const fallback = displayPosts.flatMap(p => {
+              if (p.images && p.images.length > 0) return p.images;
+              if (p.image_url && !p.image_url.startsWith('linear-gradient') && !p.image_url.startsWith('#')) return [p.image_url];
+              return [];
+            }).filter(Boolean);
+            setUserPhotos(fallback);
+          }
+        });
+    }
+    return () => { isMounted = false; };
+  }, [displayUser?.id, displayPosts.length]);
 
   const handleAvatarFile = async (e) => {
     const file = e.target.files?.[0];
@@ -236,14 +261,24 @@ export const ProfileView = () => {
           {activeSubTab === 'photos' && (
             <div className="widget-card">
               <h3 className="widget-card-title">Bộ sưu tập ảnh</h3>
-              <div className="photo-grid-6">
-                <div className="photo-square" style={{ background: '#3a3b3c' }}></div>
-                <div className="photo-square" style={{ background: '#4e4f50' }}></div>
-                <div className="photo-square" style={{ background: '#5c4419' }}></div>
-                <div className="photo-square" style={{ background: '#274a82' }}></div>
-                <div className="photo-square" style={{ background: '#5c2323' }}></div>
-                <div className="photo-square" style={{ background: '#1b5b50' }}></div>
-              </div>
+              {userPhotos && userPhotos.length > 0 ? (
+                <div className="photo-grid-6">
+                  {userPhotos.map((imgUrl, idx) => (
+                    <div key={idx} className="photo-square" style={{ overflow: 'hidden' }}>
+                      <img
+                        src={imgUrl}
+                        alt={`Ảnh ${idx + 1}`}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-gray)' }}>
+                  Chưa có ảnh nào được đăng tải.
+                </div>
+              )}
             </div>
           )}
 
@@ -292,14 +327,24 @@ export const ProfileView = () => {
           {/* Card Ảnh */}
           <div className="widget-card">
             <h3 className="widget-card-title">Ảnh</h3>
-            <div className="photo-grid-6">
-              <div className="photo-square" style={{ background: '#3a3b3c' }}></div>
-              <div className="photo-square" style={{ background: '#4e4f50' }}></div>
-              <div className="photo-square" style={{ background: '#5c4419' }}></div>
-              <div className="photo-square" style={{ background: '#274a82' }}></div>
-              <div className="photo-square" style={{ background: '#5c2323' }}></div>
-              <div className="photo-square" style={{ background: '#1b5b50' }}></div>
-            </div>
+            {userPhotos && userPhotos.length > 0 ? (
+              <div className="photo-grid-6">
+                {userPhotos.slice(0, 6).map((imgUrl, idx) => (
+                  <div key={idx} className="photo-square" style={{ overflow: 'hidden' }}>
+                    <img
+                      src={imgUrl}
+                      alt={`Ảnh ${idx + 1}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '16px 0', fontSize: '13px', color: 'var(--text-gray)' }}>
+                Chưa có ảnh nào được tải lên
+              </div>
+            )}
           </div>
         </div>
       </div>
