@@ -814,7 +814,7 @@
         <div class="form-group">
           <label>Hình ảnh đính kèm (Tùy chọn)</label>
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <input type="file" id="create-post-image-file" accept="image/*" class="form-control" style="padding:6px;" onchange="handlePostImageSelect(this)">
+            <input type="file" id="create-post-image-file" accept="image/*" multiple class="form-control" style="padding:6px;" onchange="handlePostImageSelect(this)">
             <input type="text" id="create-post-image-url" class="form-control" placeholder="Hoặc dán liên kết URL ảnh..." oninput="handlePostImageUrlInput(this)">
             <div id="create-post-image-preview-wrapper" style="display:none; position:relative; max-height:180px; overflow:hidden; border-radius:8px; border:1px solid var(--border-light); margin-top:4px;">
               <img id="create-post-image-preview" src="" style="width:100%; height:180px; object-fit:cover; display:block;">

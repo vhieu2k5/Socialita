@@ -12,6 +12,7 @@ erDiagram
         varchar email UK "Email"
         varchar avatar_url "Ảnh đại diện"
         varchar school "Trường học/Nơi làm việc"
+        varchar liveIn "Nơi sinh sống"
         enum roles "Phân quyền (admin/user)"
         enum status "Trạng thái (active/locked)"
         timestamp last_login_at "Đăng nhập cuối"
@@ -26,6 +27,7 @@ erDiagram
         varchar image_url "Hình ảnh"
         varchar location "Vị trí"
         varchar gradient "Màu nền"
+        enum privacy "Quyền riêng tư (public/friends/private)"
         enum status "Trạng thái (active/hidden)"
         timestamp created_at
         timestamp updated_at
@@ -70,6 +72,7 @@ erDiagram
         int id PK
         int post_id FK "Bài viết"
         int user_id FK "Người bình luận"
+        int parent_id FK "Bình luận cha (trả lời/reply)"
         text content "Nội dung bình luận"
         timestamp created_at
     }
@@ -82,14 +85,29 @@ erDiagram
         timestamp created_at
     }
 
+    NOTIFICATIONS {
+        int id PK
+        int user_id FK "Người nhận thông báo"
+        int actor_id FK "Người thực hiện hành động"
+        varchar type "Loại thông báo (like, comment, friend...)"
+        int post_id FK "Bài viết liên quan"
+        text content "Nội dung thông báo"
+        boolean is_read "Trạng thái đã đọc"
+        timestamp created_at
+    }
+
     %% Quan hệ giữa các bảng
     USERS ||--o{ POSTS : "đăng bài (creates)"
     USERS ||--o{ COMMENTS : "viết bình luận (writes)"
     USERS ||--o{ REACTIONS : "thả tim (reacts)"
     USERS ||--o{ MESSAGES : "gửi/nhận (sends/receives)"
     USERS ||--o{ FRIENDSHIPS : "kết bạn (befriends)"
+    USERS ||--o{ NOTIFICATIONS : "nhận (receives)"
+    USERS ||--o{ NOTIFICATIONS : "kích hoạt (triggers)"
     POSTS ||--o{ COMMENTS : "chứa (has)"
     POSTS ||--o{ REACTIONS : "nhận (receives)"
+    POSTS ||--o{ NOTIFICATIONS : "liên kết (references)"
+    COMMENTS ||--o{ COMMENTS : "trả lời (replies)"
 ```
 
 ### Chú thích ký hiệu:

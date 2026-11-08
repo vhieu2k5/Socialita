@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.46, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
 --
 -- Host: localhost    Database: mini_social
 -- ------------------------------------------------------
--- Server version	8.0.46
+-- Server version	8.4.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -33,7 +33,7 @@ CREATE TABLE `reactions` (
   KEY `fk_reactions_user_id` (`user_id`),
   CONSTRAINT `fk_reactions_post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_reactions_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,7 +42,7 @@ CREATE TABLE `reactions` (
 
 LOCK TABLES `reactions` WRITE;
 /*!40000 ALTER TABLE `reactions` DISABLE KEYS */;
-INSERT INTO `reactions` VALUES (2,1,2,'love','2026-09-28 03:41:02'),(3,1,6,'love','2026-09-28 03:41:02'),(4,1,7,'love','2026-09-28 03:41:02'),(5,2,1,'love','2026-09-28 03:41:02'),(6,2,6,'like','2026-09-28 03:41:02'),(7,2,7,'love','2026-09-28 03:41:02'),(8,3,1,'love','2026-09-28 03:41:02'),(9,3,2,'love','2026-09-28 03:41:02'),(10,3,7,'like','2026-09-28 03:41:02'),(11,4,1,'love','2026-09-28 03:41:02'),(12,4,2,'love','2026-09-28 03:41:02'),(14,1,1,'love','2026-10-04 04:22:05'),(15,9,1,'love','2026-10-04 04:27:56'),(16,10,1,'love','2026-10-04 04:29:15'),(17,11,1,'love','2026-10-04 04:35:04');
+INSERT INTO `reactions` VALUES (2,1,2,'love','2026-09-28 03:41:02'),(3,1,6,'love','2026-09-28 03:41:02'),(4,1,7,'love','2026-09-28 03:41:02'),(5,2,1,'love','2026-09-28 03:41:02'),(6,2,6,'like','2026-09-28 03:41:02'),(7,2,7,'love','2026-09-28 03:41:02'),(8,3,1,'love','2026-09-28 03:41:02'),(9,3,2,'love','2026-09-28 03:41:02'),(10,3,7,'like','2026-09-28 03:41:02'),(11,4,1,'love','2026-09-28 03:41:02'),(12,4,2,'love','2026-09-28 03:41:02'),(14,1,1,'love','2026-10-04 04:22:05'),(15,9,1,'love','2026-10-04 04:27:56'),(16,10,1,'love','2026-10-04 04:29:15'),(17,11,1,'love','2026-10-04 04:35:04'),(18,14,12,'love','2026-11-08 05:55:22'),(19,14,11,'love','2026-11-08 05:55:36'),(20,11,2,'love','2026-11-08 06:40:08');
 /*!40000 ALTER TABLE `reactions` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -55,4 +55,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-04 11:42:22
+-- Dump completed on 2026-11-08 13:40:16
