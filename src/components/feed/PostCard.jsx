@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSocial } from '../../context/SocialContext';
 import { formatDate, getInitials } from '../../utils/formatters';
 import { PostMediaGrid } from './PostMediaGrid';
+import { ConfirmModal } from '../ui/ConfirmModal';
 
 export const PostCard = ({ post }) => {
   const {
@@ -11,6 +12,7 @@ export const PostCard = ({ post }) => {
     deleteCommentPost,
     sharePost,
     deletePost,
+    showToast,
     currentUser,
     user
   } = useSocial();
@@ -20,6 +22,22 @@ export const PostCard = ({ post }) => {
   const [comments, setComments] = useState(post.comments || []);
   const [loadingComments, setLoadingComments] = useState(false);
   const [likedCommentIds, setLikedCommentIds] = useState([]);
+
+  // Three-dot options menu state
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handle = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
 
   // Quản lý trả lời lồng nhau kiểu Facebook
   const [activeReplyParentId, setActiveReplyParentId] = useState(null);
@@ -61,6 +79,26 @@ export const PostCard = ({ post }) => {
     setCommentText('');
   };
 
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/post/${post.id}`;
+    navigator.clipboard.writeText(url).then(() => {
+      showToast('Đã sao chép liên kết bài viết!');
+    }).catch(() => {
+      showToast('Không thể sao chép liên kết', 'error');
+    });
+    setMenuOpen(false);
+  };
+
+  const handleDeleteClick = () => {
+    setMenuOpen(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deletePost(post.id);
+    setShowDeleteConfirm(false);
+  };
+
   // Mở ô trả lời lồng nhau trực tiếp dưới bình luận
   const handleOpenReply = (parentCommentId, targetAuthorName) => {
     setActiveReplyParentId(parentCommentId);
@@ -71,61 +109,61 @@ export const PostCard = ({ post }) => {
     }, 60);
   };
 
-  // Gửi phản hồi lồng nhau (parent_id = parentCommentId)
-  const handleReplySubmit = async (e, parentCommentId) => {
+  // Gửi câu trả lời con (parent_id = rootCommentId)
+  const handleReplySubmit = async (e, parentId) => {
     e.preventDefault();
     if (!replyText.trim()) return;
 
-    let finalContent = replyText.trim();
-    const newComment = await addCommentPost(post.id, finalContent, parentCommentId);
-    if (newComment) {
-      setComments((prev) => [...prev, newComment]);
+    const newReply = await addCommentPost(post.id, replyText.trim(), parentId);
+    if (newReply) {
+      setComments((prev) => [...prev, newReply]);
     }
-    setReplyText('');
     setActiveReplyParentId(null);
+    setReplyText('');
     setReplyTargetName('');
   };
 
-  const handleDeleteComment = async (commentId) => {
-    await deleteCommentPost(commentId, post.id);
-    setComments((prev) => prev.filter((c) => String(c.id) !== String(commentId) && String(c.parent_id) !== String(commentId)));
-  };
-
+  // Thả tim bình luận
   const handleToggleLikeComment = (commentId) => {
     setLikedCommentIds((prev) =>
       prev.includes(commentId) ? prev.filter((id) => id !== commentId) : [...prev, commentId]
     );
   };
 
-  // Format nội dung bình luận (Làm nổi bật @Tag tên người dùng)
-  const renderCommentContent = (content) => {
-    if (!content) return '';
-    const matchMention = content.match(/^(@[^\s]+\s[^\s]+|@[^\s]+)(.*)/s);
-    if (matchMention) {
-      return (
-        <>
-          <span style={{ color: '#1877f2', fontWeight: 700, marginRight: '4px' }}>
-            {matchMention[1]}
-          </span>
-          {matchMention[2]}
-        </>
-      );
+  // Xóa bình luận
+  const handleDeleteComment = async (commentId) => {
+    const ok = await deleteCommentPost(commentId, post.id);
+    if (ok) {
+      setComments((prev) => prev.filter((c) => c.id !== commentId && c.parent_id !== commentId));
     }
-    return content;
   };
 
-  // Tách bình luận gốc (Level 1) và phản hồi (Level 2)
-  const rootComments = [];
-  const repliesMap = {};
-
-  comments.forEach((c) => {
+  // Phân tách cây bình luận 2 cấp (Gốc & Phản hồi)
+  const rootComments = comments.filter((c) => !c.parent_id);
+  const repliesMap = comments.reduce((acc, c) => {
     if (c.parent_id) {
-      if (!repliesMap[c.parent_id]) repliesMap[c.parent_id] = [];
-      repliesMap[c.parent_id].push(c);
-    } else {
-      rootComments.push(c);
+      if (!acc[c.parent_id]) acc[c.parent_id] = [];
+      acc[c.parent_id].push(c);
     }
-  });
+    return acc;
+  }, {});
+
+
+  // Render highlight @tên_người_được_trả_lời
+  const renderCommentContent = (content) => {
+    if (!content) return '';
+    const parts = content.split(/(@[\p{L}0-9_\s]+?\b)/gu);
+    return parts.map((part, index) => {
+      if (part.startsWith('@')) {
+        return (
+          <span key={index} className="mention-tag" style={{ color: 'var(--brand-red)', fontWeight: 700 }}>
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
 
   const isVideoUrl = (url) => typeof url === 'string' && (/\.(mp4|webm|mov|ogg)($|\?)/i.test(url) || url.includes('video/'));
 
@@ -169,6 +207,7 @@ export const PostCard = ({ post }) => {
 
   const currentCommentCount = Math.max(post.commentsCount || 0, comments.length);
 
+
   return (
     <article className="post-card">
       {/* 1. Header Tác giả */}
@@ -176,7 +215,7 @@ export const PostCard = ({ post }) => {
         <div className="post-author">
           <div className="avatar-circle" style={{ backgroundColor: post.authorAvatarBg || '#e52e3d' }}>
             {post.authorAvatar ? (
-              <img src={post.authorAvatar} alt={post.authorName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              <img src={post.authorAvatar} alt={post.authorName} style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
             ) : (
               getInitials(post.authorName)
             )}
@@ -187,25 +226,38 @@ export const PostCard = ({ post }) => {
           </div>
         </div>
 
-        {/* Nút xóa bài viết nếu là tác giả hoặc admin */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {isAuthorOrAdmin && (
-            <button
-              onClick={() => deletePost(post.id)}
-              title="Xóa bài viết"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#9ca3af',
-                fontSize: '14px',
-                padding: '4px'
-              }}
-            >
-              <i class="fa-solid fa-trash"></i>
-            </button>
+        {/* Three-dot options menu */}
+        <div style={{ position: 'relative' }} ref={menuRef}>
+          <button
+            className="post-menu-btn"
+            onClick={(e) => { e.stopPropagation(); setMenuOpen(prev => !prev); }}
+            title="Tùy chọn bài viết"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
+            </svg>
+          </button>
+
+          {menuOpen && (
+            <div className="post-menu-dropdown">
+              <button className="post-menu-item" onClick={handleCopyLink}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                  <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                </svg>
+                Copy link bài viết
+              </button>
+              {isAuthorOrAdmin && (
+                <button className="post-menu-item danger" onClick={handleDeleteClick}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+                  </svg>
+                  Xoá bài viết
+                </button>
+              )}
+            </div>
           )}
-          <button style={{ color: 'var(--text-light-gray)', fontSize: '18px', background: 'none', border: 'none', cursor: 'pointer' }}><i class="fa-solid fa-ellipsis"></i></button>
+
         </div>
       </div>
 
@@ -226,19 +278,20 @@ export const PostCard = ({ post }) => {
         </div>
       ) : null}
 
-      {/* 5. Thống kê tương tác */}
+      {/* 4. Thống kê tương tác */}
       <div className="post-stats-row">
         <span>{post.likes || 0} lượt thích</span>
         <span>{currentCommentCount} bình luận · {post.sharesCount || 0} chia sẻ</span>
       </div>
 
-      {/* 6. Dải nút hành động: Thích, Bình luận, Chia sẻ */}
+      {/* 5. Dải nút hành động: Thích, Bình luận, Chia sẻ */}
       <div className="post-actions-row">
         <button
           className={`action-btn ${post.liked ? 'liked' : ''}`}
           onClick={() => toggleLikePost(post.id)}
         >
           <i className={post.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
+
           <span>{post.liked ? 'Đã thích' : 'Thích'}</span>
         </button>
 
@@ -253,7 +306,7 @@ export const PostCard = ({ post }) => {
         </button>
       </div>
 
-      {/* 7. Phần mở rộng Bình luận (Giao diện chuẩn Facebook: Cây phân nhánh & Trả lời lồng nhau) */}
+      {/* 6. Phần mở rộng Bình luận (Giao diện chuẩn Facebook: Cây phân nhánh & Trả lời lồng nhau) */}
       {showComments && (
         <div className="comments-container">
           {/* Ô nhập bình luận gốc chính */}
@@ -322,7 +375,7 @@ export const PostCard = ({ post }) => {
                           style={{
                             width: '34px',
                             height: '34px',
-                            backgroundColor: '#e52e3d',
+                            backgroundColor: '#35c9b0',
                             color: '#fff',
                             borderRadius: '50%',
                             flexShrink: 0
@@ -335,7 +388,7 @@ export const PostCard = ({ post }) => {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="comment-bubble">
                           <div className="comment-author-name">{root.authorName}</div>
-                          <div className="comment-text-content">{renderCommentContent(root.content)}</div>
+                          <div className="comment-text-content">{root.content}</div>
                         </div>
 
                         {/* Thao tác dưới bình luận gốc */}
@@ -517,6 +570,18 @@ export const PostCard = ({ post }) => {
           )}
         </div>
       )}
+
+      {/* Delete Confirm Modal */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        icon={<span style={{ fontSize: '36px' }}>🗑️</span>}
+        title="Xoá bài viết?"
+        body="Hành động này không thể hoàn tác, bài viết của bạn sẽ bị xoá và biến mất vĩnh viễn."
+        confirmLabel="Xoá bài viết"
+        confirmDanger
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </article>
   );
 };

@@ -44,8 +44,10 @@ export const LandingPage = ({ onEnter, onAbout }) => {
       {/* ── NAV ── */}
       <nav className="landing-nav" data-reveal style={{ '--delay': '0s' }}>
         <div className="landing-nav__logo">
-          <img src="/logo.png" alt="Socialita" />
-          <span>Socialita</span>
+          <a href="/">
+            <img src="/logo.png" alt="Socialita" />
+            <span>Socialita</span>
+          </a>
         </div>
         <div className="landing-nav__links">
           <button onClick={scrollToAbout} className="landing-nav__link">Features</button>
@@ -60,7 +62,7 @@ export const LandingPage = ({ onEnter, onAbout }) => {
 
         <div className="landing-hero__left" data-reveal style={{ '--delay': '0.1s' }}>
           <img
-            src="/pics/Socialita_Square_1x1.png"
+            src="/pics/Socialita_Anh_vuong_1x1_QC.png"
             alt="Socialita"
             className="landing-hero__emblem"
           />
@@ -99,7 +101,7 @@ export const LandingPage = ({ onEnter, onAbout }) => {
       {/* ── VIDEO PLACEHOLDER SECTION ── */}
       <section className="landing-video-section" data-reveal>
         <div className="landing-video-wrapper">
-          <img src="/pics/Socialita_Banner.png" alt="Video Thumbnail" className="landing-video-thumb" />
+          <img src="/pics/Socialita_Banner_QC.png" alt="Video Thumbnail" className="landing-video-thumb" />
           <div className="landing-video-overlay">
             <button className="play-button magnetic" onClick={handlePlayVideo}>
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -121,7 +123,7 @@ export const LandingPage = ({ onEnter, onAbout }) => {
           <button className="close-video" onClick={handleCloseVideo}>✕</button>
           {isVideoOpen && (
             <div className="video-placeholder">
-              <img src="/pics/Socialita_Banner.png" alt="Playing Video..." />
+              <img src="/pics/Socialita_Banner_QC.png" alt="Playing Video..." />
               <div className="playing-text">Video Playing...</div>
             </div>
           )}

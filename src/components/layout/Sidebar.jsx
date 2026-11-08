@@ -3,7 +3,7 @@ import { useSocial } from '../../context/SocialContext';
 import { Logo } from '../ui/Logo';
 
 export const Sidebar = () => {
-  const { tab, setTab, openCreatePostModal, friendRequests, showToast, openLogoutModal } = useSocial();
+  const { tab, setTab, openCreatePostModal, friendRequests, showToast, openLogoutModal, logout, closeUserProfile } = useSocial();
 
   const navItems = [
     {
@@ -15,7 +15,8 @@ export const Sidebar = () => {
       id: 'feed',
       label: 'Feed',
       badge: 12,
-      icon: 'fa-solid fa-newspaper'
+      icon: 'fa-solid fa-newspaper',
+      iconPath: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
     },
     {
       id: 'profile',
@@ -49,7 +50,12 @@ export const Sidebar = () => {
             return (
               <button
                 key={item.id}
-                onClick={() => setTab(item.id)}
+                onClick={() => {
+                  if (item.id === 'profile' && typeof closeUserProfile === 'function') {
+                    closeUserProfile();
+                  }
+                  setTab(item.id);
+                }}
                 className={`sidebar-item ${isActive ? 'active' : ''}`}
               >
                 {/* ĐOẠN MỚI: */}

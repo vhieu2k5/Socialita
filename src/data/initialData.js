@@ -7,32 +7,21 @@ export const INITIAL_USER = {
   bio: 'Yêu thích du lịch, công nghệ và chụp ảnh - Sài Gòn, VN',
   avatarBg: '#35c9b0',
   stats: {
-    posts: 86,
-    friends: 128,
-    followers: '1.4K',
-    groups: 9
+    posts: 0,
+    friends: 0,
+    followers: 0,
+    groups: 0
   },
   intro: {
     school: 'Sinh viên tại ĐH Kinh tế TP.HCM',
     liveIn: 'Sống tại Sài Gòn, Việt Nam',
-    joinedDate: 'Tham gia từ tháng 3, 2024'
+    joinedDate: 'Tham gia gần đây'
   },
-  photos: [
-    '#3a3b3c',
-    '#4e4f50',
-    '#5c4419',
-    '#274a82',
-    '#5c2323',
-    '#1b5b50'
-  ]
+  photos: []
 };
 
 export const INITIAL_STORIES = [
-  { id: 's-user', userName: 'Story của bạn', isUser: true },
-  { id: 's-1', userName: 'Bảo Trân', avatarBg: '#e52e3d', seen: false },
-  { id: 's-2', userName: 'Đức Anh', avatarBg: '#3b82f6', seen: false },
-  { id: 's-3', userName: 'Hải Yến', avatarBg: '#10b981', seen: false },
-  { id: 's-4', userName: 'Quang Huy', avatarBg: '#f59e0b', seen: false }
+  { id: 's-user', userName: 'Story của bạn', isUser: true }
 ];
 
 export const INITIAL_POSTS = [
@@ -175,6 +164,7 @@ export const INITIAL_POSTS = [
   }
 ];
 
+
 export const INITIAL_TRENDS = [
   { id: 'tr-1', rank: '01', tag: '#SocialitaChallenge', postCount: '4.2K bài viết' },
   { id: 'tr-2', rank: '02', tag: '#GoiYPhim', postCount: '1.9K bài viết' },
@@ -198,6 +188,7 @@ export const INITIAL_FRIEND_REQUESTS = [
   { id: 'req-1', name: 'Ngọc Bích', username: 'ngocbich', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop', mutualFriends: 6, avatarBg: '#ff7675' },
   { id: 'req-2', name: 'Tấn Phát', username: 'tanphat', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', mutualFriends: 3, avatarBg: '#74b9ff' }
 ];
+
 
 export const INITIAL_GROUPS = [
   {
@@ -244,21 +235,4 @@ export const DISCOVER_GROUPS = [
   }
 ];
 
-export const MOCK_ACCOUNT = [
-  {
-    id: 1,
-    name: 'Admin — Hiếu',
-    email: 'admin@gmail.com',
-    password: '123',
-    role: 'admin',
-    avatarBg: '#e52e3d'
-  },
-  {
-    id: 2,
-    name: 'Thiện',
-    email: 'user@gmail.com',
-    password: '123',
-    role: 'user',
-    avatarBg: '#3b82f6'
-  }
-];
+export const MOCK_ACCOUNT = [];

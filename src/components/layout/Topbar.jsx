@@ -20,7 +20,9 @@ export const Topbar = () => {
     unreadNotificationsCount,
     sendRequest,
     acceptRequest,
-    openFriendProfile
+    openFriendProfile,
+    openUserProfile,
+    closeUserProfile
   } = useSocial();
 
   const [searchResults, setSearchResults] = useState([]);
@@ -349,6 +351,7 @@ export const Topbar = () => {
           style={{ backgroundColor: '#38bdf8' }}
           onClick={() => {
             closeDrawers();
+            if (typeof closeUserProfile === 'function') closeUserProfile();
             setTab('profile');
           }}
           title="Trang cá nhân"

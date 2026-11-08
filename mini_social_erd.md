@@ -85,14 +85,28 @@ erDiagram
         timestamp created_at
     }
 
+    NOTIFICATIONS {
+        int id PK
+        int user_id FK "Người nhận thông báo"
+        int actor_id FK "Người thực hiện hành động"
+        varchar type "Loại thông báo (like, comment, friend...)"
+        int post_id FK "Bài viết liên quan"
+        text content "Nội dung thông báo"
+        boolean is_read "Trạng thái đã đọc"
+        timestamp created_at
+    }
+
     %% Quan hệ giữa các bảng
     USERS ||--o{ POSTS : "đăng bài (creates)"
     USERS ||--o{ COMMENTS : "viết bình luận (writes)"
     USERS ||--o{ REACTIONS : "thả tim (reacts)"
     USERS ||--o{ MESSAGES : "gửi/nhận (sends/receives)"
     USERS ||--o{ FRIENDSHIPS : "kết bạn (befriends)"
+    USERS ||--o{ NOTIFICATIONS : "nhận (receives)"
+    USERS ||--o{ NOTIFICATIONS : "kích hoạt (triggers)"
     POSTS ||--o{ COMMENTS : "chứa (has)"
     POSTS ||--o{ REACTIONS : "nhận (receives)"
+    POSTS ||--o{ NOTIFICATIONS : "liên kết (references)"
     COMMENTS ||--o{ COMMENTS : "trả lời (replies)"
 ```
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSocial } from '../context/SocialContext';
 import { api } from '../services/api';
 import { Logo } from '../components/ui/Logo';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 
 // Helper chuẩn hóa đường dẫn avatar từ Backend MySQL hoặc URL ngoài
 const resolveAvatarUrl = (url) => {
@@ -65,6 +66,7 @@ export const FriendsView = () => {
   const {
     user,
     friends,
+    setFriends,
     friendRequests,
     friendSuggestions,
     acceptRequest,
@@ -72,14 +74,21 @@ export const FriendsView = () => {
     sendRequest,
     unfriend,
     openFriendProfile,
+    openUserProfile,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    showToast
   } = useSocial();
 
+  const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Tìm kiếm người dùng trực tiếp từ Database MySQL khi nhập từ khóa
+  // Unfriend flow state (2-step modal from Figma)
+  const [unfriendTarget, setUnfriendTarget] = useState(null);   // step 1: info popup
+  const [confirmTarget, setConfirmTarget] = useState(null);     // step 2: confirm popup
+
+  // Tìm kiếm người dùng trực tiếp từ Database MySQL khi nhập từ khóa trên Topbar
   useEffect(() => {
     const term = (searchQuery || '').trim();
     if (!term) {
@@ -118,17 +127,62 @@ export const FriendsView = () => {
 
   const isSearchActive = Boolean((searchQuery || '').trim());
   const activeTerm = (searchQuery || '').trim();
+  const localFilterTerm = (searchTerm || activeTerm).toLowerCase();
 
-  // Lọc trong danh sách bạn bè đã kết bạn
+  // Lọc trong danh sách bạn bè đã kết bạn (hỗ trợ cả ô tìm kiếm cục bộ searchTerm và searchQuery)
   const filteredFriends = (friends || []).filter(f => {
-    const nameMatch = (f.name || '').toLowerCase().includes(activeTerm.toLowerCase());
-    const usernameMatch = (f.username || '').toLowerCase().includes(activeTerm.toLowerCase());
+    const nameMatch = (f.name || '').toLowerCase().includes(localFilterTerm);
+    const usernameMatch = (f.username || '').toLowerCase().includes(localFilterTerm);
     return nameMatch || usernameMatch;
+  });
+
+  // Left click on friend card -> open profile modal (and support openUserProfile)
+  const handleFriendClick = (friend) => {
+    if (typeof openFriendProfile === 'function') {
+      openFriendProfile(friend);
+    } else if (typeof openUserProfile === 'function') {
+      openUserProfile(friend);
+    }
+  };
+
+  // Right click on friend card -> trigger unfriend flow
+  const handleFriendContextMenu = (e, friend) => {
+    e.preventDefault();
+    setUnfriendTarget(friend);
+  };
+
+  const handleUnfriendClick = (friend) => {
+    setUnfriendTarget(friend);
+  };
+
+  const handleProceedToConfirm = () => {
+    setConfirmTarget(unfriendTarget);
+    setUnfriendTarget(null);
+  };
+
+  const handleConfirmUnfriend = () => {
+    if (!confirmTarget) return;
+    if (typeof unfriend === 'function') {
+      unfriend(confirmTarget.id);
+    } else if (typeof setFriends === 'function') {
+      setFriends(prev => prev.filter(f => f.id !== confirmTarget.id));
+      if (showToast) showToast(`Đã huỷ kết bạn với @${confirmTarget.name}`, 'info');
+    }
+    setConfirmTarget(null);
+  };
+
+  // Filter friend suggestions: not already in friends or requests
+  const friendIds = new Set((friends || []).map(f => String(f.id)));
+  const requestIds = new Set((friendRequests || []).map(r => String(r.id || r.requester_id)));
+
+  const validSuggestions = (friendSuggestions || []).filter(s => {
+    const sId = String(s.id);
+    return !friendIds.has(sId) && !requestIds.has(sId);
   });
 
   return (
     <div style={{ maxWidth: '960px', margin: '0 auto', width: '100%', paddingBottom: '40px' }}>
-      {/* 1. Tiêu đề trang & Logo */}
+      {/* 1. Tiêu đề trang & Ô lọc bạn bè + Logo */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--text-dark)' }}>Bạn bè</h2>
@@ -137,12 +191,22 @@ export const FriendsView = () => {
           </p>
         </div>
 
-        <div>
+        <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+          <div className="search-box" style={{ width: '260px' }}>
+            <i className="fa-solid fa-magnifying-glass search-icon" style={{ fontSize: '14px', display: 'flex', alignItems: 'center' }}></i>
+            <input
+              type="text"
+              className="search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Lọc nhanh bạn bè..."
+            />
+          </div>
           <Logo size="sm" />
         </div>
       </div>
 
-      {/* 2. CHẾ ĐỘ TÌM KIẾM: HIỂN THỊ KẾT QUẢ TỪ DATABASE */}
+      {/* 2. CHẾ ĐỘ TÌM KIẾM TOÀN CỤC TỪ TOPBAR: HIỂN THỊ KẾT QUẢ TỪ DATABASE */}
       {isSearchActive && (
         <div style={{ marginBottom: '36px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
@@ -203,7 +267,7 @@ export const FriendsView = () => {
                     <div
                       className="friend-info-clickable"
                       style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, cursor: 'pointer' }}
-                      onClick={() => openFriendProfile({
+                      onClick={() => handleFriendClick({
                         id: u.id,
                         name: u.full_name || u.username,
                         username: u.username,
@@ -284,7 +348,7 @@ export const FriendsView = () => {
               <div key={req.id} className="widget-card friend-card-hover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px' }}>
                 <div
                   className="friend-info-clickable" style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0, cursor: 'pointer' }}
-                  onClick={() => openFriendProfile({
+                  onClick={() => handleFriendClick({
                     id: req.requester_id || req.id,
                     name: req.name,
                     avatar_url: req.avatar_url,
@@ -329,21 +393,32 @@ export const FriendsView = () => {
           </h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
             {filteredFriends.map(friend => (
-              <div key={friend.id} className="widget-card friend-card-hover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px' }}>
+              <div
+                key={friend.id}
+                className="widget-card friend-card-hover"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', position: 'relative' }}
+                onContextMenu={(e) => handleFriendContextMenu(e, friend)}
+              >
                 <div
-                  className="friend-info-clickable" style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0, cursor: 'pointer' }}
-                  onClick={() => openFriendProfile(friend)}
-                  title="Bấm để xem trang cá nhân"
+                  className="friend-info-clickable"
+                  style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0, cursor: 'pointer' }}
+                  onClick={() => handleFriendClick(friend)}
+                  title="Chuột trái: Xem trang cá nhân | Chuột phải: Hủy kết bạn"
                 >
-                  <UserAvatar
-                    url={friend.avatar_url}
-                    name={friend.name}
-                    bg={friend.avatarBg || 'var(--brand-red)'}
-                    size={46}
-                  />
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <UserAvatar
+                      url={friend.avatar_url}
+                      name={friend.name}
+                      bg={friend.avatarBg || 'var(--brand-red)'}
+                      size={46}
+                    />
+                    {friend.isOnline && <span className="online-badge" style={{ border: '2px solid #fff' }} />}
+                  </div>
                   <div style={{ overflow: 'hidden' }}>
                     <div className="friend-name-text" style={{ fontWeight: 800, fontSize: '14px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{friend.name}</div>
-                    <div style={{ fontSize: '12px', color: 'var(--text-light-gray)' }}>{friend.friendSince}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-light-gray)' }}>
+                      {friend.mutualFriends ? `${friend.mutualFriends} bạn chung` : (friend.friendSince || 'Bạn bè')}
+                    </div>
                     {friend.school && (
                       <div style={{ fontSize: '11px', color: 'var(--text-light-gray)', marginTop: '2px', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                         <i className="fa-solid fa-graduation-cap"></i> {friend.school}
@@ -352,26 +427,27 @@ export const FriendsView = () => {
                   </div>
                 </div>
 
-                {unfriend && (
-                  <button
-                    onClick={() => unfriend(friend.id)}
-                    style={{
-                      padding: '6px 10px',
-                      borderRadius: '8px',
-                      border: '1px solid #fee2e2',
-                      background: '#fff5f5',
-                      color: '#ef4444',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0
-                    }}
-                    title="Hủy kết bạn"
-                  >
-                    Hủy kết bạn
-                  </button>
-                )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUnfriendClick(friend);
+                  }}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: '8px',
+                    border: '1px solid #fee2e2',
+                    background: '#fff5f5',
+                    color: '#ef4444',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                  title="Hủy kết bạn"
+                >
+                  Hủy kết bạn
+                </button>
               </div>
             ))}
 
@@ -386,18 +462,23 @@ export const FriendsView = () => {
       )}
 
       {/* 5. GỢI Ý KẾT BẠN (FRIEND SUGGESTIONS) */}
-      {!isSearchActive && friendSuggestions && friendSuggestions.length > 0 && (
+      {!isSearchActive && validSuggestions && validSuggestions.length > 0 && (
         <div style={{ marginTop: '36px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)', marginBottom: '16px' }}>
-            Gợi ý kết bạn dành cho bạn
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 800, color: 'var(--text-dark)', margin: 0 }}>
+              Gợi ý kết bạn dành cho bạn ({validSuggestions.length})
+            </h3>
+            <span style={{ fontSize: '12px', color: 'var(--text-light-gray)' }}>
+              Những người bạn có thể biết
+            </span>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-            {friendSuggestions.map(s => (
+            {validSuggestions.map(s => (
               <div key={s.id} className="widget-card friend-card-hover" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px' }}>
                 <div
                   className="friend-info-clickable"
                   style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0, cursor: 'pointer' }}
-                  onClick={() => openFriendProfile({
+                  onClick={() => handleFriendClick({
                     id: s.id,
                     name: s.name,
                     username: s.username,
@@ -421,11 +502,19 @@ export const FriendsView = () => {
                     <div style={{ fontSize: '11px', color: 'var(--text-light-gray)' }}>
                       {s.mutualFriends ? `${s.mutualFriends} bạn chung` : (s.username ? `@${s.username}` : 'Gợi ý cho bạn')}
                     </div>
+                    {s.school && (
+                      <div style={{ fontSize: '11px', color: 'var(--text-light-gray)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <i className="fa-solid fa-graduation-cap"></i> {s.school}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <button
-                  onClick={() => sendRequest(s.id, s.name)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sendRequest(s.id, s.name);
+                  }}
                   disabled={s.requested}
                   style={{
                     padding: '6px 14px',
@@ -436,7 +525,8 @@ export const FriendsView = () => {
                     fontWeight: 700,
                     fontSize: '12px',
                     cursor: s.requested ? 'not-allowed' : 'pointer',
-                    flexShrink: 0
+                    flexShrink: 0,
+                    marginLeft: '10px'
                   }}
                 >
                   {s.requested ? 'Đã gửi' : 'Kết bạn'}
@@ -446,6 +536,51 @@ export const FriendsView = () => {
           </div>
         </div>
       )}
+
+      {/* Step 1: Info popup */}
+      {unfriendTarget && (
+        <div className="confirm-overlay" onClick={() => setUnfriendTarget(null)}>
+          <div className="confirm-modal" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '20px' }}>
+              <UserAvatar url={unfriendTarget.avatar_url} name={unfriendTarget.name} bg="#e52e3d" size={48} />
+              <span style={{ fontSize: '24px', color: '#9ca3af' }}>✕</span>
+              <UserAvatar url={user?.avatar_url} name={user?.name || 'Bạn'} bg="#35c9b0" size={48} />
+            </div>
+            <h3 className="confirm-title">Huỷ kết bạn với {unfriendTarget.name}?</h3>
+            <p className="confirm-body">
+              {unfriendTarget.name} sẽ bị xoá khỏi danh sách bạn bè của bạn. Bạn có thể gửi lại lời mời kết bạn bất cứ lúc nào.
+            </p>
+            <div className="confirm-actions">
+              <button className="confirm-btn-cancel" onClick={() => setUnfriendTarget(null)}>Để sau</button>
+              <button className="confirm-btn-ok danger" onClick={handleProceedToConfirm}>Huỷ kết bạn</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: Confirm popup */}
+      <ConfirmModal
+        isOpen={!!confirmTarget}
+        icon={<span style={{ fontSize: '36px' }}>⚠️</span>}
+        title="Bạn chắc chắn chứ?"
+        body="Sau khi huỷ, hai bạn sẽ không còn thấy bài viết chế độ 'Bạn bè' của nhau."
+        confirmLabel="Chắc chắn huỷ"
+        confirmDanger
+        onConfirm={handleConfirmUnfriend}
+        onCancel={() => setConfirmTarget(null)}
+      >
+        {confirmTarget && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#f9fafb', borderRadius: '10px', padding: '10px 14px', margin: '12px 0' }}>
+            <UserAvatar url={confirmTarget.avatar_url} name={confirmTarget.name} bg={confirmTarget.avatarBg || '#e52e3d'} size={36} />
+            <div style={{ textAlign: 'left' }}>
+              <div style={{ fontWeight: 700, fontSize: '13px' }}>{confirmTarget.name}</div>
+              <div style={{ fontSize: '11px', color: '#8e8e93' }}>{confirmTarget.mutualFriends ? `${confirmTarget.mutualFriends} bạn chung` : ''}</div>
+            </div>
+          </div>
+        )}
+      </ConfirmModal>
     </div>
   );
 };
+
+export default FriendsView;

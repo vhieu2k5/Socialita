@@ -1,16 +1,61 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSocial } from '../context/SocialContext';
 import { PostCard } from '../components/feed/PostCard';
+import { api } from '../services/api';
 
 export const ProfileView = () => {
-  const { user, posts, friends, joinedGroups, openEditProfileModal, openCreatePostModal, uploadAvatar, showToast } = useSocial();
+  const {
+    user,
+    viewingProfileUser,
+    closeUserProfile,
+    posts,
+    friends,
+    joinedGroups,
+    openEditProfileModal,
+    openCreatePostModal,
+    uploadAvatar,
+    unfriend,
+    openChat,
+    setTab,
+    showToast
+  } = useSocial();
   const [activeSubTab, setActiveSubTab] = useState('posts');
+  const [userPhotos, setUserPhotos] = useState([]);
   const avatarInputRef = useRef(null);
 
-  const myPosts = posts.filter(p =>
-    (p.user_id && user.id && Number(p.user_id) === Number(user.id)) ||
-    (p.authorName && user.name && p.authorName.trim() === user.name.trim())
+  // If viewingProfileUser is set and different from logged in user, show that user's profile
+  const isViewingOther = Boolean(viewingProfileUser && viewingProfileUser.id && String(viewingProfileUser.id) !== String(user?.id));
+  const displayUser = isViewingOther ? viewingProfileUser : user;
+
+  const isFriend = isViewingOther && (friends || []).some(f => String(f.id) === String(displayUser.id));
+
+  const displayPosts = (posts || []).filter(p =>
+    (p.user_id && displayUser.id && Number(p.user_id) === Number(displayUser.id)) ||
+    (p.authorName && displayUser.name && p.authorName.trim() === displayUser.name.trim())
   );
+
+  useEffect(() => {
+    let isMounted = true;
+    if (displayUser?.id) {
+      api.getUserPhotos(displayUser.id)
+        .then(res => {
+          if (isMounted && res && Array.isArray(res.photos)) {
+            setUserPhotos(res.photos);
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            const fallback = displayPosts.flatMap(p => {
+              if (p.images && p.images.length > 0) return p.images;
+              if (p.image_url && !p.image_url.startsWith('linear-gradient') && !p.image_url.startsWith('#')) return [p.image_url];
+              return [];
+            }).filter(Boolean);
+            setUserPhotos(fallback);
+          }
+        });
+    }
+    return () => { isMounted = false; };
+  }, [displayUser?.id, displayPosts.length]);
 
   const handleAvatarFile = async (e) => {
     const file = e.target.files?.[0];
@@ -19,82 +64,156 @@ export const ProfileView = () => {
     }
   };
 
+  const handleUnfriendFromProfile = () => {
+    if (confirm(`Bạn có chắc chắn muốn huỷ kết bạn với ${displayUser.name}?`)) {
+      unfriend(displayUser.id);
+    }
+  };
+
   return (
     <div>
+      {/* Nút quay lại nếu đang xem trang cá nhân người khác */}
+      {isViewingOther && (
+        <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button
+            onClick={() => {
+              closeUserProfile();
+              setTab('friends');
+            }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              background: '#fff',
+              color: 'var(--text-dark)',
+              fontWeight: 700,
+              fontSize: '13px',
+              cursor: 'pointer',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+            }}
+          >
+            <span>←</span>
+            <span>Quay lại Bạn bè</span>
+          </button>
+          <span style={{ fontSize: '13px', color: 'var(--text-gray)' }}>
+            Đang xem trang cá nhân của <b>{displayUser.name}</b>
+          </span>
+        </div>
+      )}
+
       {/* 1. THẺ PROFILE LỚN Ở TRÊN CÙNG (CĂN GIỮA TOÀN BỘ) */}
       <div className="profile-card">
-        {/* Nút chỉnh sửa & chia sẻ ở góc trên bên phải */}
+        {/* Nút thao tác ở góc trên bên phải */}
         <div className="profile-top-actions">
-          <button className="btn-profile-action" onClick={openEditProfileModal}>
-            <i className="fa-solid fa-pen-to-square"></i>
-            <span>Chỉnh sửa trang cá nhân</span>
-          </button>
-          <button className="btn-profile-action primary" onClick={openCreatePostModal}>
-            <i className="fa-solid fa-share-from-square"></i>
-            <span>Chia sẻ</span>
-          </button>
+          {isViewingOther ? (
+            <>
+              {isFriend ? (
+                <button
+                  className="btn-profile-action"
+                  style={{ borderColor: '#fee2e2', color: '#ef4444', background: '#fff5f5' }}
+                  onClick={handleUnfriendFromProfile}
+                >
+                  <i className="fa-solid fa-user-xmark"></i>
+                  <span>Huỷ kết bạn</span>
+                </button>
+              ) : (
+                <div style={{ fontSize: '13px', color: 'var(--text-gray)', fontWeight: 600, alignSelf: 'center', marginRight: '8px' }}>
+                  {displayUser.mutualFriends ? `${displayUser.mutualFriends} bạn chung` : ''}
+                </div>
+              )}
+              <button
+                className="btn-profile-action primary"
+                onClick={() => openChat && openChat(displayUser)}
+              >
+                <i className="fa-solid fa-comment-dots"></i>
+                <span>Nhắn tin</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="btn-profile-action" onClick={openEditProfileModal}>
+                <i className="fa-solid fa-pen-to-square"></i>
+                <span>Chỉnh sửa trang cá nhân</span>
+              </button>
+              <button className="btn-profile-action primary" onClick={openCreatePostModal}>
+                <i className="fa-solid fa-share-from-square"></i>
+                <span>Chia sẻ</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* Avatar & Thông tin căn giữa */}
         <div className="profile-center-info">
           <div style={{ position: 'relative' }}>
-            <div className="profile-large-avatar" style={{ backgroundColor: '#35c9b0' }}>
-              {user.avatar_url ? (
-                <img src={user.avatar_url} alt="Avt" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            <div className="profile-large-avatar" style={{ backgroundColor: displayUser.avatarBg || '#35c9b0' }}>
+              {displayUser.avatar_url ? (
+                <img src={displayUser.avatar_url} alt={displayUser.name} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
               ) : (
-                'Avt'
+                displayUser.name?.[0] || 'Avt'
               )}
             </div>
-            <button
-              onClick={() => avatarInputRef.current?.click()}
-              style={{
-                position: 'absolute',
-                bottom: '12px',
-                right: '4px',
-                width: '24px',
-                height: '24px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e5e7eb',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '12px',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-                cursor: 'pointer'
-              }}
-              title="Đổi ảnh đại diện"
-            >
-              <i className="fa-solid fa-plus"></i>
-            </button>
-            <input
-              type="file"
-              ref={avatarInputRef}
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={handleAvatarFile}
-            />
+            {!isViewingOther && (
+              <>
+                <button
+                  onClick={() => avatarInputRef.current?.click()}
+                  style={{
+                    position: 'absolute',
+                    bottom: '12px',
+                    right: '4px',
+                    width: '24px',
+                    height: '24px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+                    cursor: 'pointer'
+                  }}
+                  title="Đổi ảnh đại diện"
+                >
+                  <i className="fa-solid fa-plus"></i>
+                </button>
+                <input
+                  type="file"
+                  ref={avatarInputRef}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handleAvatarFile}
+                />
+              </>
+            )}
           </div>
 
-          <h2 className="profile-user-name">{user.name}</h2>
-          <p className="profile-user-bio">{user.bio || 'Chưa cập nhật tiểu sử'}</p>
+          <h2 className="profile-user-name">{displayUser.name}</h2>
+          <p className="profile-user-bio">{displayUser.bio || (isViewingOther ? 'Thành viên cộng đồng Socialita' : 'Chưa cập nhật tiểu sử')}</p>
 
           {/* 4 Thống kê căn giữa */}
           <div className="profile-stats-grid">
             <div className="profile-stat-box">
-              <div className="count">{myPosts.length}</div>
+              <div className="count">{displayPosts.length}</div>
               <div className="desc">Bài viết</div>
             </div>
             <div className="profile-stat-box">
-              <div className="count">{friends ? friends.length : (user.stats?.friends ?? 0)}</div>
+              <div className="count">
+                {isViewingOther
+                  ? (displayUser.mutualFriends ? `${displayUser.mutualFriends} chung` : (displayUser.stats?.friends ?? (isFriend ? 1 : 0)))
+                  : (friends ? friends.length : (user.stats?.friends ?? 0))}
+              </div>
               <div className="desc">Bạn bè</div>
             </div>
             <div className="profile-stat-box">
-              <div className="count">{user.stats?.followers ?? 0}</div>
+              <div className="count">{displayUser.stats?.followers ?? 0}</div>
               <div className="desc">Người theo dõi</div>
             </div>
             <div className="profile-stat-box">
-              <div className="count">{joinedGroups ? joinedGroups.length : 0}</div>
+              <div className="count">{isViewingOther ? 0 : (joinedGroups ? joinedGroups.length : 0)}</div>
               <div className="desc">Hội nhóm</div>
             </div>
           </div>
@@ -129,11 +248,11 @@ export const ProfileView = () => {
         <div className="main-column">
           {activeSubTab === 'posts' && (
             <div id="profile-posts-list">
-              {myPosts.length > 0 ? (
-                myPosts.map(post => <PostCard key={post.id} post={post} />)
+              {displayPosts.length > 0 ? (
+                displayPosts.map(post => <PostCard key={post.id} post={post} />)
               ) : (
                 <div className="widget-card" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-gray)' }}>
-                  Bạn chưa đăng bài viết nào. Hãy chia sẻ khoảnh khắc đầu tiên của bạn!
+                  {isViewingOther ? `${displayUser.name} chưa đăng bài viết nào.` : 'Bạn chưa đăng bài viết nào. Hãy chia sẻ khoảnh khắc đầu tiên của bạn!'}
                 </div>
               )}
             </div>
@@ -142,14 +261,24 @@ export const ProfileView = () => {
           {activeSubTab === 'photos' && (
             <div className="widget-card">
               <h3 className="widget-card-title">Bộ sưu tập ảnh</h3>
-              <div className="photo-grid-6">
-                <div className="photo-square" style={{ background: '#3a3b3c' }}></div>
-                <div className="photo-square" style={{ background: '#4e4f50' }}></div>
-                <div className="photo-square" style={{ background: '#5c4419' }}></div>
-                <div className="photo-square" style={{ background: '#274a82' }}></div>
-                <div className="photo-square" style={{ background: '#5c2323' }}></div>
-                <div className="photo-square" style={{ background: '#1b5b50' }}></div>
-              </div>
+              {userPhotos && userPhotos.length > 0 ? (
+                <div className="photo-grid-6">
+                  {userPhotos.map((imgUrl, idx) => (
+                    <div key={idx} className="photo-square" style={{ overflow: 'hidden' }}>
+                      <img
+                        src={imgUrl}
+                        alt={`Ảnh ${idx + 1}`}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-gray)' }}>
+                  Chưa có ảnh nào được đăng tải.
+                </div>
+              )}
             </div>
           )}
 
@@ -186,7 +315,7 @@ export const ProfileView = () => {
                 <span style={{ width: '20px', display: 'inline-flex', justifyContent: 'center', fontSize: '15px', color: 'var(--brand-gray)' }}>
                   <i className="fa-solid fa-graduation-cap"></i>
                 </span>
-                <span>{user.intro?.school || user.school || 'Chưa cập nhật trường học'}</span>
+                <span>{displayUser.intro?.school || displayUser.school || 'Chưa cập nhật trường học'}</span>
               </div>
 
               {/* 2. Nơi sống */}
@@ -194,7 +323,7 @@ export const ProfileView = () => {
                 <span style={{ width: '20px', display: 'inline-flex', justifyContent: 'center', fontSize: '15px', color: 'var(--brand-gray)' }}>
                   <i className="fa-solid fa-location-dot"></i>
                 </span>
-                <span>{user.intro?.liveIn || user.liveIn || 'Chưa cập nhật nơi sống'}</span>
+                <span>{displayUser.intro?.liveIn || displayUser.liveIn || 'Chưa cập nhật nơi sống'}</span>
               </div>
 
               {/* 3. Ngày tham gia */}
@@ -202,7 +331,7 @@ export const ProfileView = () => {
                 <span style={{ width: '20px', display: 'inline-flex', justifyContent: 'center', fontSize: '15px', color: 'var(--brand-gray)' }}>
                   <i className="fa-regular fa-calendar-days"></i>
                 </span>
-                <span>{user.intro?.joinedDate || 'Tham gia gần đây'}</span>
+                <span>{displayUser.intro?.joinedDate || (isViewingOther ? 'Thành viên Socialita' : 'Tham gia gần đây')}</span>
               </div>
 
             </div>
@@ -211,17 +340,29 @@ export const ProfileView = () => {
           {/* Card Ảnh */}
           <div className="widget-card">
             <h3 className="widget-card-title">Ảnh</h3>
-            <div className="photo-grid-6">
-              <div className="photo-square" style={{ background: '#3a3b3c' }}></div>
-              <div className="photo-square" style={{ background: '#4e4f50' }}></div>
-              <div className="photo-square" style={{ background: '#5c4419' }}></div>
-              <div className="photo-square" style={{ background: '#274a82' }}></div>
-              <div className="photo-square" style={{ background: '#5c2323' }}></div>
-              <div className="photo-square" style={{ background: '#1b5b50' }}></div>
-            </div>
+            {userPhotos && userPhotos.length > 0 ? (
+              <div className="photo-grid-6">
+                {userPhotos.slice(0, 6).map((imgUrl, idx) => (
+                  <div key={idx} className="photo-square" style={{ overflow: 'hidden' }}>
+                    <img
+                      src={imgUrl}
+                      alt={`Ảnh ${idx + 1}`}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '16px 0', fontSize: '13px', color: 'var(--text-gray)' }}>
+                Chưa có ảnh nào được tải lên
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default ProfileView;

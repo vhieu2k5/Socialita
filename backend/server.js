@@ -27,6 +27,30 @@ db.query("ALTER TABLE posts MODIFY COLUMN image_url TEXT").catch(() => {});
 db.query("ALTER TABLE posts ADD COLUMN privacy ENUM('public', 'friends', 'private') DEFAULT 'public'").catch(() => {});
 // Tự động bổ sung cột parent_id cho bảng comments để hỗ trợ trả lời bình luận (Reply lồng nhau kiểu Facebook)
 db.query("ALTER TABLE comments ADD COLUMN parent_id INT DEFAULT NULL").catch(() => {});
+// Tự động khởi tạo bảng notifications nếu chưa có
+db.query(`
+    CREATE TABLE IF NOT EXISTS \`notifications\` (
+      \`id\` int NOT NULL AUTO_INCREMENT,
+      \`user_id\` int NOT NULL,
+      \`actor_id\` int NOT NULL,
+      \`type\` varchar(50) NOT NULL,
+      \`post_id\` int DEFAULT NULL,
+      \`content\` text,
+      \`is_read\` tinyint(1) DEFAULT 0,
+      \`created_at\` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (\`id\`),
+      KEY \`fk_notifications_user_id\` (\`user_id\`),
+      KEY \`fk_notifications_actor_id\` (\`actor_id\`),
+      KEY \`fk_notifications_post_id\` (\`post_id\`),
+      CONSTRAINT \`fk_notifications_user_id\` FOREIGN KEY (\`user_id\`) REFERENCES \`users\` (\`id\`) ON DELETE CASCADE,
+      CONSTRAINT \`fk_notifications_actor_id\` FOREIGN KEY (\`actor_id\`) REFERENCES \`users\` (\`id\`) ON DELETE CASCADE,
+      CONSTRAINT \`fk_notifications_post_id\` FOREIGN KEY (\`post_id\`) REFERENCES \`posts\` (\`id\`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+`).catch(() => {});
+db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_online TINYINT(1) DEFAULT 0").catch(() => {});
+db.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_active_at TIMESTAMP NULL DEFAULT NULL").catch(() => {});
+
+
 
 // 2. Cấu hình Static folder & Tự động tạo thư mục uploads nếu chưa có
 const uploadDir = path.join(__dirname, 'uploads');
@@ -51,8 +75,7 @@ function generateToken(user) {
     return Buffer.from(`${user.id}:${user.email}:${Date.now()}`).toString('base64');
 }
 
-/* ========================================================
-   AUTH APIS (Đăng nhập / Đăng ký) - STT 13
+/* =================================================   AUTH APIS (Đăng nhập / Đăng ký) - STT 13
 ======================================================== */
 // Đăng nhập
 app.post('/api/auth/login', async (req, res) => {
@@ -205,8 +228,7 @@ app.post('/api/auth/google', async (req, res) => {
     }
 });
 
-/* ========================================================
-   USER APIS (Quản lý thông tin & Avatar) - STT 11 & STT 12
+/* =================================================   USER APIS (Quản lý thông tin & Avatar) - STT 11 & STT 12
 ======================================================== */
 // Lấy danh sách users (Admin - STT 11) - Đã ẩn password_hash
 app.get('/api/users', async (req, res) => {
@@ -372,8 +394,7 @@ app.delete('/api/users/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
+/* =================================================   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
 ======================================================== */
 // Lấy danh sách tất cả bài viết kèm thông tin tác giả (JOIN users)
 // Multer lưu ảnh bài viết
@@ -420,8 +441,7 @@ app.post('/api/posts/upload-images', uploadPostImg.array('images', 10), (req, re
     }
 });
 
-/* ========================================================
-   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
+/* =================================================   POSTS APIS (Quản lý bài viết) - STT 5, 11 & 12
 ======================================================== */
 // Lấy danh sách tất cả bài viết kèm thông tin tác giả, reactions, comments (Hỗ trợ lọc bạn bè - Newsfeed)
 app.get('/api/posts', async (req, res) => {
@@ -603,8 +623,7 @@ app.delete('/api/posts/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   REACTIONS APIS (Thả tim / Like bài viết)
+/* =================================================   REACTIONS APIS (Thả tim / Like bài viết)
 ======================================================== */
 // Thả tim / Bỏ thả tim (Toggle reaction)
 app.post('/api/posts/:id/react', async (req, res) => {
@@ -624,10 +643,30 @@ app.post('/api/posts/:id/react', async (req, res) => {
             // Đã like -> Huỷ like (toggle)
             await db.query("DELETE FROM reactions WHERE post_id = ? AND user_id = ?", [postId, user_id]);
             reacted = false;
+            // Xóa thông báo like tương ứng
+            await db.query(
+                "DELETE FROM notifications WHERE post_id = ? AND actor_id = ? AND type = 'like'",
+                [postId, user_id]
+            ).catch(() => {});
         } else {
             // Chưa like -> Thêm like
             await db.query("INSERT INTO reactions (post_id, user_id, type, created_at) VALUES (?, ?, ?, NOW())", [postId, user_id, type]);
             reacted = true;
+
+            // Tạo thông báo cho chủ bài viết (nếu không phải tự like bài của mình)
+            try {
+                const [[post]] = await db.query("SELECT user_id, content FROM posts WHERE id = ?", [postId]);
+                if (post && post.user_id && Number(post.user_id) !== Number(user_id)) {
+                    const snippet = post.content ? (post.content.length > 40 ? post.content.substring(0, 40) + '...' : post.content) : '';
+                    const notifContent = snippet ? `đã thích bài viết của bạn: "${snippet}"` : 'đã thích bài viết của bạn';
+                    await db.query(
+                        "INSERT INTO notifications (user_id, actor_id, type, post_id, content, is_read, created_at) VALUES (?, ?, 'like', ?, ?, 0, NOW())",
+                        [post.user_id, user_id, postId, notifContent]
+                    );
+                }
+            } catch (errNotif) {
+                console.error("Lỗi tạo thông báo reaction:", errNotif.message);
+            }
         }
 
         const [[{ totalReactions }]] = await db.query("SELECT COUNT(*) AS totalReactions FROM reactions WHERE post_id = ?", [postId]);
@@ -662,8 +701,7 @@ app.get('/api/posts/:id/reactions', async (req, res) => {
     }
 });
 
-/* ========================================================
-   COMMENTS APIS (Bình luận bài viết)
+/* =================================================   COMMENTS APIS (Bình luận bài viết)
 ======================================================== */
 // Lấy danh sách bình luận của 1 bài viết
 app.get('/api/posts/:id/comments', async (req, res) => {
@@ -705,6 +743,32 @@ app.post('/api/posts/:id/comments', async (req, res) => {
             WHERE c.id = ?
         `, [result.insertId]);
 
+        // Tạo thông báo cho chủ bài viết / người được trả lời
+        try {
+            const [[post]] = await db.query("SELECT user_id, content FROM posts WHERE id = ?", [postId]);
+            if (post && post.user_id && Number(post.user_id) !== Number(user_id)) {
+                const snippet = content.trim().length > 40 ? content.trim().substring(0, 40) + '...' : content.trim();
+                const notifContent = `đã bình luận về bài viết của bạn: "${snippet}"`;
+                await db.query(
+                    "INSERT INTO notifications (user_id, actor_id, type, post_id, content, is_read, created_at) VALUES (?, ?, 'comment', ?, ?, 0, NOW())",
+                    [post.user_id, user_id, postId, notifContent]
+                );
+            }
+            if (parentId) {
+                const [[parentComment]] = await db.query("SELECT user_id FROM comments WHERE id = ?", [parentId]);
+                if (parentComment && parentComment.user_id && Number(parentComment.user_id) !== Number(user_id) && Number(parentComment.user_id) !== Number(post?.user_id)) {
+                    const snippet = content.trim().length > 40 ? content.trim().substring(0, 40) + '...' : content.trim();
+                    const notifContent = `đã trả lời bình luận của bạn: "${snippet}"`;
+                    await db.query(
+                        "INSERT INTO notifications (user_id, actor_id, type, post_id, content, is_read, created_at) VALUES (?, ?, 'comment', ?, ?, 0, NOW())",
+                        [parentComment.user_id, user_id, postId, notifContent]
+                    );
+                }
+            }
+        } catch (errNotif) {
+            console.error("Lỗi tạo thông báo bình luận:", errNotif.message);
+        }
+
         const [[{ totalComments }]] = await db.query("SELECT COUNT(*) AS totalComments FROM comments WHERE post_id = ?", [postId]);
 
         res.status(201).json({
@@ -734,21 +798,38 @@ app.delete('/api/comments/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   FRIENDSHIPS APIS (Kết bạn)
+/* =================================================   FRIENDSHIPS APIS (Kết bạn)
 ======================================================== */
 // Lấy danh sách bạn bè đã kết bạn của user
 app.get('/api/users/:id/friends', async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = parseInt(req.params.id);
         const sql = `
-            SELECT u.id, u.username, u.full_name, u.avatar_url, u.bio, u.school, u.liveIn, f.created_at AS friendship_date
+            SELECT 
+                u.id, 
+                u.username, 
+                u.full_name, 
+                u.avatar_url, 
+                u.bio, 
+                u.school, 
+                u.liveIn, 
+                f.created_at AS friendship_date,
+                (
+                    SELECT COUNT(*)
+                    FROM friendships f1
+                    JOIN friendships f2 ON (
+                        (CASE WHEN f1.user_id1 = ? THEN f1.user_id2 ELSE f1.user_id1 END) = 
+                        (CASE WHEN f2.user_id1 = u.id THEN f2.user_id2 ELSE f2.user_id1 END)
+                    )
+                    WHERE (f1.user_id1 = ? OR f1.user_id2 = ?) AND f1.status = 'accepted'
+                      AND (f2.user_id1 = u.id OR f2.user_id2 = u.id) AND f2.status = 'accepted'
+                ) AS mutualFriends
             FROM friendships f
             JOIN users u ON (u.id = CASE WHEN f.user_id1 = ? THEN f.user_id2 ELSE f.user_id1 END)
-            WHERE (f.user_id1 = ? OR f.user_id2 = ?) AND f.status = 'accepted'
+            WHERE (f.user_id1 = ? OR f.user_id2 = ?) AND f.status = 'accepted' AND u.status = 'active'
             ORDER BY f.created_at DESC
         `;
-        const [rows] = await db.query(sql, [userId, userId, userId]);
+        const [rows] = await db.query(sql, [userId, userId, userId, userId, userId, userId]);
         res.json({ friends: rows });
     } catch (error) {
         console.error(error);
@@ -775,23 +856,72 @@ app.get('/api/users/:id/friend-requests', async (req, res) => {
     }
 });
 
-// Lấy danh sách gợi ý kết bạn (chưa kết bạn và chưa gửi lời mời)
+// Lấy danh sách gợi ý kết bạn (bạn của bạn bè - friends of friends có bạn chung, hoặc người dùng khác trong hệ thống)
 app.get('/api/users/:id/suggestions', async (req, res) => {
     try {
-        const userId = req.params.id;
+        const userId = parseInt(req.params.id);
         const sql = `
-            SELECT u.id, u.username, u.full_name, u.avatar_url, u.bio, u.school, u.liveIn
-            FROM users u
-            WHERE u.id != ? AND u.status = 'active'
+            SELECT 
+                u.id, 
+                u.username, 
+                u.full_name, 
+                u.avatar_url, 
+                u.bio, 
+                u.school, 
+                u.liveIn,
+                COUNT(DISTINCT my_friends.friend_id) AS mutualFriends
+            FROM (
+                SELECT CASE WHEN user_id1 = ? THEN user_id2 ELSE user_id1 END AS friend_id
+                FROM friendships
+                WHERE (user_id1 = ? OR user_id2 = ?) AND status = 'accepted'
+            ) AS my_friends
+            JOIN friendships fof 
+              ON (fof.user_id1 = my_friends.friend_id OR fof.user_id2 = my_friends.friend_id)
+             AND fof.status = 'accepted'
+            JOIN users u 
+              ON u.id = CASE WHEN fof.user_id1 = my_friends.friend_id THEN fof.user_id2 ELSE fof.user_id1 END
+            WHERE u.id != ? 
+              AND u.status = 'active'
               AND u.id NOT IN (
-                SELECT user_id2 FROM friendships WHERE user_id1 = ?
-                UNION
-                SELECT user_id1 FROM friendships WHERE user_id2 = ?
+                SELECT CASE WHEN user_id1 = ? THEN user_id2 ELSE user_id1 END
+                FROM friendships
+                WHERE user_id1 = ? OR user_id2 = ?
               )
-            ORDER BY u.created_at DESC
-            LIMIT 6
+            GROUP BY u.id, u.username, u.full_name, u.avatar_url, u.bio, u.school, u.liveIn
+            HAVING mutualFriends > 0
+            ORDER BY mutualFriends DESC, u.created_at DESC
+            LIMIT 12
         `;
-        const [rows] = await db.query(sql, [userId, userId, userId]);
+        let [rows] = await db.query(sql, [userId, userId, userId, userId, userId, userId, userId]);
+
+        // Nếu gợi ý có bạn chung ít hơn 6, lấy thêm các tài khoản thật đã đăng ký trong hệ thống
+        if (rows.length < 6) {
+            const excludedIds = [userId, ...rows.map(r => r.id)];
+            const limit = 6 - rows.length;
+            const [fallbackUsers] = await db.query(`
+                SELECT 
+                    u.id, 
+                    u.username, 
+                    u.full_name, 
+                    u.avatar_url, 
+                    u.bio, 
+                    u.school, 
+                    u.liveIn,
+                    0 AS mutualFriends
+                FROM users u
+                WHERE u.id NOT IN (?)
+                  AND u.status = 'active'
+                  AND u.id NOT IN (
+                    SELECT CASE WHEN user_id1 = ? THEN user_id2 ELSE user_id1 END
+                    FROM friendships
+                    WHERE user_id1 = ? OR user_id2 = ?
+                  )
+                ORDER BY u.created_at DESC
+                LIMIT ?
+            `, [excludedIds, userId, userId, userId, limit]);
+            rows = [...rows, ...fallbackUsers];
+        }
+
         res.json({ suggestions: rows });
     } catch (error) {
         console.error(error);
@@ -823,6 +953,16 @@ app.post('/api/friends/request', async (req, res) => {
             [requester_id, receiver_id]
         );
 
+        // Tạo thông báo gửi lời mời kết bạn
+        try {
+            await db.query(
+                "INSERT INTO notifications (user_id, actor_id, type, content, is_read, created_at) VALUES (?, ?, 'friend', 'đã gửi lời mời kết bạn cho bạn', 0, NOW())",
+                [receiver_id, requester_id]
+            );
+        } catch (errNotif) {
+            console.error("Lỗi tạo thông báo kết bạn:", errNotif.message);
+        }
+
         res.status(201).json({ message: "Đã gửi lời mời kết bạn thành công!" });
     } catch (error) {
         console.error(error);
@@ -848,6 +988,17 @@ const handleFriendResponse = async (req, res) => {
                 "UPDATE friendships SET status = 'accepted' WHERE user_id1 = ? AND user_id2 = ?",
                 [requester_id, user_id]
             );
+
+            // Tạo thông báo chấp nhận kết bạn
+            try {
+                await db.query(
+                    "INSERT INTO notifications (user_id, actor_id, type, content, is_read, created_at) VALUES (?, ?, 'friend_accept', 'đã chấp nhận lời mời kết bạn của bạn', 0, NOW())",
+                    [requester_id, user_id]
+                );
+            } catch (errNotif) {
+                console.error("Lỗi tạo thông báo chấp nhận kết bạn:", errNotif.message);
+            }
+
             res.json({ message: "Đã đồng ý kết bạn!" });
         } else {
             await db.query(
@@ -880,8 +1031,7 @@ app.delete('/api/friends/:u1/:u2', async (req, res) => {
     }
 });
 
-/* ========================================================
-   MESSAGES APIS (Nhắn tin trò chuyện)
+/* =================================================   MESSAGES APIS (Nhắn tin trò chuyện)
 ======================================================== */
 // Lấy danh sách hội thoại gần đây của user (Phải đặt trước /:u1/:u2 để không bị match nhầm)
 app.get('/api/messages/conversations/:userId', async (req, res) => {
@@ -914,6 +1064,33 @@ app.get('/api/messages/conversations/:userId', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Lỗi khi tải danh sách hội thoại" });
+    }
+});
+
+// Đếm số lượng tin nhắn chưa đọc của người dùng (Phải đặt trước /:u1/:u2 để không bị match nhầm)
+app.get('/api/messages/unread-count/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const [[{ count }]] = await db.query(
+            "SELECT COUNT(*) AS count FROM messages WHERE receiver_id = ? AND is_read = 0",
+            [userId]
+        );
+        res.json({ unreadCount: count });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi đếm tin nhắn chưa đọc" });
+    }
+});
+
+// Đánh dấu tin nhắn từ người gửi là đã đọc
+app.put('/api/messages/mark-read/:u1/:u2', async (req, res) => {
+    try {
+        const { u1, u2 } = req.params;
+        await db.query("UPDATE messages SET is_read = 1 WHERE sender_id = ? AND receiver_id = ?", [u2, u1]);
+        res.json({ success: true, message: "Đã đánh dấu đã đọc" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi cập nhật trạng thái tin nhắn" });
     }
 });
 
@@ -965,8 +1142,110 @@ app.post('/api/messages', async (req, res) => {
     }
 });
 
-/* ========================================================
-   ADMIN STATS APIS (Thống kê - STT 11)
+
+
+/* =================================================   NOTIFICATIONS APIS (Thông báo hệ thống & tương tác)
+======================================================== */
+// Lấy danh sách thông báo của người dùng
+app.get('/api/notifications/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const sql = `
+            SELECT 
+                n.*,
+                u.full_name AS actor_name,
+                u.username AS actor_username,
+                u.avatar_url AS actor_avatar
+            FROM notifications n
+            JOIN users u ON n.actor_id = u.id
+            WHERE n.user_id = ?
+            ORDER BY n.created_at DESC
+            LIMIT 50
+        `;
+        const [rows] = await db.query(sql, [userId]);
+        res.json({ notifications: rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi khi tải thông báo" });
+    }
+});
+
+// Đếm số lượng thông báo chưa đọc
+app.get('/api/notifications/unread-count/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const [[{ count }]] = await db.query(
+            "SELECT COUNT(*) AS count FROM notifications WHERE user_id = ? AND is_read = 0",
+            [userId]
+        );
+        res.json({ unreadCount: count });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi khi đếm thông báo chưa đọc" });
+    }
+});
+
+// Đánh dấu 1 thông báo là đã đọc
+app.put('/api/notifications/:id/read', async (req, res) => {
+    try {
+        const notifId = req.params.id;
+        await db.query("UPDATE notifications SET is_read = 1 WHERE id = ?", [notifId]);
+        res.json({ success: true, message: "Đã đánh dấu thông báo đã đọc" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi cập nhật thông báo" });
+    }
+});
+
+// Đánh dấu tất cả thông báo của người dùng là đã đọc
+app.put('/api/notifications/mark-all-read/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        await db.query("UPDATE notifications SET is_read = 1 WHERE user_id = ?", [userId]);
+        res.json({ success: true, message: "Đã đánh dấu tất cả thông báo là đã đọc" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi cập nhật thông báo" });
+    }
+});
+
+// Lấy danh sách ảnh bài viết của người dùng trực tiếp từ Database
+app.get('/api/users/:id/photos', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const [rows] = await db.query(
+            "SELECT image_url FROM posts WHERE user_id = ? AND status = 'active' AND image_url IS NOT NULL AND image_url != '' ORDER BY created_at DESC",
+            [userId]
+        );
+        let photos = [];
+        for (const row of rows) {
+            const raw = row.image_url;
+            if (!raw) continue;
+            const trimmed = String(raw).trim();
+            if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                try {
+                    const parsed = JSON.parse(trimmed);
+                    if (Array.isArray(parsed)) {
+                        photos.push(...parsed.filter(Boolean));
+                        continue;
+                    }
+                } catch (e) {}
+            }
+            if (trimmed.includes(',')) {
+                photos.push(...trimmed.split(',').map(s => s.trim()).filter(Boolean));
+            } else if (!trimmed.startsWith('linear-gradient') && !trimmed.startsWith('#')) {
+                photos.push(trimmed);
+            }
+        }
+        res.json({ photos });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Lỗi tải ảnh của người dùng" });
+    }
+});
+
+
+/* =================================================   ADMIN STATS APIS (Thống kê - STT 11)
 ======================================================== */
 app.get('/api/admin/stats', async (req, res) => {
     try {
@@ -989,8 +1268,7 @@ app.get('/api/admin/stats', async (req, res) => {
     }
 });
 
-/* ========================================================
-   REPORT APIS (Báo cáo vi phạm)
+/* =================================================   REPORT APIS (Báo cáo vi phạm)
 ======================================================== */
 // Tạo báo cáo (User)
 app.post('/api/reports', async (req, res) => {
@@ -1054,8 +1332,7 @@ app.put('/api/admin/reports/:id', async (req, res) => {
     }
 });
 
-/* ========================================================
-   ADMIN MANAGEMENT APIS (Quản lý User & Admin)
+/* =================================================   ADMIN MANAGEMENT APIS (Quản lý User & Admin)
 ======================================================== */
 // Khóa/Mở khóa tài khoản (Có lý do & ghi chú)
 app.put('/api/admin/users/:id/status', async (req, res) => {
@@ -1175,8 +1452,57 @@ app.get('/api/groups', async (req, res) => {
     }
 });
 
+/* =================================================   ONLINE/OFFLINE STATUS APIs
+   ======================================================== */
+// Heartbeat — called periodically while user is active
+app.post('/api/users/heartbeat', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ message: 'Thiếu userId' });
+        await db.query(
+            "UPDATE users SET is_online = 1, last_active_at = NOW() WHERE id = ?",
+            [userId]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// Offline — called on logout or tab close
+app.post('/api/users/offline', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) return res.status(400).json({ message: 'Thiếu userId' });
+        await db.query(
+            "UPDATE users SET is_online = 0, last_active_at = NOW() WHERE id = ?",
+            [userId]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
+// Get online friends list / active users
+app.get('/api/users/:id/online-status', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            "SELECT id, username, full_name, avatar_url, is_online, last_active_at FROM users WHERE id != ? AND status = 'active' ORDER BY is_online DESC, full_name ASC",
+            [req.params.id]
+        );
+        res.json({ users: rows });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Lỗi server' });
+    }
+});
+
 app.listen(8080, () => {
     console.log("Server đang chạy tại http://localhost:8080");
 });
-
-
+app.get('/', (req, res) => {
+    res.send('Socialita Backend is running!');
+});
