@@ -434,6 +434,7 @@ export const SocialProvider = ({ children }) => {
             id: String(p.id),
             user_id: p.user_id,
             authorName: p.full_name || p.username || 'Người dùng Socialita',
+            username: p.username || '', 
             authorAvatar: p.avatar_url || '',
             authorAvatarBg: '#e52e3d',
             time: p.created_at ? `${formatDate(p.created_at)} · ${privacyLabel}` : `Vừa xong · ${privacyLabel}`,
@@ -1054,15 +1055,16 @@ export const SocialProvider = ({ children }) => {
     }
   };
 
-  const sendRequest = async (sugId) => {
+  const sendRequest = async (targetId, targetName) => {
     setFriendSuggestions(prev =>
-      prev.map(s => (s.id === sugId ? { ...s, requested: true } : s))
+      prev.map(s => (s.id === targetId ? { ...s, requested: true } : s))
     );
-    const sug = friendSuggestions.find(s => s.id === sugId);
-    if (sug) showToast(`Đã gửi lời mời kết bạn đến ${sug.name}`);
+    const sug = friendSuggestions.find(s => s.id === targetId);
+    const displayName = targetName || sug?.name || 'người dùng';
+    showToast(`Đã gửi lời mời kết bạn đến ${displayName}`);
 
     try {
-      await api.sendFriendRequest(user.id, sugId);
+      await api.sendFriendRequest(user.id, targetId);
     } catch (err) {
       console.warn('Lỗi gửi lời mời kết bạn trên server:', err.message);
     }

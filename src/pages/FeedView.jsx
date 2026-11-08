@@ -17,6 +17,25 @@ export const FeedView = () => {
 
     if (!matchesSearch) return false;
     if (feedFilter === 'all') return true;
+
+    // 2. Tab "Đang theo dõi" (Following / Feed bạn bè): Hiển thị bài viết của bạn bè hoặc chính mình
+    if (feedFilter === 'following') {
+      const isFriend = Array.isArray(friends) && friends.some(f =>
+        (f.id && p.user_id && String(f.id) === String(p.user_id)) ||
+        (f.name && p.authorName && f.name.trim().toLowerCase() === p.authorName.trim().toLowerCase()) ||
+        (f.username && p.username && f.username.trim().toLowerCase() === p.username.trim().toLowerCase())
+      );
+      const isSelf =
+        (user?.id && p.user_id && Number(p.user_id) === Number(user.id)) ||
+        (user?.name && p.authorName && user.name.trim().toLowerCase() === p.authorName.trim().toLowerCase());
+      return Boolean(isFriend || isSelf);
+    }
+
+    // 3. Tab "Hội nhóm": Bài viết thuộc nhóm
+    if (feedFilter === 'groups') {
+      return p.category === 'groups' || Boolean(p.group_id);
+    }
+
     return p.category === feedFilter;
   });
 
@@ -32,7 +51,9 @@ export const FeedView = () => {
 
           {filteredPosts.length === 0 && (
             <div className="widget-card" style={{ textAlign: 'center', color: 'var(--text-gray)', padding: '32px' }}>
-              Chưa có bài viết nào trong danh mục này. Hãy là người đầu tiên đăng bài!
+              {feedFilter === 'following'
+                ? 'Chưa có bài viết nào từ bạn bè của bạn. Hãy kết nối thêm bạn bè hoặc đăng bài viết mới!'
+                : 'Chưa có bài viết nào trong danh mục này. Hãy là người đầu tiên đăng bài!'}
             </div>
           )}
         </div>

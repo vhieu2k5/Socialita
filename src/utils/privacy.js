@@ -10,9 +10,19 @@
 export function canViewPost(post, currentUser, friends = []) {
   if (!post) return false;
 
+  const currentUserId = currentUser?.id ? String(currentUser.id) : null;
+  const currentUserName = currentUser?.name ? currentUser.name.trim().toLowerCase() : '';
+  const currentUsername = currentUser?.username ? currentUser.username.trim().toLowerCase() : '';
+
+  const postUserId = post.user_id ? String(post.user_id) : null;
+  const postAuthorName = post.authorName ? post.authorName.trim().toLowerCase() : '';
+  const postUsername = post.username ? post.username.trim().toLowerCase() : '';
+
   // 1. Kiểm tra nếu người xem là tác giả
-  const isAuthor = (currentUser?.id && post.user_id && Number(post.user_id) === Number(currentUser.id)) ||
-                   (currentUser?.name && post.authorName && currentUser.name.trim() === post.authorName.trim());
+  const isAuthor =
+    (currentUserId && postUserId && currentUserId === postUserId) ||
+    (currentUserName && postAuthorName && currentUserName === postAuthorName) ||
+    (currentUsername && postUsername && currentUsername === postUsername);
   if (isAuthor) return true;
 
   // 2. Chế độ "Chỉ mình tôi" (private) -> Người khác hoàn toàn không được xem
@@ -20,10 +30,17 @@ export function canViewPost(post, currentUser, friends = []) {
 
   // 3. Chế độ "Bạn bè" (friends) -> Phải là bạn bè của tác giả
   if (post.privacy === 'friends') {
-    const isFriend = Array.isArray(friends) && friends.some(f => 
-      (f.name && f.name.trim() === post.authorName?.trim()) ||
-      (f.id && post.user_id && String(f.id) === String(post.user_id))
-    );
+    const isFriend = Array.isArray(friends) && friends.some(f => {
+      const friendId = f.id ? String(f.id) : null;
+      const friendName = f.name ? f.name.trim().toLowerCase() : '';
+      const friendUsername = f.username ? f.username.trim().toLowerCase() : '';
+
+      return (
+        (friendId && postUserId && friendId === postUserId) ||
+        (friendName && postAuthorName && friendName === postAuthorName) ||
+        (friendUsername && postUsername && friendUsername === postUsername)
+      );
+    });
     return isFriend;
   }
 

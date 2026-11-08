@@ -1956,17 +1956,6 @@ input::-ms-clear {
       font-size: 13px;
       color: #a1a1a6;
     }
-
-    .mini-logo {
-      position: absolute;
-      bottom: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      font-weight: 800;
-      font-size: 14px;
-    }
   
 
 /* Enhancements for Auth Layout */
@@ -2002,15 +1991,6 @@ input::-ms-clear {
 .auth-form-wrapper {
   width: 100%;
   max-width: 400px;
-}
-.mini-logo {
-  margin-top: 28px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  font-weight: 800;
-  font-size: 14px;
 }
 .password-strength-bar {
   display: flex;

@@ -145,6 +145,12 @@ export const api = {
   },
 
   // === FRIENDS & GROUPS ===
+  searchUsers: (query, currentUserId) => {
+    const q = encodeURIComponent(query || '');
+    const uid = currentUserId ? `&current_user_id=${currentUserId}` : '';
+    return request(`/api/users/search?q=${q}${uid}`);
+  },
+
   getFriends: (userId) =>
     request(`/api/users/${userId}/friends`),
 

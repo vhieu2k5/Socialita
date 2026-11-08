@@ -37,7 +37,67 @@ export const INITIAL_STORIES = [
 
 export const INITIAL_POSTS = [
   {
+    id: 'p-video-1',
+    user_id: 2,
+    privacy: 'public',
+    authorName: 'Quang Huy',
+    authorAvatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop',
+    time: '15 phút trước · Công khai',
+    isPublic: true,
+    content: 'Chia sẻ một chút không gian xanh mát và bình yên giữa lòng Hà Nội 🌿🌸 Dừng lại một chút giữa bộn bề để thư giãn cùng thiên nhiên nhé cả nhà! #NatureVibes #RelaxingVideo #GreenLife',
+    location: 'Vườn bách thảo Hà Nội',
+    mediaType: 'video',
+    mediaUrl: 'http://localhost:8080/uploads/sample-flower.mp4',
+    images: ['http://localhost:8080/uploads/sample-flower.mp4'],
+    image_url: 'http://localhost:8080/uploads/sample-flower.mp4',
+    likes: 128,
+    liked: false,
+    commentsCount: 14,
+    sharesCount: 8,
+    category: 'all',
+    comments: [
+      {
+        id: 'c-vid-1',
+        authorName: 'Lê Minh Anh',
+        content: 'Chill thực sự luôn Huy ơi, màu video đẹp quá! 🥰',
+        time: '10 phút trước',
+        likes: 4
+      }
+    ]
+  },
+  {
+    id: 'p-video-2',
+    user_id: 7,
+    privacy: 'public',
+    authorName: 'Hoàng Nam',
+    authorAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    time: '1 giờ trước · Công khai',
+    isPublic: true,
+    content: 'Thước phim ngắn ghi lại hành trình rong ruổi cung đường đèo ven biển miền Trung 🌊🏍️ Gió biển lồng lộng, cảnh sắc tuyệt đẹp của quê hương Việt Nam! #TravelVlog #Roadtrip #VietnamFromAbove',
+    location: 'Đèo Hải Vân, Đà Nẵng',
+    mediaType: 'video',
+    mediaUrl: 'http://localhost:8080/uploads/sample-travel.mp4',
+    images: ['http://localhost:8080/uploads/sample-travel.mp4'],
+    image_url: 'http://localhost:8080/uploads/sample-travel.mp4',
+    likes: 245,
+    liked: true,
+    commentsCount: 28,
+    sharesCount: 12,
+    category: 'all',
+    comments: [
+      {
+        id: 'c-vid-2',
+        authorName: 'Bùi Việt Anh',
+        content: 'Góc quay cinematic quá bạn ơi, xin tips chỉnh màu với! 🎥🔥',
+        time: '45 phút trước',
+        likes: 5
+      }
+    ]
+  },
+  {
     id: 'p-multi-photos',
+    user_id: 1,
+    privacy: 'public',
     authorName: 'Lê Minh Anh',
     authorAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
     time: '30 phút trước · Công khai',
@@ -69,6 +129,8 @@ export const INITIAL_POSTS = [
   },
   {
     id: 'p-1',
+    user_id: 2,
+    privacy: 'public',
     authorName: 'Quang Huy',
     authorAvatar: '',
     time: '2 giờ trước · Công khai',
@@ -94,6 +156,8 @@ export const INITIAL_POSTS = [
   },
   {
     id: 'p-2',
+    user_id: 6,
+    privacy: 'public',
     authorName: 'Hải Yến',
     authorAvatar: '',
     time: '5 giờ trước · Công khai',
@@ -118,21 +182,21 @@ export const INITIAL_TRENDS = [
 ];
 
 export const INITIAL_FRIEND_SUGGESTIONS = [
-  { id: 'sug-1', name: 'Ngọc Bích', mutualFriends: 6, avatarBg: '#ff7675' },
-  { id: 'sug-2', name: 'Tấn Phát', mutualFriends: 3, avatarBg: '#74b9ff' },
-  { id: 'sug-3', name: 'Hải Đăng', mutualFriends: 9, avatarBg: '#55efc4' }
+  { id: 'sug-1', name: 'Ngọc Bích', username: 'ngocbich', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop', mutualFriends: 6, avatarBg: '#ff7675' },
+  { id: 'sug-2', name: 'Tấn Phát', username: 'tanphat', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', mutualFriends: 3, avatarBg: '#74b9ff' },
+  { id: 'sug-3', name: 'Hải Đăng', username: 'haidang', avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop', mutualFriends: 9, avatarBg: '#55efc4' }
 ];
 
 export const INITIAL_FRIENDS = [
-  { id: 'fr-1', name: 'Quang Huy', friendSince: 'Bạn từ 08/2024', mutualFriends: 14, avatarBg: '#4c8dff' },
-  { id: 'fr-2', name: 'Hải Yến', friendSince: 'Bạn từ 05/2024', mutualFriends: 8, avatarBg: '#e056fd' },
-  { id: 'fr-3', name: 'Đức Anh', friendSince: 'Bạn từ 01/2025', mutualFriends: 5, avatarBg: '#f0932b' },
-  { id: 'fr-4', name: 'Thùy Linh', friendSince: 'Bạn từ 02/2025', mutualFriends: 20, avatarBg: '#686de0' }
+  { id: 'fr-1', name: 'Quang Huy', username: 'quanghuy', avatar_url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop', friendSince: 'Bạn từ 08/2024', mutualFriends: 14, avatarBg: '#4c8dff' },
+  { id: 'fr-2', name: 'Hải Yến', username: 'haiyen', avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop', friendSince: 'Bạn từ 05/2024', mutualFriends: 8, avatarBg: '#e056fd' },
+  { id: 'fr-3', name: 'Đức Anh', username: 'ducanh', avatar_url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop', friendSince: 'Bạn từ 01/2025', mutualFriends: 5, avatarBg: '#f0932b' },
+  { id: 'fr-4', name: 'Thùy Linh', username: 'thuylinh', avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop', friendSince: 'Bạn từ 02/2025', mutualFriends: 20, avatarBg: '#686de0' }
 ];
 
 export const INITIAL_FRIEND_REQUESTS = [
-  { id: 'req-1', name: 'Ngọc Bích', mutualFriends: 6, avatarBg: '#ff7675' },
-  { id: 'req-2', name: 'Tấn Phát', mutualFriends: 3, avatarBg: '#74b9ff' }
+  { id: 'req-1', name: 'Ngọc Bích', username: 'ngocbich', avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop', mutualFriends: 6, avatarBg: '#ff7675' },
+  { id: 'req-2', name: 'Tấn Phát', username: 'tanphat', avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', mutualFriends: 3, avatarBg: '#74b9ff' }
 ];
 
 export const INITIAL_GROUPS = [

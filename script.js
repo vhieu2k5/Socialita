@@ -175,16 +175,58 @@ function buildPostCardHtml(p) {
 
       <p class="post-content">${escapeHtml(p.content)}</p>
 
-      ${hasImage ? `
-        <div class="post-media-box has-image">
-          <img src="${p.image_url}" alt="Hình ảnh bài viết" class="post-card-img" onerror="this.parentElement.style.display='none'">
-          ${p.location ? `<div class="location-tag"><span>📍</span><span>${escapeHtml(p.location)}</span></div>` : ''}
-        </div>
-      ` : (hasGradient ? `
-        <div class="post-media-box" style="background:${gradientStyle};">
-          ${p.location ? `<div class="location-tag"><span>📍</span><span>${escapeHtml(p.location)}</span></div>` : ''}
-        </div>
-      ` : '')}
+      ${(() => {
+        let mediaUrls = [];
+        if (p.image_url) {
+          const raw = String(p.image_url).trim();
+          if (raw.startsWith('[') && raw.endsWith(']')) {
+            try {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) mediaUrls = parsed.filter(Boolean);
+            } catch (e) {
+              mediaUrls = [raw];
+            }
+          } else if (raw.includes(',')) {
+            mediaUrls = raw.split(',').map(s => s.trim()).filter(Boolean);
+          } else {
+            mediaUrls = [raw];
+          }
+        }
+
+        const isVideo = (url) => typeof url === 'string' && (/\.(mp4|webm|mov|ogg)($|\?)/i.test(url) || url.includes('video/'));
+        const videos = mediaUrls.filter(isVideo);
+        const images = mediaUrls.filter(m => !isVideo(m));
+
+        if (videos.length > 0 || images.length > 0) {
+          let html = '<div class="post-media-box has-image" style="background:#0f172a; border-radius:12px; overflow:hidden;">';
+          videos.forEach(v => {
+            html += `<video src="${escapeHtml(v)}" controls style="width:100%; max-height:480px; display:block; background:#000;"></video>`;
+          });
+          if (images.length === 1) {
+            html += `<img src="${escapeHtml(images[0])}" alt="Hình ảnh bài viết" class="post-card-img" style="width:100%; max-height:480px; object-fit:cover; display:block;" onerror="this.style.display='none'">`;
+          } else if (images.length > 1) {
+            html += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:3px;">`;
+            images.slice(0, 4).forEach((img) => {
+              html += `<img src="${escapeHtml(img)}" alt="Hình ảnh" style="width:100%; height:180px; object-fit:cover; display:block;" onerror="this.style.display='none'">`;
+            });
+            html += `</div>`;
+          }
+          if (p.location) {
+            html += `<div class="location-tag"><span>📍</span><span>${escapeHtml(p.location)}</span></div>`;
+          }
+          html += '</div>';
+          return html;
+        }
+
+        if (hasGradient) {
+          return `
+            <div class="post-media-box" style="background:${gradientStyle};">
+              ${p.location ? `<div class="location-tag"><span>📍</span><span>${escapeHtml(p.location)}</span></div>` : ''}
+            </div>
+          `;
+        }
+        return '';
+      })()}
 
       <div class="post-stats-row">
         <span class="like-count-stat" data-likes="${likesCount}">${likesCount} lượt thích</span>
@@ -979,12 +1021,59 @@ function handleMainSearch(input) {
   });
 }
 
-function handleFriendSearch(input) {
+async function handleFriendSearch(input) {
   const query = input.value.toLowerCase().trim();
-  document.querySelectorAll('#all-friends-list .friend-row').forEach(row => {
+  const rows = document.querySelectorAll('#all-friends-list .friend-row');
+  let matchedCount = 0;
+  rows.forEach(row => {
     const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(query) ? 'flex' : 'none';
+    const match = text.includes(query);
+    row.style.display = match ? 'flex' : 'none';
+    if (match) matchedCount++;
   });
+
+  const searchResultsDiv = document.getElementById('friend-db-search-results');
+  if (!query) {
+    if (searchResultsDiv) searchResultsDiv.innerHTML = '';
+    return;
+  }
+
+  // Tìm kiếm thêm tài khoản từ Database
+  try {
+    const res = await fetch(`http://localhost:8080/api/users/search?q=${encodeURIComponent(query)}&current_user_id=${user.id}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const users = data.users || [];
+    
+    if (searchResultsDiv) {
+      if (users.length > 0) {
+        searchResultsDiv.innerHTML = `
+          <div style="margin-top:16px; padding:12px; background:#f8fafc; border-radius:8px;">
+            <div style="font-weight:700; font-size:13px; margin-bottom:8px; color:var(--text-dark);">Tài khoản tìm thấy trên Socialita:</div>
+            ${users.map(u => `
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid #e2e8f0;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div class="avatar-circle-sm" style="background:#35c9b0; width:32px; height:32px; font-size:12px;">${(u.full_name || u.username)[0]}</div>
+                  <div>
+                    <div style="font-weight:700; font-size:13px;">${escapeHtml(u.full_name || u.username)}</div>
+                    <div style="font-size:11px; color:#64748b;">@${escapeHtml(u.username)}</div>
+                  </div>
+                </div>
+                ${u.friendship_status === 'friend' ? '<span style="font-size:11px; color:#0284c7; font-weight:700;">Bạn bè</span>' : (
+                  u.friendship_status === 'requested' ? '<span style="font-size:11px; color:#64748b;">Đã gửi lời mời</span>' :
+                  `<button onclick="sendFriendRequest(this, ${u.id}, '${escapeHtml(u.full_name || u.username)}')" style="padding:4px 10px; border-radius:6px; background:var(--brand-red); color:#fff; border:none; font-size:11px; font-weight:700; cursor:pointer;">Kết bạn</button>`
+                )}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (matchedCount === 0) {
+        searchResultsDiv.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-gray); font-size:12px;">Không tìm thấy tài khoản nào khớp với "${escapeHtml(query)}"</div>`;
+      }
+    }
+  } catch (err) {
+    console.warn('Lỗi tìm kiếm tài khoản:', err);
+  }
 }
 
 // ==================== AUTHENTICATION LOGIC ====================

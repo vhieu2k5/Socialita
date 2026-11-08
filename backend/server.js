@@ -12,10 +12,10 @@ app.use(express.json());
 
 // 1. Khởi tạo kết nối MySQL Pool
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'hai12345',
-    database: 'mini_social',
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'redtalk789',
+    database: process.env.DB_NAME || 'mini_social',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -226,6 +226,63 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
+// Tìm kiếm người dùng theo tên hoặc username (Hỗ trợ kết bạn)
+app.get('/api/users/search', async (req, res) => {
+    try {
+        const q = (req.query.q || '').trim();
+        const currentUserId = req.query.current_user_id ? parseInt(req.query.current_user_id) : (req.query.userId ? parseInt(req.query.userId) : 0);
+
+        if (!q) {
+            return res.json({ users: [] });
+        }
+
+        const searchTerm = `%${q}%`;
+        const prefixTerm = `${q}%`;
+
+        const sql = `
+            SELECT u.id, u.username, u.full_name, u.avatar_url, u.bio, u.school, u.liveIn,
+                   CASE 
+                     WHEN f.status = 'accepted' THEN 'friend'
+                     WHEN f.status = 'pending' AND f.user_id1 = ? THEN 'requested'
+                     WHEN f.status = 'pending' AND f.user_id2 = ? THEN 'incoming_request'
+                     ELSE 'none'
+                   END AS friendship_status,
+                   (SELECT COUNT(*) FROM friendships WHERE (user_id1 = u.id OR user_id2 = u.id) AND status = 'accepted') AS friend_count
+            FROM users u
+            LEFT JOIN friendships f ON (
+                (f.user_id1 = ? AND f.user_id2 = u.id) OR 
+                (f.user_id2 = ? AND f.user_id1 = u.id)
+            )
+            WHERE u.id != ? 
+              AND u.status = 'active'
+              AND (u.full_name LIKE ? OR u.username LIKE ? OR u.email LIKE ?)
+            ORDER BY 
+              CASE WHEN u.full_name LIKE ? THEN 1 WHEN u.username LIKE ? THEN 2 ELSE 3 END,
+              u.created_at DESC
+            LIMIT 20
+        `;
+
+        const params = [
+            currentUserId,
+            currentUserId,
+            currentUserId,
+            currentUserId,
+            currentUserId,
+            searchTerm,
+            searchTerm,
+            searchTerm,
+            prefixTerm,
+            prefixTerm
+        ];
+
+        const [rows] = await db.query(sql, params);
+        res.json({ users: rows });
+    } catch (error) {
+        console.error('Lỗi khi tìm kiếm người dùng:', error);
+        res.status(500).json({ message: "Lỗi server khi tìm kiếm người dùng" });
+    }
+});
+
 // Lấy thông tin 1 user theo ID
 app.get('/api/users/:id', async (req, res) => {
     try {
@@ -379,10 +436,13 @@ app.get('/api/posts', async (req, res) => {
         // Nếu người dùng chọn tab 'Đang theo dõi' (Newsfeed bạn bè)
         if (filter === 'following' && userId) {
             whereClause += ` AND p.status = 'active' AND (
-                p.user_id = ? OR p.user_id IN (
-                    SELECT user_id2 FROM friendships WHERE user_id1 = ? AND status = 'accepted'
-                    UNION
-                    SELECT user_id1 FROM friendships WHERE user_id2 = ? AND status = 'accepted'
+                p.user_id = ? OR (
+                    p.user_id IN (
+                        SELECT user_id2 FROM friendships WHERE user_id1 = ? AND status = 'accepted'
+                        UNION
+                        SELECT user_id1 FROM friendships WHERE user_id2 = ? AND status = 'accepted'
+                    )
+                    AND (p.privacy = 'public' OR p.privacy = 'friends' OR p.privacy IS NULL)
                 )
             )`;
             params.push(userId, userId, userId);

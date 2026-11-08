@@ -131,11 +131,6 @@ export const SignInForm = ({ onSwitchToSignUp }) => {
         </div>
       </form>
 
-      {/* Mini logo ở dưới chân form */}
-      <div className="mini-logo">
-        <img src="/logo.png" alt="Socialita Logo" style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
-        <span style={{ fontSize: '12px', fontWeight: 800, fontFamily: 'var(--font-mono)', color: '#0f0f11' }}>Socialita</span>
-      </div>
 
       <GoogleAuthModal
         isOpen={isGoogleModalOpen}

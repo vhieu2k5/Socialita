@@ -127,9 +127,7 @@ export const PostCard = ({ post }) => {
     }
   });
 
-  const mediaSource = post.image_url || post.mediaUrl || '';
-  const isVideo = mediaSource.match(/\.(mp4|webm|mov|ogg)$/i) || post.mediaType === 'video';
-  const isAuthorOrAdmin = currentUser?.role === 'admin' || (user?.name && user.name === post.authorName);
+  const isVideoUrl = (url) => typeof url === 'string' && (/\.(mp4|webm|mov|ogg)($|\?)/i.test(url) || url.includes('video/'));
 
   let postImages = [];
   if (Array.isArray(post.images) && post.images.length > 0) {
@@ -138,7 +136,8 @@ export const PostCard = ({ post }) => {
     const raw = String(post.image_url).trim();
     if (raw.startsWith('[') && raw.endsWith(']')) {
       try {
-        postImages = JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) postImages = parsed.filter(Boolean);
       } catch (e) {
         postImages = [raw];
       }
@@ -147,9 +146,26 @@ export const PostCard = ({ post }) => {
     } else {
       postImages = [raw];
     }
-  } else if (post.mediaUrl && !isVideo) {
+  } else if (post.mediaUrl) {
     postImages = [post.mediaUrl];
   }
+
+  // Bóc tách nếu phần tử là chuỗi JSON mảng
+  postImages = postImages.flatMap((item) => {
+    if (typeof item === 'string' && item.trim().startsWith('[') && item.trim().endsWith(']')) {
+      try {
+        const parsed = JSON.parse(item.trim());
+        return Array.isArray(parsed) ? parsed.filter(Boolean) : [item];
+      } catch (e) {
+        return [item];
+      }
+    }
+    return [item];
+  });
+
+  const isVideo = postImages.some(isVideoUrl) || post.mediaType === 'video' || isVideoUrl(post.mediaUrl);
+  const mediaSource = postImages.find(isVideoUrl) || postImages[0] || (typeof post.mediaUrl === 'string' ? post.mediaUrl : '');
+  const isAuthorOrAdmin = currentUser?.role === 'admin' || (user?.name && user.name === post.authorName);
 
   const currentCommentCount = Math.max(post.commentsCount || 0, comments.length);
 
